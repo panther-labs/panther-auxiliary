@@ -1,0 +1,125 @@
+# Copyright (C) 2020 Panther Labs Inc
+#
+# Panther Enterprise is licensed under the terms of a commercial license available from
+# Panther Labs Inc ("Panther Commercial License") by contacting contact@runpanther.com.
+# All use, distribution, and/or modification of this software, whether commercial or non-commercial,
+# falls under the Panther Commercial License to the extent it is permitted.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Sample template for gathering Cloud Watch logs into Panther via Firehose
+
+Parameters:
+  BufferIntervalInSeconds:
+    Type: Number
+    Default: 300
+    Description: Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. The default value is 300.
+  CloudwatchLogGroupName:
+    Type: String
+    Description: The Log group name that will be ingested by panther.
+  ExpirationInDays:
+    Type: Number
+    Default: 7
+    Description: Indicates the number of days after creation when objects are deleted from Amazon S3.
+  SubscriptionFilterPattern:
+    Type: String
+    Default: ' '
+    Description: (Optional) The default pattern " " will return all events, You can specify a more specific filter pattern here.
+
+Resources:
+  # IAM Permisssions - Roles and Policies
+  CloudwatchFirehoseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - !Sub logs.${AWS::Region}.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: panther-cloudwatch-firehose-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - firehose:*
+                Resource: !Sub arn:${AWS::Partition}:firehose:${AWS::Region}:${AWS::AccountId}:*
+
+  FirehoseS3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - firehose.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: panther-firehose-s3-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
+                Resource:
+                  - !GetAtt FirehoseBucket.Arn
+                  - !Sub ${FirehoseBucket.Arn}/*
+
+  # Cloudwatch Subscription and Firehose Resources
+  FirehoseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Status: Enabled
+            Id: !Sub ${ExpirationInDays}DayExpiration
+            ExpirationInDays: !Ref ExpirationInDays
+            NoncurrentVersionExpirationInDays: !Ref ExpirationInDays
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      VersioningConfiguration:
+        Status: Enabled
+
+  PantherFirehose:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      S3DestinationConfiguration:
+        BucketARN: !GetAtt FirehoseBucket.Arn
+        BufferingHints:
+          IntervalInSeconds: !Ref BufferIntervalInSeconds
+          SizeInMBs: 128 # Maximum
+        Prefix: PantherCloudWatchStream/ # Magic S3 prefix which tells Panther that a special data transformation needs to be done prior to parsing.
+        RoleARN: !GetAtt FirehoseS3Role.Arn
+
+  CloudwatchSubscriptionFilter:
+    Type: AWS::Logs::SubscriptionFilter
+    Properties:
+      DestinationArn: !GetAtt PantherFirehose.Arn
+      FilterPattern: !Ref SubscriptionFilterPattern
+      LogGroupName: !Ref CloudwatchLogGroupName
+      RoleArn: !GetAtt CloudwatchFirehoseRole.Arn
+
+Outputs:
+  FirehoseBucket:
+    Description: Kinesis Firehose S3 Bucket
+    Value: !Ref FirehoseBucket

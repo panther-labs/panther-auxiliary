@@ -1,0 +1,51 @@
+# Copyright (C) 2020 Panther Labs Inc
+#
+# Panther Enterprise is licensed under the terms of a commercial license available from
+# Panther Labs Inc ("Panther Commercial License") by contacting contact@runpanther.com.
+# All use, distribution, and/or modification of this software, whether commercial or non-commercial,
+# falls under the Panther Commercial License to the extent it is permitted.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  Panther IAM Role for creating and managing StackSets. The purpose of this role is to assume
+  the execution IAM roles in each target account for configuring various Panther infrastructure.
+
+Parameters:
+  MasterAccountRegion:
+    Type: String
+    Default: ''
+
+Conditions:
+  UseCurrentRegion: !Equals ['', !Ref MasterAccountRegion]
+
+Resources:
+  CloudFormationStackSetAdminRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !If
+        - UseCurrentRegion
+        - !Sub PantherCloudFormationStackSetAdminRole-${AWS::Region}
+        - !Sub PantherCloudFormationStackSetAdminRole-${MasterAccountRegion}
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AssumeRolesInTargetAccounts
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: sts:AssumeRole
+                Resource: !If
+                  - UseCurrentRegion
+                  - !Sub arn:${AWS::Partition}:iam::*:role/PantherCloudFormationStackSetExecutionRole-${AWS::Region}
+                  - !Sub arn:${AWS::Partition}:iam::*:role/PantherCloudFormationStackSetExecutionRole-${MasterAccountRegion}
+
+Outputs:
+  CloudFormationStackSetAdminRoleArn:
+    Description: The Arn of the CloudFormation StackSet IAM Role for sending data to Panther.
+    Value: !GetAtt CloudFormationStackSetAdminRole.Arn

@@ -1,0 +1,131 @@
+# Copyright (C) 2020 Panther Labs Inc
+#
+# Panther Enterprise is licensed under the terms of a commercial license available from
+# Panther Labs Inc ("Panther Commercial License") by contacting contact@runpanther.com.
+# All use, distribution, and/or modification of this software, whether commercial or non-commercial,
+# falls under the Panther Commercial License to the extent it is permitted.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  This stack configures Panther's real-time CloudWatch Event collection.
+  It works by creating CloudWatch Event rules which feed to Panther's SQS Queue proxied by
+  a local SNS topic in each region.
+
+Parameters:
+  SnsTopicName:
+    Type: String
+    Description: The name of the new SNS Topic to create for receiving CloudWatch events
+    Default: panther-cloudwatch-events-topic
+  SnsEventsCmkMgmtRoleArn:
+    Type: String
+    Description: The ARN of the role that manages the KMS CMK used by the SNS topic
+    Default: ''
+    # Defaults to :root (all identities) in satellite account
+    # To restrict access to the key, use an existing role (not managed by this template)
+    # to manage the KMS CMK used by the SNS topic
+    # Unless you use a dedicated key management role, this will be the role
+    # you use in the AWS console or the role used in your template deployment
+    # pipeline
+  MasterAccountId:
+    Type: String
+    Description: The AWS Account ID of the Panther deployment
+  QueueArn:
+    Type: String
+    Description: The Panther SQS Queue Arn to receive CloudWatch Events via SNS
+
+Conditions:
+  MgmtRoleProvided: !Not [!Equals ['', !Ref SnsEventsCmkMgmtRoleArn]]
+
+Resources:
+  # SNS Topic, Policy, KMS CMK, and Subscription to SQS
+
+  PantherEventsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Ref SnsTopicName
+      KmsMasterKeyId: !Ref PantherEventsKey
+
+  TopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: CloudWatchEventsPublish
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sns:Publish
+            Resource: !Ref PantherEventsTopic
+          - Sid: CrossAccountSubscription
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:${AWS::Partition}:iam::${MasterAccountId}:root
+            Action: sns:Subscribe
+            Resource: !Ref PantherEventsTopic
+      Topics:
+        - !Ref PantherEventsTopic
+
+  PantherEventsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: The Panther CloudWatch events customer-managed CMK
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: panther-events-cmk
+        Statement:
+          - Sid: EventBridgeSNSPublish
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action:
+              - kms:GenerateDataKey
+              - kms:Decrypt
+            Resource: '*'
+          - Sid: KeyManagement
+            Effect: Allow
+            Principal:
+              AWS: !If
+                - MgmtRoleProvided
+                - !Ref SnsEventsCmkMgmtRoleArn
+                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
+            Action:
+              - kms:Create*
+              - kms:Describe*
+              - kms:Enable*
+              - kms:List*
+              - kms:Put*
+              - kms:Update*
+              - kms:Revoke*
+              - kms:Disable*
+              - kms:Get*
+              - kms:Delete*
+              - kms:ScheduleKeyDeletion
+              - kms:CancelKeyDeletion
+            Resource: '*'
+
+  PantherEventsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: alias/panther-events
+      TargetKeyId: !Ref PantherEventsKey
+
+  QueueSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref QueueArn
+      Protocol: sqs
+      RawMessageDelivery: true
+      TopicArn: !Ref PantherEventsTopic
+
+  CloudTrailRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Collect CloudTrail API calls.
+      EventPattern:
+        detail-type:
+          - AWS API Call via CloudTrail
+      State: ENABLED
+      Targets:
+        - Arn: !Ref PantherEventsTopic
+          Id: panther-collect-cloudtrail-events
