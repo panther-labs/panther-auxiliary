@@ -6,6 +6,7 @@ jobs:
       - image: erikgoldmanpanther/auxiliary-builder:latest
     steps:
       - checkout
+      - run: find .
       - run: find . -iname '*.tf' | xargs -I {} terraform validate {}
       - run: terraform fmt -check -recursive ./terraform
       - run: find . -iname '*.tf' | xargs -I {} tflint {}
