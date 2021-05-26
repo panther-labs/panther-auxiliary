@@ -1,0 +1,34 @@
+# Copyright (C) 2020 Panther Labs Inc
+#
+# Panther Enterprise is licensed under the terms of a commercial license available from
+# Panther Labs Inc ("Panther Commercial License") by contacting contact@runpanther.com.
+# All use, distribution, and/or modification of this software, whether commercial or non-commercial,
+# falls under the Panther Commercial License to the extent it is permitted.
+
+
+# Configures real-time alerting for Cloud Security
+# Apply this module in the Panther master account, and apply the panther_cloudwatch_events module
+# in each satellite account.
+# Subscriptions originating in the subscribing queue owner's account do not require confirmation. 
+# Applying a subscription in the SNS topic owner's account will result in an unconfirmed 
+# subscription, and a continual diff.
+# Subscriptions in the CloudFormation template version of this cloudwatch_events Terraform module
+# are applied in the opposite manner (in satellite accounts) because Panther is configured to
+# auto-confirm subscription requests originating from CloudFormation.
+
+# Each satellite account requires its own topic subscription resource. In Terraform, this can be 
+# accomplished for multiple accounts using a for_each expression.
+
+resource "aws_sns_topic_subscription" "panther_cloudwatch" {
+  for_each = toset(var.satellite_accounts)
+
+  endpoint             = "arn:${var.aws_partition}:sqs:${var.panther_region}:${var.master_account_id}:panther-aws-events-queue"
+  protocol             = "sqs"
+  raw_message_delivery = true
+  topic_arn            = "arn:${var.aws_partition}:sns:${var.satellite_account_region}:${each.key}:-PantherEventsTopic-"
+}
+
+variable "satellite_accounts" {
+  description = "The account numbers of satellite accounts that will have the CloudWatch Events module applied to them"
+  type        = list(string)
+}

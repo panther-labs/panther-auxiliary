@@ -6,14 +6,12 @@
 # falls under the Panther Commercial License to the extent it is permitted.
 
 
+# Configures Log Analysis for logs stored in S3
+# Includes Cloudtrail-specific "new logs" notification permissions
+# Apply this module in each satellite account, and apply the panther_log_processing_notifications_subscription
+# module in the Panther master account
 
-
-#####
-# Sets up an SNS topic.
-
-# This topic is used to notify the Panther master account whenever new data is written to the
-# LogProcessing bucket.
-resource "aws_sns_topic" "log_processing" {
+resource "aws_sns_topic" "panther_log_processing" {
   name = var.sns_topic_name
 
   # Note: the AWS-managed CMK for the SNS service, "alias/aws/sns",
@@ -23,7 +21,7 @@ resource "aws_sns_topic" "log_processing" {
   kms_master_key_id = "alias/panther-log-processing"
 }
 
-resource "aws_sns_topic_policy" "policy" {
+resource "aws_sns_topic_policy" "panther_log_processing" {
   arn = aws_sns_topic.log_processing.arn
 
   policy = jsonencode({
@@ -49,7 +47,7 @@ resource "aws_sns_topic_policy" "policy" {
         Resource : aws_sns_topic.log_processing.arn
       },
       {
-        Sid : "AllowSubscriptionToPanther",
+        Sid : "AllowSubscriptionFromPanther",
         Effect : "Allow",
         Principal : {
           AWS : "arn:${var.aws_partition}:iam::${var.master_account_id}:root"

@@ -104,11 +104,12 @@ resource "aws_kinesis_firehose_delivery_stream" "panther_firehose" {
   destination = "extended_s3"
 
   extended_s3_configuration {
-    bucket_arn      = aws_s3_bucket.firehose_bucket.arn
-    buffer_size     = 128 # Maximum
-    buffer_interval = var.buffer_interval_in_seconds
-    prefix          = "PantherCloudWatchStream/" # Magic S3 prefix which tells Panther that a special data transformation needs to be done prior to parsing.
-    role_arn        = aws_iam_role.firehose_s3_role.arn
+    bucket_arn         = aws_s3_bucket.firehose_bucket.arn
+    buffer_size        = 128 # Maximum
+    buffer_interval    = var.buffer_interval_in_seconds
+    compression_format = "GZIP"
+    prefix             = "PantherCloudWatchStream/" # Magic S3 prefix which tells Panther that a special data transformation needs to be done prior to parsing.
+    role_arn           = aws_iam_role.firehose_s3_role.arn
   }
 }
 

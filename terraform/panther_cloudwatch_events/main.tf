@@ -6,11 +6,9 @@
 # falls under the Panther Commercial License to the extent it is permitted.
 
 
-
-####
-# This template configures Panther's real-time CloudWatch Event collection process.
-# It works by creating CloudWatch Event rules which feed to Panther's SQS Queue proxied by
-# a local SNS topic in each region.
+# Configures real-time monitoring for Cloud Security
+# Apply this module in each satellite account, and apply the panther_cloudwatch_events_subscription
+# module in the Panther master account
 
 resource "aws_sns_topic" "panther_events" {
   name = var.sns_topic_name
@@ -38,7 +36,7 @@ resource "aws_sns_topic_policy" "panther_events" {
         Resource : aws_sns_topic.panther_events.arn
       },
       {
-        Sid : "CrossAccountSubscription",
+        Sid : "AllowSubscriptionFromPanther",
         Effect : "Allow",
         Principal : {
           AWS : "arn:${var.aws_partition}:iam::${var.master_account_id}:root"
