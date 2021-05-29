@@ -28,7 +28,7 @@ resource "aws_iam_role" "panther_audit" {
         },
         Action : "sts:AssumeRole",
         Condition : {
-          Bool : { "aws:SecureTransport" : true }
+          Bool : { "aws:SecureTransport" : "true" }
         }
       }
     ]
@@ -219,7 +219,7 @@ resource "aws_iam_role" "panther_remediation" {
         },
         Action : "sts:AssumeRole",
         Condition : {
-          Bool : { "aws:SecureTransport" : true }
+          Bool : { "aws:SecureTransport" : "true" }
         }
       }
     ]
