@@ -21,7 +21,7 @@ resource "aws_iam_role" "deployment" {
         }
         Action : "sts:AssumeRole",
         Condition : {
-          Bool : { "aws:SecureTransport" : true }
+          Bool : { "aws:SecureTransport" : "true" }
         }
       },
       {
@@ -31,7 +31,7 @@ resource "aws_iam_role" "deployment" {
         }
         Action : "sts:AssumeRole",
         Condition : {
-          Bool : { "aws:SecureTransport" : true }
+          Bool : { "aws:SecureTransport" : "true" }
         }
       },
     ]

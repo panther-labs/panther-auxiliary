@@ -25,7 +25,7 @@ resource "aws_iam_role" "log_processing" {
         }
         Action : "sts:AssumeRole",
         Condition : {
-          Bool : { "aws:SecureTransport" : true }
+          Bool : { "aws:SecureTransport" : "true" }
         }
       }
     ]
