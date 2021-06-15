@@ -1,0 +1,154 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Panther Generic EC2 Firehose Template
+
+Resources:
+  EC2DataFirehose:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt FirehoseBucket.Arn
+        BufferingHints:
+          IntervalInSeconds: 300
+          SizeInMBs: 128
+        CompressionFormat: GZIP
+        RoleARN: !GetAtt EC2DataFirehoseRole.Arn
+
+  EC2DataFirehoseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: FirehoseServiceAssumeRole
+            Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref AWS::AccountId
+
+  EC2DataFirehoseRoleManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Firehose permissions to write to data bucket
+      Roles:
+        - !Ref EC2DataFirehoseRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Sid: AllowS3Delivery
+            Effect: Allow
+            Action:
+              - s3:AbortMultipartUpload
+              - s3:GetBucketLocation
+              - s3:GetObject
+              - s3:ListBucket
+              - s3:ListBucketMultipartUploads
+              - s3:PutObject
+            Resource:
+              - !GetAtt FirehoseBucket.Arn
+              - !Sub ${FirehoseBucket.Arn}/*
+
+  FirehoseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: 30DayExpiration
+            Status: Enabled
+            ExpirationInDays: 30
+            NoncurrentVersionExpirationInDays: 30
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled
+      # NOTE: Uncomment when you are ready to onboard to Panther
+      # NotificationConfiguration:
+      #   TopicConfigurations:
+      #     - Topic: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:panther-s3-notifications
+      #       Event: s3:ObjectCreated:*
+
+  DataBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FirehoseBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub ${FirehoseBucket.Arn}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+  ### EC2 Instance Profile ###
+  FirehoseInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref FirehoseInstanceProfileAssumeRole
+
+  FirehoseInstanceProfileAssumeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AssumeFirehoseRoles
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: sts:AssumeRole
+                Resource: !GetAtt FirehoseWriteOnlyRole.Arn
+
+  FirehoseWriteOnlyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: FirehosePutRecords
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - firehose:PutRecord
+                  - firehose:PutRecordBatch
+                Resource: !GetAtt EC2DataFirehose.Arn
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonKinesisFirehoseReadOnlyAccess
+
+Outputs:
+  InstanceProfileName:
+    Value: !Ref FirehoseInstanceProfile
+  FirehoseName:
+    Value: !Ref EC2DataFirehose
+  FirehoseSendDataRoleArn:
+    Value: !GetAtt FirehoseWriteOnlyRole.Arn
+  S3Bucket:
+    Value: !Ref FirehoseBucket
