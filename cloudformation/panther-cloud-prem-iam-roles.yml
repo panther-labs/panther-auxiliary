@@ -1,0 +1,140 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: IAM roles to perform common actions across several AWS accounts.
+
+Mappings:
+  Accounts:
+    HostedRoot:
+      AccountId: '255674391660'
+
+Parameters:
+  MaxAdminSessionDurationSec:
+    Type: Number
+    Default: 3600 # 1 hour
+    Description: The session duration of the assumed admin role.
+  MaxSessionDurationSec:
+    Type: Number
+    Default: 14400 # 4 hours
+    Description: The session duration of the assumed role.
+
+Resources:
+  PantherDeploymentRoleStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://panther-public-cloudformation-templates.s3.amazonaws.com/panther-deployment-role/v1.18.2/template.yml
+      Parameters:
+        IdentityAccountId: !FindInMap [ Accounts, HostedRoot, AccountId ]
+      Tags:
+        - Key: Application
+          Value: Panther
+
+  SupportRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: PantherSupportRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              AWS: !Sub
+                - arn:aws:iam::${AccountId}:root
+                - AccountId: !FindInMap [ Accounts, HostedRoot, AccountId ]
+            Action: sts:AssumeRole
+            Condition:
+              Bool:
+                aws:MultiFactorAuthPresent: true
+                aws:SecureTransport: true
+              NumericLessThan:
+                aws:MultiFactorAuthAge: !Ref MaxSessionDurationSec
+      MaxSessionDuration: !Ref MaxSessionDurationSec
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess
+        - arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess
+        - arn:aws:iam::aws:policy/IAMReadOnlyAccess
+      Policies:
+        -
+          PolicyName: ViewAccountInfra
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  # check acm configurations
+                  - acm:ListCertificates
+                  - acm:DescribeCertificate
+                  # Check dynamo configurations
+                  - dynamodb:ListTables
+                  - dynamodb:DescribeLimits
+                  - dynamodb:DescribeTable
+                  - dynamodb:DescribeTimeToLive
+                  # Check ecr configurations
+                  - ecr:DescribeImages
+                  - ecr:DescribeRepositories
+                  # Check ecs configurations
+                  - ecs:DescribeClusters
+                  - ecs:DescribeContainerInstances
+                  - ecs:DescribeServices
+                  - ecs:DescribeTaskDefinition
+                  - ecs:DescribeTaskSets
+                  - ecs:DescribeTasks
+                  - ecs:ListAccountSettings
+                  - ecs:ListAttributes
+                  - ecs:ListClusters
+                  - ecs:ListContainerInstances
+                  - ecs:ListServices
+                  - ecs:ListTaskDefinitions
+                  - ecs:ListTasks
+                  - elasticfilesystem:DescribeFileSystems
+                  # Check load balancer configurations
+                  - elasticloadbalancing:DescribeLoadBalancers
+                  # Check firehose configurations
+                  - firehose:DescribeDeliveryStream
+                  - firehose:List*
+                  # Check glue configurations
+                  - glue:BatchGet*
+                  - glue:Get*
+                  # Personal Health Dashboard (service outages)
+                  - health:*
+                  # Check lambda configurations
+                  - events:Describe*
+                  - events:List*
+                  - lambda:GetAccountSettings
+                  - lambda:GetAlias
+                  - lambda:GetFunction
+                  - lambda:GetFunctionConcurrency
+                  - lambda:GetFunctionConfiguration
+                  - lambda:GetFunctionEventInvokeConfig
+                  - lambda:GetLayerVersion
+                  - lambda:GetLayerVersionByArn
+                  - lambda:GetLayerVersionPolicy
+                  - lambda:GetPolicy
+                  - lambda:ListAliases
+                  - lambda:ListEventSourceMappings
+                  - lambda:ListFunctions
+                  - lambda:ListLayerVersions
+                  - lambda:ListLayers
+                  - tag:GetResources
+                  # Check s3 configurations
+                  - s3:GetBucketAcl
+                  - s3:GetBucketCORS
+                  - s3:GetBucketLocation
+                  - s3:GetBucketNotification
+                  - s3:GetBucketObjectLockConfiguration
+                  - s3:GetBucketPolicy
+                  - s3:ListAllMyBuckets
+                  # Check sqs configurations
+                  - sqs:GetQueueAttributes
+                  - sqs:GetQueueUrl
+                  - sqs:ListDeadLetterSourceQueues
+                  - sqs:ListQueues
+                  # sqs troubleshooting
+                  - sqs:PurgeQueue
+                  # AWS support
+                  - support:*
+                  # Check step function / state machine configurations
+                  - states:Describe*
+                  - states:GetExecutionHistory
+                  - states:List*
+                Resource: '*'
