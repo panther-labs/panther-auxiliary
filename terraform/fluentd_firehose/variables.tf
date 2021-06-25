@@ -14,6 +14,12 @@ variable "buffer_interval_in_seconds" {
   description = "Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. The default value is 300."
 }
 
+variable "s3_prefix" {
+  type        = string
+  default     = "firehose/"
+  description = "The root prefix to use when writing logs to S3."
+}
+
 variable "expiration_in_days" {
   type        = number
   default     = 7
