@@ -13,7 +13,7 @@ Parameters:
   S3Prefix:
     Type: String
     Default: firehose/
-    Description: The root prefix to use when writing logs to S3
+    Description: The root prefix to use when writing logs to S3.
 
 Resources:
   FluentdFirehose:
