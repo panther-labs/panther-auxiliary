@@ -10,6 +10,10 @@ Parameters:
     Type: Number
     Default: 7
     Description: Indicates the number of days after creation when objects are deleted from Amazon S3.
+  S3Prefix:
+    Type: String
+    Default: firehose/
+    Description: The root prefix to use when writing logs to S3
 
 Resources:
   FluentdFirehose:
@@ -22,6 +26,7 @@ Resources:
           IntervalInSeconds: !Ref BufferIntervalInSeconds
           SizeInMBs: 128 # Maximum
         CompressionFormat: GZIP
+        Prefix: !Sub ${S3Prefix}
         RoleARN: !GetAtt FluentdServiceRole.Arn
 
   FluentdServiceRole:
