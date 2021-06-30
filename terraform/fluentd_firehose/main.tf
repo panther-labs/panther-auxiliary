@@ -36,7 +36,7 @@ resource "aws_iam_policy" "fluentd_firehose_managed_policy" {
     Version : "2012-10-17",
     Statement : [
       {
-        Sid : "AllowS3Delivery"
+        Sid : "AllowS3Delivery",
         Effect : "Allow",
         Action : [
           "s3:AbortMultipartUpload",
@@ -95,7 +95,7 @@ resource "aws_s3_bucket_policy" "firehose_bucket" {
         Effect : "Deny",
         Principal : "*",
         Action : "s3:GetObject",
-        Resource : "${aws_s3_bucket.firehose_bucket.arn}/*"
+        Resource : "${aws_s3_bucket.firehose_bucket.arn}/*",
         Condition : {
           Bool : { "aws:SecureTransport" : false }
         }
