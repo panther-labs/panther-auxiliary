@@ -7,7 +7,7 @@ resource "aws_kinesis_firehose_delivery_stream" "fluentd_firehose" {
     buffer_size        = 128 # Maximum
     buffer_interval    = var.buffer_interval_in_seconds
     compression_format = "GZIP"
-    role_arn           = aws_iam_role.firehose_service_role.arn 
+    role_arn           = aws_iam_role.firehose_service_role.arn
     prefix             = var.s3_prefix
   }
 }
