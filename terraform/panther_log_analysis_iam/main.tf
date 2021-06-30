@@ -54,7 +54,7 @@ resource "aws_iam_role_policy" "log_processing" {
       {
         Effect : "Allow",
         Action : "s3:GetObject",
-        Resource : "arn:aws:s3:::${var.s3_bucket_name}/${var.s3_prefix}*"
+        Resource : "arn:aws:s3:::${var.s3_bucket_name}/*"
       },
       {
         Effect : "Allow",
