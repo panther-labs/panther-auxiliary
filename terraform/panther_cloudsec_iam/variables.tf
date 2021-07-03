@@ -32,8 +32,3 @@ variable "include_stack_set_execution_role" {
   type    = bool
   default = true
 }
-
-variable "include_remediation_role" {
-  type    = bool
-  default = true
-}

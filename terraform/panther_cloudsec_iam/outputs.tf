@@ -16,8 +16,3 @@ output "panther_cloud_formation_stackset_execution_role_arn" {
   value       = var.include_stack_set_execution_role ? aws_iam_role.panther_cloud_formation_stackset_execution[0].arn : "N/A"
   description = "The ARN of the CloudFormation StackSet Execution IAM Role"
 }
-
-output "panther_remediation_role_arn" {
-  value       = var.include_remediation_role ? aws_iam_role.panther_remediation[0].arn : "N/A"
-  description = "The ARN of the Panther Auto Remediation IAM Role"
-}
