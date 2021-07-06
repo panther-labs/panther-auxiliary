@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Panther S3 template to be used with Fluentd's S3 match plugin
+    
+Resources:
+  FluentdUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: fluentd-s3
+
+  FluentdGroupMembership:
+    Type: AWS::IAM::UserToGroupAddition
+    Properties:
+      GroupName: !Ref FluentdGroup
+      Users:
+        - !Ref FluentdUser
+
+  FluentdGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: FluentdAnalytics
+
+  FluentdGroupPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: fluentd_s3_forwarder
+      Groups:
+        - !Ref FluentdGroup
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Action:
+              - s3:AbortMultipartUpload
+              - s3:GetBucketLocation
+              - s3:GetObject
+              - s3:ListBucket
+              - s3:ListBucketMultipartUploads
+              - s3:ListMultipartUploadParts
+              - s3:PutObject
+            Resource: 
+              - !Sub arn:${AWS::Partition}:s3:::${FluentdBucket}
+              - !Sub arn:${AWS::Partition}:s3:::${FluentdBucket}/*
+
+  FluentdBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      # Short expiration because this data is sent to Panther.
+      # This can be adjusted per your individual needs.
+      LifecycleConfiguration:
+        Rules:
+          - Id: 30DayExpiration
+            Status: Enabled
+            ExpirationInDays: 30
+            NoncurrentVersionExpirationInDays: 30
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled
+
+  FluentdBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FluentdBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub ${FluentdBucket.Arn}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+Outputs:
+  FluentdUser:
+    Value: !GetAtt FluentdUser.Arn
+  S3Bucket:
+    Value: !Ref FluentdBucket
