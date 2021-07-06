@@ -45,13 +45,16 @@ resource "aws_iam_role_policy" "log_processing" {
     Statement : [
       {
         Effect : "Allow",
-        Action : "s3:GetBucketLocation",
+        Action : [
+          "s3:GetBucketLocation",
+          "s3:ListBucket"
+        ],
         Resource : "arn:aws:s3:::${var.s3_bucket_name}"
       },
       {
         Effect : "Allow",
         Action : "s3:GetObject",
-        Resource : "arn:aws:s3:::${var.s3_bucket_name}/${var.s3_prefix}*"
+        Resource : "arn:aws:s3:::${var.s3_bucket_name}/*"
       },
       {
         Effect : "Allow",
