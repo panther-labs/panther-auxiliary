@@ -21,7 +21,7 @@ resource "aws_iam_role" "deployment" {
         }
         Action : "sts:AssumeRole",
         Condition : {
-          Bool : { "aws:SecureTransport" : true }
+          Bool : { "aws:SecureTransport" : "true" }
         }
       },
       {
@@ -31,7 +31,7 @@ resource "aws_iam_role" "deployment" {
         }
         Action : "sts:AssumeRole",
         Condition : {
-          Bool : { "aws:SecureTransport" : true }
+          Bool : { "aws:SecureTransport" : "true" }
         }
       },
     ]
@@ -79,6 +79,7 @@ resource "aws_iam_policy" "deployment" {
         "ec2:CreateFlowLogs",
         "ec2:CreateInternetGateway",
         "ec2:CreateNatGateway",
+        "ec2:CreateNetworkInterface",
         "ec2:CreateRoute",
         "ec2:CreateRouteTable",
         "ec2:CreateSecurityGroup",
@@ -125,11 +126,13 @@ resource "aws_iam_policy" "deployment" {
         "elasticfilesystem:DescribeFileSystemPolicy",
         "elasticfilesystem:DescribeLifecycleConfiguration",
         "elasticfilesystem:DescribeMountTargets",
+        "elasticfilesystem:DescribeMountTargetSecurityGroups",
         "elasticfilesystem:PutLifecycleConfiguration",
         "elasticfilesystem:PutFileSystemPolicy",
         "elasticfilesystem:ListTagsForResource",
         "elasticfilesystem:TagResource",
         "elasticfilesystem:UntagResource",
+        "elasticfilesystem:UpdateFileSystem",
         "elasticloadbalancing:*",
         "ecr:GetAuthorizationToken",
         "ecs:*",
