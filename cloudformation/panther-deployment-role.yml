@@ -72,7 +72,7 @@ Resources:
               - application-autoscaling:DescribeScalableTargets
               - application-autoscaling:PutScalingPolicy
               - application-autoscaling:RegisterScalableTarget
-              - appsync:*
+              - appsync:Delete* # can be removed in 1.22, after all AppSync infra is fully removed from existing deployments
               - athena:*
               - cloudformation:Describe*
               - cloudformation:List*
@@ -140,6 +140,7 @@ Resources:
               - elasticfilesystem:DescribeLifecycleConfiguration
               - elasticfilesystem:DescribeMountTargets
               - elasticfilesystem:DescribeMountTargetSecurityGroups
+              - elasticfilesystem:ModifyMountTargetSecurityGroups
               - elasticfilesystem:PutLifecycleConfiguration
               - elasticfilesystem:PutFileSystemPolicy
               - elasticfilesystem:ListTagsForResource
@@ -150,9 +151,6 @@ Resources:
               - ecr:GetAuthorizationToken
               - ecs:*
               - events:*
-              - firehose:DescribeDeliveryStream
-              - firehose:CreateDeliveryStream
-              - firehose:DeleteDeliveryStream
               - firehose:ListDeliveryStreams
               - glue:*
               - guardduty:CreatePublishingDestination
@@ -183,34 +181,35 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/panther*
               - !Sub arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stackset/panther*
-          - Effect: Allow # for ddb athena connector
-            Action: cloudformation:*
-            Resource: !Sub arn:${AWS::Partition}:cloudformation:*:aws:transform/Serverless-2016-10-31
-          - Effect: Allow # for ddb athena connector
-            Action: serverlessrepo:*
-            Resource: !Sub arn:${AWS::Partition}:serverlessrepo:*:*:applications/*
-          - Effect: Allow # for ddb athena connector
+              - !Sub arn:${AWS::Partition}:cloudformation:*:aws:transform/Serverless-2016-10-31
+          - Effect: Allow
             Action:
-              - lambda:GetFunction
-              - lambda:CreateFunction
-            Resource: !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:ddb
-          - Effect: Allow # for ddb athena connector
-            Action: s3:GetObject
-            Resource: !Sub arn:${AWS::Partition}:s3:::awsserverlessrepo-changesets-*
-          - Effect: Allow
-            Action: dynamodb:*
+              # IMPORTANT: does *not* include access to table items
+              - dynamodb:CreateTable
+              - dynamodb:DeleteTable
+              - dynamodb:Describe*
+              - dynamodb:TagResource
+              - dynamodb:UntagResource
+              - dynamodb:UpdateContinuousBackups
+              - dynamodb:UpdateTable
+              - dynamodb:UpdateTimeToLive
             Resource: !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther-*
-          - Effect: Allow
-            Action: ecr:*
-            Resource: !Sub arn:${AWS::Partition}:ecr:*:${AWS::AccountId}:repository/panther-*
-          - Effect: Allow
-            Action: execute-api:Invoke
-            Resource: !Sub arn:${AWS::Partition}:execute-api:*:${AWS::AccountId}:*
           - Effect: Allow
             Action: firehose:*
             Resource: !Sub arn:${AWS::Partition}:firehose:*:${AWS::AccountId}:deliverystream/panther-*
           - Effect: Allow
-            Action: iam:*
+            Action:
+              - iam:AttachRolePolicy
+              - iam:CreateRole
+              - iam:DeleteRole
+              - iam:DeleteRolePolicy
+              - iam:DetachRolePolicy
+              - iam:GetRole
+              - iam:GetRolePolicy
+              - iam:PassRole
+              - iam:PutRolePolicy
+              - iam:UpdateRole
+              - iam:*ServerCertificate
             Resource:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/AWSServiceRole*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/*
@@ -218,31 +217,89 @@ Resources:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:server-certificate/panther/*
           - Effect: Allow
-            Action: kms:*
+            Action:
+              - kms:CreateAlias
+              - kms:Decrypt # required for KMS-encrypted S3 deployment assets (e.g. AWS::Lambda::LayerVersion)
+              - kms:DeleteAlias
+              - kms:DescribeKey
+              - kms:DisableKeyRotation
+              - kms:EnableKeyRotation
+              - kms:GetKeyPolicy
+              - kms:GetKeyRotationStatus
+              - kms:ListResourceTags
+              - kms:PutKeyPolicy
+              - kms:ScheduleKeyDeletion
+              - kms:TagResource
+              - kms:UntagResource
+              - kms:UpdateAlias
+              - kms:UpdateKeyDescription
             Resource:
               - !Sub arn:${AWS::Partition}:kms:*:${AWS::AccountId}:alias/panther-*
-              - !Sub arn:${AWS::Partition}:kms:*:${AWS::AccountId}:key/*
+              - !Sub arn:${AWS::Partition}:kms:*:${AWS::AccountId}:key/* # key ID is not known in advance
           - Effect: Allow
-            Action: lambda:*
+            Action:
+              # IMPORTANT: does *not* include lambda:InvokeFunction
+              - lambda:AddLayerVersionPermission
+              - lambda:AddPermission
+              - lambda:CreateFunction
+              - lambda:Delete*
+              - lambda:Get*
+              - lambda:PublishLayerVersion
+              - lambda:Put*
+              - lambda:RemoveLayerVersionPermission
+              - lambda:RemovePermission
+              - lambda:TagResource
+              - lambda:UntagResource
+              - lambda:Update*
             Resource:
-              - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:event-source-mapping:*
               - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:panther-*
               - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:layer:panther-*
-
-              # Panther v1.14 unintentionally introduced a Lambda function named "ddb."
-              # v1.15 renamed the function so it has the conventional "panther-" prefix.
-              #
-              # The deployment role needs to be able to delete the "ddb" function
-              # until all accounts have migrated to v1.15+. Otherwise, the migration will fail.
-              - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:ddb
           - Effect: Allow
-            Action: s3:*
+            Action: lambda:InvokeFunction
+            Resource:
+              - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:panther-cfn-custom-resources
+              - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:panther-pip-layer-builder
+          - Effect: Allow
+            Action:
+              # IMPORTANT: does *not* include s3:GetObject
+              - s3:CreateBucket
+              - s3:DeleteBucket*
+              - s3:GetBucket*
+              - s3:Get*Configuration
+              - s3:PutBucket*
+              - s3:Put*Configuration
             Resource: !Sub arn:${AWS::Partition}:s3:::panther-*
           - Effect: Allow
-            Action: sns:*
+            Action: s3:GetObject
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::panther-bootstrap-*analysisversions-*/layers/* # for AWS::Lambda::LayerVersion
+              # Release assets (Lambda binaries)
+              - !Sub arn:${AWS::Partition}:s3:::panther-dev-sourcebucket-*
+              - !Sub arn:${AWS::Partition}:s3:::panther-enterprise-*
+          - Effect: Allow
+            Action:
+              - sns:AddPermission
+              - sns:CreateTopic
+              - sns:DeleteTopic
+              - sns:GetTopicAttributes
+              - sns:RemovePermission
+              - sns:SetTopicAttributes
+              - sns:Subscribe
+              - sns:TagResource
+              - sns:Unsubscribe
+              - sns:UntagResource
             Resource: !Sub arn:${AWS::Partition}:sns:*:${AWS::AccountId}:panther-*
           - Effect: Allow
-            Action: sqs:*
+            Action:
+              # IMPORTANT: does *not* include sqs:ReceiveMessage
+              - sqs:AddPermission
+              - sqs:CreateQueue
+              - sqs:DeleteQueue
+              - sqs:GetQueueAttributes
+              - sqs:GetQueueUrl
+              - sqs:SetQueueAttributes
+              - sqs:TagQueue
+              - sqs:UntagQueue
             Resource: !Sub arn:${AWS::Partition}:sqs:*:${AWS::AccountId}:panther-*
           - Effect: Allow
             Action: states:*
