@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Panther Fluentd Firehose Template
+
+Parameters:
+  BufferIntervalInSeconds:
+    Type: Number
+    Default: 300
+    Description: Buffer incoming data for the specified period of time, in seconds, before delivering it to the destination. The default value is 300.
+  ExpirationInDays:
+    Type: Number
+    Default: 7
+    Description: Indicates the number of days after creation when objects are deleted from Amazon S3.
+  S3Prefix:
+    Type: String
+    Default: firehose/
+    Description: The root prefix to use when writing logs to S3.
+
+Resources:
+  FluentdFirehose:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt FirehoseBucket.Arn
+        BufferingHints:
+          IntervalInSeconds: !Ref BufferIntervalInSeconds
+          SizeInMBs: 128 # Maximum
+        CompressionFormat: GZIP
+        Prefix: !Sub ${S3Prefix}
+        RoleARN: !GetAtt FluentdServiceRole.Arn
+
+  FluentdServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: FirehoseServiceAssumeRole
+            Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref AWS::AccountId
+
+  FluentdFirehoseRoleManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Firehose permissions to write to data bucket
+      Roles:
+        - !Ref FluentdServiceRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Sid: AllowS3Delivery
+            Effect: Allow
+            Action:
+              - s3:AbortMultipartUpload
+              - s3:GetBucketLocation
+              - s3:GetObject
+              - s3:ListBucket
+              - s3:ListBucketMultipartUploads
+              - s3:PutObject
+            Resource:
+              - !GetAtt FirehoseBucket.Arn
+              - !Sub ${FirehoseBucket.Arn}/*
+
+  FirehoseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Status: Enabled
+            Id: !Sub ${ExpirationInDays}DayExpiration
+            ExpirationInDays: !Ref ExpirationInDays
+            NoncurrentVersionExpirationInDays: !Ref ExpirationInDays
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled
+
+  FirehoseBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FirehoseBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub ${FirehoseBucket.Arn}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+  ### EC2 Instance Profile ###
+  FirehoseInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref FirehoseInstanceProfileAssumeRole
+
+  FirehoseInstanceProfileAssumeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AssumeFirehoseRoles
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: sts:AssumeRole
+                Resource: !GetAtt FluentdFirehoseWriteOnlyRole.Arn
+
+  FluentdFirehoseWriteOnlyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: FirehosePutRecords
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - firehose:PutRecord
+                  - firehose:PutRecordBatch
+                Resource: !GetAtt FluentdFirehose.Arn
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonKinesisFirehoseReadOnlyAccess
+
+Outputs:
+  InstanceProfileName:
+    Value: !Ref FirehoseInstanceProfile
+  FirehoseName:
+    Value: !Ref FluentdFirehose
+  FirehoseSendDataRoleArn:
+    Value: !GetAtt FluentdFirehoseWriteOnlyRole.Arn
+  S3Bucket:
+    Value: !Ref FirehoseBucket
