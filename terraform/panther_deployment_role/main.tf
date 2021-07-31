@@ -59,7 +59,7 @@ resource "aws_iam_policy" "deployment" {
         "application-autoscaling:DescribeScalableTargets",
         "application-autoscaling:PutScalingPolicy",
         "application-autoscaling:RegisterScalableTarget",
-        "appsync:Delete*",
+        "appsync:*",
         "athena:*",
         "cloudformation:Describe*",
         "cloudformation:List*",
@@ -179,6 +179,16 @@ resource "aws_iam_policy" "deployment" {
       ]
     },
     {
+      "Action": "serverlessrepo:*",
+      "Effect": "Allow",
+      "Resource": "arn:${var.aws_partition}:serverlessrepo:*:*:applications/*"
+    },
+    {
+      "Action": "s3:GetObject",
+      "Effect": "Allow",
+      "Resource": "arn:${var.aws_partition}:s3:::awsserverlessrepo-changesets-*"
+    },
+    {
       "Action": [
         "dynamodb:CreateTable",
         "dynamodb:DeleteTable",
@@ -208,8 +218,11 @@ resource "aws_iam_policy" "deployment" {
         "iam:GetRolePolicy",
         "iam:PassRole",
         "iam:PutRolePolicy",
+        "iam:UpdateAssumeRolePolicy",
         "iam:UpdateRole",
-        "iam:*ServerCertificate"
+        "iam:UpdateRoleDescription",
+        "iam:*ServerCertificate",
+        "iam:CreateServiceLinkedRole"
       ],
       "Effect": "Allow",
       "Resource": [
@@ -261,6 +274,7 @@ resource "aws_iam_policy" "deployment" {
       ],
       "Effect": "Allow",
       "Resource": [
+        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:event-source-mapping:*",
         "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-*",
         "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:layer:panther-*"
       ]

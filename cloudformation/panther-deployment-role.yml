@@ -72,7 +72,7 @@ Resources:
               - application-autoscaling:DescribeScalableTargets
               - application-autoscaling:PutScalingPolicy
               - application-autoscaling:RegisterScalableTarget
-              - appsync:Delete* # can be removed in 1.22, after all AppSync infra is fully removed from existing deployments
+              - appsync:* # can be removed in 1.22, after all AppSync infra is fully removed from existing deployments
               - athena:*
               - cloudformation:Describe*
               - cloudformation:List*
@@ -182,6 +182,12 @@ Resources:
               - !Sub arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/panther*
               - !Sub arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stackset/panther*
               - !Sub arn:${AWS::Partition}:cloudformation:*:aws:transform/Serverless-2016-10-31
+          - Effect: Allow # for ddb athena connector - can be removed once all deployments are 1.21+
+            Action: serverlessrepo:*
+            Resource: !Sub arn:${AWS::Partition}:serverlessrepo:*:*:applications/*
+          - Effect: Allow # for ddb athena connector - can be removed once all deployments are 1.21+
+            Action: s3:GetObject
+            Resource: !Sub arn:${AWS::Partition}:s3:::awsserverlessrepo-changesets-*
           - Effect: Allow
             Action:
               # IMPORTANT: does *not* include access to table items
@@ -208,8 +214,11 @@ Resources:
               - iam:GetRolePolicy
               - iam:PassRole
               - iam:PutRolePolicy
+              - iam:UpdateAssumeRolePolicy
               - iam:UpdateRole
+              - iam:UpdateRoleDescription
               - iam:*ServerCertificate
+              - iam:CreateServiceLinkedRole
             Resource:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/AWSServiceRole*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/*
@@ -252,6 +261,7 @@ Resources:
               - lambda:UntagResource
               - lambda:Update*
             Resource:
+              - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:event-source-mapping:*
               - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:panther-*
               - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:layer:panther-*
           - Effect: Allow
