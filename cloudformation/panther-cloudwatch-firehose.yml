@@ -108,7 +108,6 @@ Resources:
         BufferingHints:
           IntervalInSeconds: !Ref BufferIntervalInSeconds
           SizeInMBs: 128 # Maximum
-        CompressionFormat: GZIP
         Prefix: PantherCloudWatchStream/ # Magic S3 prefix which tells Panther that a special data transformation needs to be done prior to parsing.
         RoleARN: !GetAtt FirehoseS3Role.Arn
 
