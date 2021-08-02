@@ -21,7 +21,7 @@ resource "aws_iam_role" "deployment" {
         }
         Action : "sts:AssumeRole",
         Condition : {
-          Bool : { "aws:SecureTransport" : "true" }
+          Bool : { "aws:SecureTransport" : true }
         }
       },
       {
@@ -31,7 +31,7 @@ resource "aws_iam_role" "deployment" {
         }
         Action : "sts:AssumeRole",
         Condition : {
-          Bool : { "aws:SecureTransport" : "true" }
+          Bool : { "aws:SecureTransport" : true }
         }
       },
     ]
@@ -127,6 +127,7 @@ resource "aws_iam_policy" "deployment" {
         "elasticfilesystem:DescribeLifecycleConfiguration",
         "elasticfilesystem:DescribeMountTargets",
         "elasticfilesystem:DescribeMountTargetSecurityGroups",
+        "elasticfilesystem:ModifyMountTargetSecurityGroups",
         "elasticfilesystem:PutLifecycleConfiguration",
         "elasticfilesystem:PutFileSystemPolicy",
         "elasticfilesystem:ListTagsForResource",
@@ -137,9 +138,6 @@ resource "aws_iam_policy" "deployment" {
         "ecr:GetAuthorizationToken",
         "ecs:*",
         "events:*",
-        "firehose:DescribeDeliveryStream",
-        "firehose:CreateDeliveryStream",
-        "firehose:DeleteDeliveryStream",
         "firehose:ListDeliveryStreams",
         "glue:*",
         "guardduty:CreatePublishingDestination",
@@ -176,13 +174,9 @@ resource "aws_iam_policy" "deployment" {
       "Effect": "Allow",
       "Resource": [
         "arn:${var.aws_partition}:cloudformation:*:${var.aws_account_id}:stack/panther*",
-        "arn:${var.aws_partition}:cloudformation:*:${var.aws_account_id}:stackset/panther*"
+        "arn:${var.aws_partition}:cloudformation:*:${var.aws_account_id}:stackset/panther*",
+        "arn:${var.aws_partition}:cloudformation:*:aws:transform/Serverless-2016-10-31"
       ]
-    },
-    {
-      "Action": "cloudformation:*",
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:cloudformation:*:aws:transform/Serverless-2016-10-31"
     },
     {
       "Action": "serverlessrepo:*",
@@ -190,32 +184,23 @@ resource "aws_iam_policy" "deployment" {
       "Resource": "arn:${var.aws_partition}:serverlessrepo:*:*:applications/*"
     },
     {
-      "Action": [
-        "lambda:GetFunction",
-        "lambda:CreateFunction"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:ddb"
-    },
-    {
       "Action": "s3:GetObject",
       "Effect": "Allow",
       "Resource": "arn:${var.aws_partition}:s3:::awsserverlessrepo-changesets-*"
     },
     {
-      "Action": "dynamodb:*",
+      "Action": [
+        "dynamodb:CreateTable",
+        "dynamodb:DeleteTable",
+        "dynamodb:Describe*",
+        "dynamodb:TagResource",
+        "dynamodb:UntagResource",
+        "dynamodb:UpdateContinuousBackups",
+        "dynamodb:UpdateTable",
+        "dynamodb:UpdateTimeToLive"
+      ],
       "Effect": "Allow",
       "Resource": "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/panther-*"
-    },
-    {
-      "Action": "ecr:*",
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:ecr:*:${var.aws_account_id}:repository/panther-*"
-    },
-    {
-      "Action": "execute-api:Invoke",
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:execute-api:*:${var.aws_account_id}:*"
     },
     {
       "Action": "firehose:*",
@@ -223,7 +208,22 @@ resource "aws_iam_policy" "deployment" {
       "Resource": "arn:${var.aws_partition}:firehose:*:${var.aws_account_id}:deliverystream/panther-*"
     },
     {
-      "Action": "iam:*",
+      "Action": [
+        "iam:AttachRolePolicy",
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:DeleteRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:GetRole",
+        "iam:GetRolePolicy",
+        "iam:PassRole",
+        "iam:PutRolePolicy",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:UpdateRole",
+        "iam:UpdateRoleDescription",
+        "iam:*ServerCertificate",
+        "iam:CreateServiceLinkedRole"
+      ],
       "Effect": "Allow",
       "Resource": [
         "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/AWSServiceRole*",
@@ -234,7 +234,23 @@ resource "aws_iam_policy" "deployment" {
       ]
     },
     {
-      "Action": "kms:*",
+      "Action": [
+        "kms:CreateAlias",
+        "kms:Decrypt",
+        "kms:DeleteAlias",
+        "kms:DescribeKey",
+        "kms:DisableKeyRotation",
+        "kms:EnableKeyRotation",
+        "kms:GetKeyPolicy",
+        "kms:GetKeyRotationStatus",
+        "kms:ListResourceTags",
+        "kms:PutKeyPolicy",
+        "kms:ScheduleKeyDeletion",
+        "kms:TagResource",
+        "kms:UntagResource",
+        "kms:UpdateAlias",
+        "kms:UpdateKeyDescription"
+      ],
       "Effect": "Allow",
       "Resource": [
         "arn:${var.aws_partition}:kms:*:${var.aws_account_id}:alias/panther-*",
@@ -242,27 +258,83 @@ resource "aws_iam_policy" "deployment" {
       ]
     },
     {
-      "Action": "lambda:*",
+      "Action": [
+        "lambda:AddLayerVersionPermission",
+        "lambda:AddPermission",
+        "lambda:CreateFunction",
+        "lambda:Delete*",
+        "lambda:Get*",
+        "lambda:PublishLayerVersion",
+        "lambda:Put*",
+        "lambda:RemoveLayerVersionPermission",
+        "lambda:RemovePermission",
+        "lambda:TagResource",
+        "lambda:UntagResource",
+        "lambda:Update*"
+      ],
       "Effect": "Allow",
       "Resource": [
         "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:event-source-mapping:*",
         "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-*",
-        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:layer:panther-*",
-        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:ddb"
+        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:layer:panther-*"
       ]
     },
     {
-      "Action": "s3:*",
+      "Action": "lambda:InvokeFunction",
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-cfn-custom-resources",
+        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-pip-layer-builder"
+      ]
+    },
+    {
+      "Action": [
+        "s3:CreateBucket",
+        "s3:DeleteBucket*",
+        "s3:GetBucket*",
+        "s3:Get*Configuration",
+        "s3:PutBucket*",
+        "s3:Put*Configuration"
+      ],
       "Effect": "Allow",
       "Resource": "arn:${var.aws_partition}:s3:::panther-*"
     },
     {
-      "Action": "sns:*",
+      "Action": "s3:GetObject",
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:s3:::panther-bootstrap-*analysisversions-*/layers/*",
+        "arn:${var.aws_partition}:s3:::panther-dev-sourcebucket-*",
+        "arn:${var.aws_partition}:s3:::panther-enterprise-*"
+      ]
+    },
+    {
+      "Action": [
+        "sns:AddPermission",
+        "sns:CreateTopic",
+        "sns:DeleteTopic",
+        "sns:GetTopicAttributes",
+        "sns:RemovePermission",
+        "sns:SetTopicAttributes",
+        "sns:Subscribe",
+        "sns:TagResource",
+        "sns:Unsubscribe",
+        "sns:UntagResource"
+      ],
       "Effect": "Allow",
       "Resource": "arn:${var.aws_partition}:sns:*:${var.aws_account_id}:panther-*"
     },
     {
-      "Action": "sqs:*",
+      "Action": [
+        "sqs:AddPermission",
+        "sqs:CreateQueue",
+        "sqs:DeleteQueue",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:SetQueueAttributes",
+        "sqs:TagQueue",
+        "sqs:UntagQueue"
+      ],
       "Effect": "Allow",
       "Resource": "arn:${var.aws_partition}:sqs:*:${var.aws_account_id}:panther-*"
     },
