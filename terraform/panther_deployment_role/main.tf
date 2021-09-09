@@ -63,6 +63,7 @@ resource "aws_iam_policy" "deployment" {
         "athena:*",
         "cloudformation:Describe*",
         "cloudformation:List*",
+        "cloudfront:UpdateDistribution",
         "cloudtrail:DescribeTrails",
         "cloudtrail:CreateTrail",
         "cloudwatch:*",
@@ -177,6 +178,11 @@ resource "aws_iam_policy" "deployment" {
         "arn:${var.aws_partition}:cloudformation:*:${var.aws_account_id}:stackset/panther*",
         "arn:${var.aws_partition}:cloudformation:*:aws:transform/Serverless-2016-10-31"
       ]
+    },
+    {
+      "Action": "codebuild:*",
+      "Effect": "Allow",
+      "Resource": "arn:${var.aws_partition}:codebuild:*:${var.aws_account_id}:project/panther-pulumi"
     },
     {
       "Action": "serverlessrepo:*",
@@ -303,7 +309,7 @@ resource "aws_iam_policy" "deployment" {
       "Action": "s3:GetObject",
       "Effect": "Allow",
       "Resource": [
-        "arn:${var.aws_partition}:s3:::panther-bootstrap-*analysisversions-*/layers/*",
+        "arn:${var.aws_partition}:s3:::panther*-analysisversions-*/layers/*",
         "arn:${var.aws_partition}:s3:::panther-dev-sourcebucket-*",
         "arn:${var.aws_partition}:s3:::panther-enterprise-*"
       ]

@@ -76,6 +76,7 @@ Resources:
               - athena:*
               - cloudformation:Describe*
               - cloudformation:List*
+              - cloudfront:UpdateDistribution
               - cloudtrail:DescribeTrails
               - cloudtrail:CreateTrail
               - cloudwatch:*
@@ -182,6 +183,9 @@ Resources:
               - !Sub arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/panther*
               - !Sub arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stackset/panther*
               - !Sub arn:${AWS::Partition}:cloudformation:*:aws:transform/Serverless-2016-10-31
+          - Effect: Allow
+            Action: codebuild:*
+            Resource: !Sub arn:${AWS::Partition}:codebuild:*:${AWS::AccountId}:project/panther-pulumi
           - Effect: Allow # for ddb athena connector - can be removed once all deployments are 1.21+
             Action: serverlessrepo:*
             Resource: !Sub arn:${AWS::Partition}:serverlessrepo:*:*:applications/*
@@ -282,7 +286,7 @@ Resources:
           - Effect: Allow
             Action: s3:GetObject
             Resource:
-              - !Sub arn:${AWS::Partition}:s3:::panther-bootstrap-*analysisversions-*/layers/* # for AWS::Lambda::LayerVersion
+              - !Sub arn:${AWS::Partition}:s3:::panther*-analysisversions-*/layers/* # for AWS::Lambda::LayerVersion
               # Release assets (Lambda binaries)
               - !Sub arn:${AWS::Partition}:s3:::panther-dev-sourcebucket-*
               - !Sub arn:${AWS::Partition}:s3:::panther-enterprise-*

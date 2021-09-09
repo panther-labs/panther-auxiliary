@@ -1,5 +1,6 @@
 region = us-west-2
 bucket = panther-public-cloudformation-templates
+foo = bar bar 
 
 upload-all:
 	for template in `find . -iname 'panther-*.yml'`; do \
