@@ -73,6 +73,7 @@ Conditions:
 
 Resources:
   LogProcessingRole:
+    # NOTE: needs to be kept in sync with panther-cloudwatch-firehose.yml
     Type: AWS::IAM::Role
     Properties:
       RoleName: !If
@@ -138,6 +139,7 @@ Resources:
 
   # Policies for allowing Panther to configure user's bucket notifications.
   ManagePantherTopic:
+    # NOTE: needs to be kept in sync with panther-cloudwatch-firehose.yml
     Type: AWS::IAM::Policy
     Condition: HasManagedBucketNotifications
     Properties:
@@ -151,6 +153,7 @@ Resources:
             Action: sns:*
             Resource: !Sub 'arn:${AWS::Partition}:sns:*:${AWS::AccountId}:panther-notifications-topic'
   GetPutBucketNotifications:
+    # NOTE: needs to be kept in sync with panther-cloudwatch-firehose.yml
     Type: AWS::IAM::Policy
     Condition: HasManagedBucketNotifications
     Properties:

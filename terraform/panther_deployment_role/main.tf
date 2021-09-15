@@ -62,10 +62,16 @@ resource "aws_iam_policy" "deployment" {
         "appsync:*",
         "athena:*",
         "cloudformation:Describe*",
+        "cloudformation:Detect*",
+        "cloudformation:Estimate*",
+        "cloudformation:Get*",
         "cloudformation:List*",
+        "cloudformation:Validate*",
+        "cloudfront:UpdateDistribution",
         "cloudtrail:DescribeTrails",
         "cloudtrail:CreateTrail",
         "cloudwatch:*",
+        "codebuild:List*",
         "cognito-idp:*",
         "dynamodb:List*",
         "ec2:AllocateAddress",
@@ -148,6 +154,8 @@ resource "aws_iam_policy" "deployment" {
         "lambda:List*",
         "logs:*",
         "s3:ListAllMyBuckets",
+        "secretsmanager:Describe*",
+        "secretsmanager:List*",
         "sns:List*",
         "sqs:List*",
         "states:CreateStateMachine",
@@ -177,6 +185,11 @@ resource "aws_iam_policy" "deployment" {
         "arn:${var.aws_partition}:cloudformation:*:${var.aws_account_id}:stackset/panther*",
         "arn:${var.aws_partition}:cloudformation:*:aws:transform/Serverless-2016-10-31"
       ]
+    },
+    {
+      "Action": "codebuild:*",
+      "Effect": "Allow",
+      "Resource": "arn:${var.aws_partition}:codebuild:*:${var.aws_account_id}:project/panther-pulumi"
     },
     {
       "Action": "serverlessrepo:*",
@@ -222,7 +235,10 @@ resource "aws_iam_policy" "deployment" {
         "iam:UpdateRole",
         "iam:UpdateRoleDescription",
         "iam:*ServerCertificate",
-        "iam:CreateServiceLinkedRole"
+        "iam:CreateServiceLinkedRole",
+        "iam:ListRoleTags",
+        "iam:TagRole",
+        "iam:UntagRole"
       ],
       "Effect": "Allow",
       "Resource": [
@@ -303,7 +319,7 @@ resource "aws_iam_policy" "deployment" {
       "Action": "s3:GetObject",
       "Effect": "Allow",
       "Resource": [
-        "arn:${var.aws_partition}:s3:::panther-bootstrap-*analysisversions-*/layers/*",
+        "arn:${var.aws_partition}:s3:::panther*-analysisversions-*/layers/*",
         "arn:${var.aws_partition}:s3:::panther-dev-sourcebucket-*",
         "arn:${var.aws_partition}:s3:::panther-enterprise-*"
       ]
