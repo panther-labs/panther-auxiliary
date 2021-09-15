@@ -148,7 +148,7 @@ Resources:
   PantherEventsKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: alias/panther-events
+      AliasName: alias/panther-log-processing
       TargetKeyId: !Ref PantherLogProcessingKey
 
 Outputs:

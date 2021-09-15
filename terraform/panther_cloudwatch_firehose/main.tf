@@ -5,6 +5,9 @@
 # All use, distribution, and/or modification of this software, whether commercial or non-commercial,
 # falls under the Panther Commercial License to the extent it is permitted.
 
+# TODO: Update the template to match latest cloudwatch-firehose CloudFormation version
+#       Needs to include panther-analysis-iam template
+
 resource "random_uuid" "subscription_name" {
 }
 

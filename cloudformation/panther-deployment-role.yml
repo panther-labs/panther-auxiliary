@@ -75,10 +75,16 @@ Resources:
               - appsync:* # can be removed in 1.22, after all AppSync infra is fully removed from existing deployments
               - athena:*
               - cloudformation:Describe*
+              - cloudformation:Detect*
+              - cloudformation:Estimate*
+              - cloudformation:Get*
               - cloudformation:List*
+              - cloudformation:Validate*
+              - cloudfront:UpdateDistribution
               - cloudtrail:DescribeTrails
               - cloudtrail:CreateTrail
               - cloudwatch:*
+              - codebuild:List*
               - cognito-idp:*
               - dynamodb:List*
               - ec2:AllocateAddress
@@ -161,6 +167,8 @@ Resources:
               - lambda:List*
               - logs:*
               - s3:ListAllMyBuckets
+              - secretsmanager:Describe*
+              - secretsmanager:List*
               - sns:List*
               - sqs:List*
               - states:CreateStateMachine
@@ -182,6 +190,9 @@ Resources:
               - !Sub arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/panther*
               - !Sub arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stackset/panther*
               - !Sub arn:${AWS::Partition}:cloudformation:*:aws:transform/Serverless-2016-10-31
+          - Effect: Allow
+            Action: codebuild:*
+            Resource: !Sub arn:${AWS::Partition}:codebuild:*:${AWS::AccountId}:project/panther-pulumi
           - Effect: Allow # for ddb athena connector - can be removed once all deployments are 1.21+
             Action: serverlessrepo:*
             Resource: !Sub arn:${AWS::Partition}:serverlessrepo:*:*:applications/*
@@ -219,6 +230,9 @@ Resources:
               - iam:UpdateRoleDescription
               - iam:*ServerCertificate
               - iam:CreateServiceLinkedRole
+              - iam:ListRoleTags
+              - iam:TagRole
+              - iam:UntagRole
             Resource:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/AWSServiceRole*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/*
@@ -282,7 +296,7 @@ Resources:
           - Effect: Allow
             Action: s3:GetObject
             Resource:
-              - !Sub arn:${AWS::Partition}:s3:::panther-bootstrap-*analysisversions-*/layers/* # for AWS::Lambda::LayerVersion
+              - !Sub arn:${AWS::Partition}:s3:::panther*-analysisversions-*/layers/* # for AWS::Lambda::LayerVersion
               # Release assets (Lambda binaries)
               - !Sub arn:${AWS::Partition}:s3:::panther-dev-sourcebucket-*
               - !Sub arn:${AWS::Partition}:s3:::panther-enterprise-*
