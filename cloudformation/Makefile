@@ -11,3 +11,5 @@ upload-single:
 	templateDisplayName=`echo $(template) | cut -d'.' -f1`; \
 	aws s3 cp $(template) s3://$(bucket)/$$templateDisplayName/v$$version/template.yml --acl public-read; \
 	aws s3 cp $(template) s3://$(bucket)/$$templateDisplayName/latest/template.yml --acl public-read;
+
+boo
