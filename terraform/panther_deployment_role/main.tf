@@ -189,7 +189,10 @@ resource "aws_iam_policy" "deployment" {
     {
       "Action": "codebuild:*",
       "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:codebuild:*:${var.aws_account_id}:project/panther-pulumi"
+      "Resource": [
+        "arn:${var.aws_partition}:codebuild:*:${var.aws_account_id}:project/panther-pulumi",
+        "arn:${var.aws_partition}:codebuild:*:${var.aws_account_id}:project/panther-pip-layer-builder"
+      ]
     },
     {
       "Action": "serverlessrepo:*",

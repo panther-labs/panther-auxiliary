@@ -192,7 +192,9 @@ Resources:
               - !Sub arn:${AWS::Partition}:cloudformation:*:aws:transform/Serverless-2016-10-31
           - Effect: Allow
             Action: codebuild:*
-            Resource: !Sub arn:${AWS::Partition}:codebuild:*:${AWS::AccountId}:project/panther-pulumi
+            Resource:
+              - !Sub arn:${AWS::Partition}:codebuild:*:${AWS::AccountId}:project/panther-pulumi
+              - !Sub arn:${AWS::Partition}:codebuild:*:${AWS::AccountId}:project/panther-pip-layer-builder
           - Effect: Allow # for ddb athena connector - can be removed once all deployments are 1.21+
             Action: serverlessrepo:*
             Resource: !Sub arn:${AWS::Partition}:serverlessrepo:*:*:applications/*
