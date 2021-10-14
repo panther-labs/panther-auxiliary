@@ -85,7 +85,7 @@ resource "aws_iam_policy" "deployment" {
         "ec2:CreateFlowLogs",
         "ec2:CreateInternetGateway",
         "ec2:CreateNatGateway",
-        "ec2:CreateNetworkInterface",
+        "ec2:*NetworkInterface*",
         "ec2:CreateRoute",
         "ec2:CreateRouteTable",
         "ec2:CreateSecurityGroup",
