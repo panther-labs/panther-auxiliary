@@ -83,7 +83,7 @@ resource "aws_iam_role" "deployment" {
         {
           Effect   = "Allow"
           Action   = "iam:*"
-          Resource = "arn:${var.aws_partition}:iam::${var.aws_account_id}:PantherDevDeploymentRole-*"
+          Resource = "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/PantherDevDeploymentRole-*"
         },
         {
           Effect   = "Allow"
