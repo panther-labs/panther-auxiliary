@@ -133,6 +133,24 @@ resource "aws_iam_role_policy" "panther_get_tags" {
   })
 }
 
+resource "aws_iam_role_policy" "panther_cloutrail_read" {
+  count = var.include_audit_role ? 1 : 0
+  name  = "CloudTrailRead"
+  role  = aws_iam_role.panther_audit[0].id
+
+  policy = jsonencode({
+    Version : "2012-10-17",
+    Statement : [
+      {
+        Effect : "Allow",
+        Action : [
+          "cloudtrail:GetTrail"
+        ],
+        Resource : "*"
+      }
+    ]
+  })
+}
 
 ###############################################################
 # CloudFormation StackSet Execution Role

@@ -143,6 +143,14 @@ Resources:
                   - eks:DescribeFargateProfile
                   - eks:DescribeNodegroup
                 Resource: '*'
+        - PolicyName: CloudTrailRead
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudtrail:GetTrail
+                Resource: '*'
       Tags:
         - Key: Application
           Value: Panther
