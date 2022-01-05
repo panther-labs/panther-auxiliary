@@ -1,0 +1,98 @@
+# Copyright (C) 2020 Panther Labs Inc
+#
+# Panther Enterprise is licensed under the terms of a commercial license available from
+# Panther Labs Inc ("Panther Commercial License") by contacting contact@runpanther.com.
+# All use, distribution, and/or modification of this software, whether commercial or non-commercial,
+# falls under the Panther Commercial License to the extent it is permitted.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: IAM Roles and a CloudFormation stackset to manage panther real time Cloud Security notifications in a single account.
+
+Parameters:
+  PantherAccountId:
+    Type: String
+    Default: ''
+  PantherAccountRegion:
+    Type: String
+    Default: ''
+  RegionsList:
+    Type: CommaDelimitedList
+    Default: us-west-1,us-west-2,us-east-1,us-east-2
+
+Resources:
+  StackSetExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub PantherCloudFormationStackSetExecutionRole-${AWS::Region}
+      Description: CloudFormation assumes this role to execute the stack set
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt StackSetAdminRole.Arn
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ManageCloudFormationStack
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: cloudformation:*
+                Resource: '*'
+        - PolicyName: PantherSetupRealTimeEvents
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - events:*
+                  - sns:*
+                Resource: '*'
+      Tags:
+        - Key: Application
+          Value: Panther
+
+  StackSetAdminRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub PantherCloudFormationStackSetAdminRole-${AWS::Region}
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AssumeRolesInTargetAccounts
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: sts:AssumeRole
+                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/PantherCloudFormationStackSetExecutionRole-${AWS::Region}
+
+  ### Panther CloudSecurity CWE Stack Set ###
+  PantherCloudSecurityCWEStackset:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      AdministrationRoleARN: !GetAtt StackSetAdminRole.Arn
+      ExecutionRoleName: !Ref StackSetExecutionRole
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+        - CAPABILITY_AUTO_EXPAND
+      Description: This stackset configures CWE -> Panther for real time Cloud Security in multiple regions in a single account
+      PermissionModel: SELF_MANAGED
+      StackInstancesGroup:
+        - DeploymentTargets:
+            Accounts:
+              - !Sub ${AWS::AccountId}
+          Regions: !Ref RegionsList
+      Parameters:
+        - ParameterKey: MasterAccountId
+          ParameterValue: !Sub ${AWS::AccountId}
+        - ParameterKey: QueueArn
+          ParameterValue: !Sub arn:aws:sqs:${PantherAccountRegion}:${PantherAccountId}:panther-aws-events-queue
+      StackSetName: panther-cloudsec-realtime-cwe
+      TemplateURL: https://s3-us-west-2.amazonaws.com/panther-public-cloudformation-templates/panther-cloudwatch-events/latest/template.yml
