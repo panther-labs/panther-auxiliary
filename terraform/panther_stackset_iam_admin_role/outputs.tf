@@ -1,4 +1,4 @@
-# Copyright (C) 2020 Panther Labs Inc
+# Copyright (C) 2022 Panther Labs Inc
 #
 # Panther Enterprise is licensed under the terms of a commercial license available from
 # Panther Labs Inc ("Panther Commercial License") by contacting contact@runpanther.com.
