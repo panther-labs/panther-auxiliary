@@ -72,7 +72,6 @@ Resources:
               - application-autoscaling:DescribeScalableTargets
               - application-autoscaling:PutScalingPolicy
               - application-autoscaling:RegisterScalableTarget
-              - appsync:* # can be removed in 1.22, after all AppSync infra is fully removed from existing deployments
               - athena:*
               - cloudformation:Describe*
               - cloudformation:Detect*
