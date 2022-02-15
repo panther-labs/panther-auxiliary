@@ -76,31 +76,44 @@ resource "aws_iam_role_policy_attachment" "osquery" {
   role       = aws_iam_role.osquery_data_firehose_role.id
 }
 
-resource "aws_s3_bucket" "osquery_data_bucket" {
-  acl = "private"
+resource "aws_s3_bucket" "osquery_data_bucket" {}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_acl" "osquery_data_bucket" {
+  bucket = aws_s3_bucket.osquery_data_bucket.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_versioning" "osquery_data_bucket" {
+  bucket = aws_s3_bucket.osquery_data_bucket.id
+
+  versioning_configuration {
+    status = "Enabled"
   }
+}
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+resource "aws_s3_bucket_server_side_encryption_configuration" "osquery_data_bucket" {
+  bucket = aws_s3_bucket.osquery_data_bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "osquery_data_bucket" {
+  bucket = aws_s3_bucket.osquery_data_bucket.id
 
   # Short expiration because this data is sent to Panther.
   # This can be adjusted per your individual needs.
-  lifecycle_rule {
-    id      = "30DayExpiration"
-    enabled = true
+  rule {
+    id     = "30DayExpiration"
+    status = "Enabled"
     expiration {
       days = 30
     }
     noncurrent_version_expiration {
-      days = 30
+      noncurrent_days = 30
     }
   }
 }

@@ -78,30 +78,45 @@ resource "aws_iam_role" "firehose_s3_role" {
   }
 }
 
-resource "aws_s3_bucket" "firehose_bucket" {
-  acl = "private"
-  versioning {
-    enabled = true
+resource "aws_s3_bucket" "firehose_bucket" {}
+
+resource "aws_s3_bucket_acl" "firehose_bucket" {
+  bucket = aws_s3_bucket.firehose_bucket.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_versioning" "firehose_bucket" {
+  bucket = aws_s3_bucket.firehose_bucket.id
+
+  versioning_configuration {
+    status = "Enabled"
   }
-  lifecycle_rule {
-    id      = "${var.expiration_in_days}DayExpiration"
-    enabled = true
-    expiration {
-      days = var.expiration_in_days
-    }
-    noncurrent_version_expiration {
-      days = var.expiration_in_days
-    }
-  }
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "firehose_bucket" {
+  bucket = aws_s3_bucket.firehose_bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "firehose_bucket" {
+  bucket = aws_s3_bucket.firehose_bucket.id
+
+  rule {
+    id     = "${var.expiration_in_days}DayExpiration"
+    status = "Enabled"
+    expiration {
+      days = var.expiration_in_days
+    }
+    noncurrent_version_expiration {
+      noncurrent_days = var.expiration_in_days
+    }
+  }
+}
 resource "aws_kinesis_firehose_delivery_stream" "panther_firehose" {
   name        = "panther_firehose"
   destination = "extended_s3"
