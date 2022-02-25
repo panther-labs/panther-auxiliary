@@ -283,6 +283,7 @@ Resources:
             Action: lambda:InvokeFunction
             Resource:
               - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:panther-cfn-custom-resources
+              - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:panther-cfn-stack-policy
               - !Sub arn:${AWS::Partition}:lambda:*:${AWS::AccountId}:function:panther-pip-layer-builder
           - Effect: Allow
             Action:
