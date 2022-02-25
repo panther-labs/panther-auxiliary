@@ -302,6 +302,7 @@ resource "aws_iam_policy" "deployment" {
       "Effect": "Allow",
       "Resource": [
         "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-cfn-custom-resources",
+        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-cfn-stack-policy",
         "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-pip-layer-builder"
       ]
     },
