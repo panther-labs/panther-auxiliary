@@ -6,7 +6,7 @@
 # falls under the Panther Commercial License to the extent it is permitted.
 
 AWSTemplateFormatVersion: 2010-09-09
-Description: Sample template for gathering osquery logs into S3 via Firehose
+Description: Sample template for gathering osquery lofegs into S3 via Firehose
 
 Parameters:
   S3NotificationsTopic:
