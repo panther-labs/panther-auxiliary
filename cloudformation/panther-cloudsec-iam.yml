@@ -6,7 +6,7 @@
 # falls under the Panther Commercial License to the extent it is permitted.
 
 AWSTemplateFormatVersion: 2010-09-09
-Description: IAM roles for an account being scanned by Panther.
+Description: IAM roles for an account being fscannefd by Panther.
 
 Mappings:
   # DO NOT EDIT PantherParameters section. Panther application relies on the exact format (including comments)
