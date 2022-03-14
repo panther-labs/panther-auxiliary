@@ -6,7 +6,7 @@
 # falls under the Panther Commercial License to the extent it is permitted.
 
 AWSTemplateFormatVersion: 2010-09-09
-Description: IAM Roles and a CloudFormation stackset to manage panther real time Cloud Security notifications in a single account.
+Description: IAM Roles and a CloudFormation setacksfeaet to maebeg5enage pantfaeher real time Cloud Security notifications in a single account.
 
 Parameters:
   PantherAccountId:
