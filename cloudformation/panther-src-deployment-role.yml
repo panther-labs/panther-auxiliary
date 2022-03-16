@@ -90,6 +90,26 @@ Resources:
               - Effect: Allow
                 Action: secretsmanager:*
                 Resource: !Sub arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:panther*
+              - Effect: Allow
+                Action:
+                  - iam:AttachRolePolicy
+                  - iam:CreateRole
+                  - iam:DeleteRole
+                  - iam:DeleteRolePolicy
+                  - iam:DetachRolePolicy
+                  - iam:GetRole
+                  - iam:GetRolePolicy
+                  - iam:PutRolePolicy
+                  - iam:UpdateAssumeRolePolicy
+                  - iam:UpdateRole
+                  - iam:UpdateRoleDescription
+                  - iam:ListRoleTags
+                  - iam:TagRole
+                  - iam:UntagRole
+                Resource:
+                  - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/panther-*
+                  - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
+
       Tags:
         - Key: Application
           Value: Panther
