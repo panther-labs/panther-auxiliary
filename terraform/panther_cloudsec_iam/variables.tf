@@ -13,12 +13,12 @@ variable "aws_partition" {
   default     = "aws"
 }
 
-variable "master_account_id" {
+variable "panther_aws_account_id" {
   type        = string
   description = "Panther AWS account ID"
 }
 
-variable "master_account_region" {
+variable "panther_aws_account_region" {
   type        = string
   description = "Panther AWS account region"
 }
