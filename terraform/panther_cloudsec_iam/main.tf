@@ -15,8 +15,8 @@
 
 resource "aws_iam_role" "panther_audit" {
   count       = var.include_audit_role ? 1 : 0
-  name        = "PantherAuditRole-${var.master_account_region}"
-  description = "The Panther master account assumes this role for read-only security scanning"
+  name        = "PantherAuditRole-${var.panther_aws_account_region}"
+  description = "The Panther account assumes this role for read-only security scanning"
 
   assume_role_policy = jsonencode({
     Version : "2012-10-17",
@@ -24,7 +24,7 @@ resource "aws_iam_role" "panther_audit" {
       {
         Effect : "Allow",
         Principal : {
-          AWS : "arn:${var.aws_partition}:iam::${var.master_account_id}:root"
+          AWS : "arn:${var.aws_partition}:iam::${var.panther_aws_account_id}:root"
         },
         Action : "sts:AssumeRole",
         Condition : {
@@ -99,9 +99,13 @@ resource "aws_iam_role_policy" "panther_get_waf_acls" {
       {
         Effect : "Allow",
         Action : [
+          "waf:GetRateBasedRule",
           "waf:GetRule",
+          "waf:GetRuleGroup",
           "waf:GetWebACL",
+          "waf-regional:GetRateBasedRule",
           "waf-regional:GetRule",
+          "waf-regional:GetRuleGroup",
           "waf-regional:GetWebACL",
           "waf-regional:GetWebACLForResource"
         ],
@@ -133,6 +137,30 @@ resource "aws_iam_role_policy" "panther_get_tags" {
   })
 }
 
+resource "aws_iam_role_policy" "panther_list_describe_eks" {
+  count = var.include_audit_role ? 1 : 0
+  name  = "ListDescribeEKS"
+  role  = aws_iam_role.panther_audit[0].id
+
+  policy = jsonencode({
+    Version : "2012-10-17",
+    Statement : [
+      {
+        Effect : "Allow",
+        Action : [
+          "eks:ListClusters",
+          "eks:ListFargateProfiles",
+          "eks:ListNodegroups",
+          "eks:DescribeCluster",
+          "eks:DescribeFargateProfile",
+          "eks:DescribeNodegroup",
+        ],
+        Resource : "*"
+      }
+    ]
+  })
+}
+
 
 ###############################################################
 # CloudFormation StackSet Execution Role
@@ -140,7 +168,7 @@ resource "aws_iam_role_policy" "panther_get_tags" {
 
 resource "aws_iam_role" "panther_cloud_formation_stackset_execution" {
   count       = var.include_stack_set_execution_role ? 1 : 0
-  name        = "PantherCloudFormationStackSetExecutionRole-${var.master_account_region}"
+  name        = "PantherCloudFormationStackSetExecutionRole-${var.panther_aws_account_region}"
   description = "CloudFormation assumes this role to execute a stack set"
 
   assume_role_policy = jsonencode({
@@ -149,7 +177,7 @@ resource "aws_iam_role" "panther_cloud_formation_stackset_execution" {
       {
         Effect : "Allow",
         Principal : {
-          "AWS" : "arn:${var.aws_partition}:iam::${var.master_account_id}:root"
+          "AWS" : "arn:${var.aws_partition}:iam::${var.panther_aws_account_id}:root"
         },
         Action : "sts:AssumeRole"
       }
