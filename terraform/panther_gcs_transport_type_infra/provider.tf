@@ -6,10 +6,11 @@
 # falls under the Panther Commercial License to the extent it is permitted.
 
 terraform {
+  required_version = ">= 1.1.7, < 1.2.0"
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "4.8.0"
+      version = ">= 4.16.0, < 5.0.0"
     }
   }
 }
