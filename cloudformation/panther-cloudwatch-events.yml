@@ -102,6 +102,8 @@ Resources:
               - kms:Delete*
               - kms:ScheduleKeyDeletion
               - kms:CancelKeyDeletion
+              - kms:TagResource
+              - kms:UntagResource
             Resource: '*'
 
   PantherEventsKeyAlias:
