@@ -277,6 +277,15 @@ resource "aws_iam_policy" "deployment" {
     },
     {
       "Action": [
+        "lambda:GetLayerVersion"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Extension*"
+      ]
+    },
+    {
+      "Action": [
         "lambda:AddLayerVersionPermission",
         "lambda:AddPermission",
         "lambda:CreateFunction",
