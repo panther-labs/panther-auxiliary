@@ -193,6 +193,9 @@ Resources:
           Value: Panther
 
 Outputs:
+  AuditRoleARN:
+    Description: The ARN of the Panther Audit IAM Role
+    Value: !GetAtt AuditRole.Arn
   CloudFormationStackSetExecutionRoleArn:
     Condition: EnableCloudWatchEvent
     Description: The Arn of the CloudFormation StackSet Execution Role for configuring Panther infra.
