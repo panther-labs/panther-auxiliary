@@ -262,6 +262,11 @@ Resources:
               - !Sub arn:${AWS::Partition}:kms:*:${AWS::AccountId}:key/* # key ID is not known in advance
           - Effect: Allow
             Action:
+              - lambda:GetLayerVersion
+            Resource:
+              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension*
+          - Effect: Allow
+            Action:
               # IMPORTANT: does *not* include lambda:InvokeFunction
               - lambda:AddLayerVersionPermission
               - lambda:AddPermission
