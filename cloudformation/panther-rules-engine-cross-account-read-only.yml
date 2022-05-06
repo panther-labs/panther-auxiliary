@@ -15,19 +15,19 @@ Parameters:
     AllowedPattern: '^\d{12}$'
   PantherRulesEngineRoleName:
     Type: String
-    Description: Panther rules-engine role name which can be found in the AWS Console under IAM by searching "rules" in the Panther Master Account
+    Description: Panther detections-engine role name which can be found in the AWS Console under IAM by searching "rules" in the Panther Master Account
   SecretArn:
     Type: String
     Default: ''
-    Description: (Optional) Allow Panther rules-engine to read the given secret arn
+    Description: (Optional) Allow Panther detections-engine to read the given secret arn
     AllowedPattern: '^(arn:(aws|aws-cn|aws-us-gov):secretsmanager:[a-z]{2}-[a-z]{4,9}-[1-9]:\d{12}:secret:\S+)?$'
   TargetBucketName:
     Type: String
-    Description: External S3 bucket which the Panther rules-engine will be allowed to read from
+    Description: External S3 bucket which the Panther detections-engine will be allowed to read from
   TargetBucketKmsKeyArn:
     Type: String
     Default: ''
-    Description: (Optional) Allow Panther rules-engine to decrypt this KMS key arn (required if the target bucket has KMS encryption enabled)
+    Description: (Optional) Allow Panther detections-engine to decrypt this KMS key arn (required if the target bucket has KMS encryption enabled)
     AllowedPattern: '^(arn:(aws|aws-cn|aws-us-gov):kms:[a-z]{2}-[a-z]{4,9}-[1-9]:\d{12}:key\/[0-9a-f-]{36})?$'
 
 Conditions:
