@@ -21,7 +21,7 @@ resource "aws_sns_topic_subscription" "panther_log_processing" {
   endpoint             = "arn:${var.aws_partition}:sqs:${var.panther_region}:${var.master_account_id}:panther-input-data-notifications-queue"
   protocol             = "sqs"
   raw_message_delivery = false
-  topic_arn            = "arn:${var.aws_partition}:sns:${var.satellite_account_region}:${each.key}:panther-notifications-topic"
+  topic_arn            = "arn:${var.aws_partition}:sns:${var.satellite_account_region}:${each.key}:${var.sns_topic_name}"
 }
 
 variable "satellite_accounts" {
