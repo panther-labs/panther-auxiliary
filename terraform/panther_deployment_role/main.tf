@@ -60,6 +60,7 @@ resource "aws_iam_policy" "deployment" {
         "application-autoscaling:PutScalingPolicy",
         "application-autoscaling:RegisterScalableTarget",
         "athena:*",
+        "batch:*",
         "cloudformation:Describe*",
         "cloudformation:Detect*",
         "cloudformation:Estimate*",

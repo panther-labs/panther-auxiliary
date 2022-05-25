@@ -45,6 +45,12 @@ resource "aws_iam_role_policy_attachment" "security_audit" {
   policy_arn = "arn:${var.aws_partition}:iam::aws:policy/SecurityAudit"
 }
 
+# CloudFormationStackDriftDetection and CloudFormationStackDriftDetectionSupplements Policies
+# are not directly required for scanning, but are required by AWS in
+# order to perform CloudFormation Stack drift detection on the corresponding resource types
+# If you delete those policies,
+# make sure to exclude CloudFormation stacks from your cloud security source setup,
+# otherwise you will be notified every 24 hours that those scans are failing.
 resource "aws_iam_role_policy" "panther_cloud_formation_stack_drift_detection" {
   count = var.include_audit_role ? 1 : 0
   name  = "CloudFormationStackDriftDetection"
@@ -65,8 +71,7 @@ resource "aws_iam_role_policy" "panther_cloud_formation_stack_drift_detection" {
   })
 }
 
-# These permissions are not directly required for scanning, but are required by AWS in
-# order to perform CloudFormation Stack drift detection on the corresponding resource types.
+
 resource "aws_iam_role_policy" "panther_cloud_formation_stack_drift_detection_supplements" {
   count = var.include_audit_role ? 1 : 0
   name  = "CloudFormationStackDriftDetectionSupplements"
