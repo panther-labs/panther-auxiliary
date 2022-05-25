@@ -73,6 +73,7 @@ Resources:
               - application-autoscaling:PutScalingPolicy
               - application-autoscaling:RegisterScalableTarget
               - athena:*
+              - batch:*
               - cloudformation:Describe*
               - cloudformation:Detect*
               - cloudformation:Estimate*
