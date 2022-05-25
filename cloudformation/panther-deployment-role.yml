@@ -266,6 +266,7 @@ Resources:
               - lambda:GetLayerVersion
             Resource:
               - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension*
+              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:464622532012:layer:Datadog-Python*
           - Effect: Allow
             Action:
               # IMPORTANT: does *not* include lambda:InvokeFunction

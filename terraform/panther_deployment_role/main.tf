@@ -282,7 +282,8 @@ resource "aws_iam_policy" "deployment" {
       ],
       "Effect": "Allow",
       "Resource": [
-        "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Extension*"
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Extension*",
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Python*"
       ]
     },
     {
