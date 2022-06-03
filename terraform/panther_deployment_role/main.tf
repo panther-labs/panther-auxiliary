@@ -108,6 +108,7 @@ resource "aws_iam_policy" "deployment" {
         "ec2:DisassociateAddress",
         "ec2:DisassociateRouteTable",
         "ec2:DisassociateSubnetCidrBlock",
+        "ec2:DisassociateVpcCidrBlock",
         "ec2:ModifySubnetAttribute",
         "ec2:ModifyVpcAttribute",
         "ec2:ModifyVpcEndpoint",
