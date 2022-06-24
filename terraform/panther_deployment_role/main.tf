@@ -93,7 +93,6 @@ resource "aws_iam_policy" "deployment" {
         "ec2:CreateTags",
         "ec2:CreateVpc",
         "ec2:DeleteVpcEndpoints",
-        "ec2:DeleteVpcEndpoint",
         "ec2:DeleteFlowLogs",
         "ec2:DeleteInternetGateway",
         "ec2:DeleteNatGateway",
