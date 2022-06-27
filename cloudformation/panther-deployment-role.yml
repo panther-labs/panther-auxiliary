@@ -87,25 +87,24 @@ Resources:
               - codebuild:List*
               - cognito-idp:*
               - dynamodb:List*
+              - ec2:*NetworkInterface*
               - ec2:AllocateAddress
               - ec2:AssociateRouteTable
               - ec2:AssociateSubnetCidrBlock
               - ec2:AssociateVpcCidrBlock
+              - ec2:AttachInternetGateway
               - ec2:AuthorizeSecurityGroupEgress
               - ec2:AuthorizeSecurityGroupIngress
-              - ec2:AttachInternetGateway
-              - ec2:CreateVpcEndpoint
               - ec2:CreateFlowLogs
               - ec2:CreateInternetGateway
               - ec2:CreateNatGateway
-              - ec2:*NetworkInterface*
               - ec2:CreateRoute
               - ec2:CreateRouteTable
               - ec2:CreateSecurityGroup
               - ec2:CreateSubnet
               - ec2:CreateTags
               - ec2:CreateVpc
-              - ec2:DeleteVpcEndpoints
+              - ec2:CreateVpcEndpoint
               - ec2:DeleteFlowLogs
               - ec2:DeleteInternetGateway
               - ec2:DeleteNatGateway
@@ -115,12 +114,15 @@ Resources:
               - ec2:DeleteSubnet
               - ec2:DeleteTags
               - ec2:DeleteVpc
+              - ec2:DeleteVpcEndpoint
+              - ec2:DeleteVpcEndpoints
               - ec2:Describe*
               - ec2:DetachInternetGateway
               - ec2:DisassociateAddress
               - ec2:DisassociateRouteTable
               - ec2:DisassociateSubnetCidrBlock
               - ec2:DisassociateVpcCidrBlock
+              - ec2:ModifyInstanceAttribute # Athena-to-Snowflake only
               - ec2:ModifySubnetAttribute
               - ec2:ModifyVpcAttribute
               - ec2:ModifyVpcEndpoint
@@ -129,6 +131,10 @@ Resources:
               - ec2:ReplaceRouteTableAssociation
               - ec2:RevokeSecurityGroupEgress
               - ec2:RevokeSecurityGroupIngress
+              - ec2:RunInstances # Athena-to-Snowflake only
+              - ec2:StartInstances # Athena-to-Snowflake only
+              - ec2:StopInstances # Athena-to-Snowflake only
+              - ec2:TerminateInstances # Athena-to-Snowflake only
               - ec2:UpdateSecurityGroupRuleDescriptionsEgress
               - ec2:UpdateSecurityGroupRuleDescriptionsIngress
               - elasticfilesystem:ClientMount
@@ -241,6 +247,15 @@ Resources:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/panther-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:server-certificate/panther/*
+          - Effect: Allow
+            Action:
+              - iam:AddRoleToInstanceProfile # Athena-to-Snowflake only
+              - iam:CreateInstanceProfile # Athena-to-Snowflake only
+              - iam:DeleteInstanceProfile # Athena-to-Snowflake only
+              - iam:RemoveRoleFromInstanceProfile # Athena-to-Snowflake only
+            Resource:
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/Panther* # Athena-to-Snowflake only
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/panther-* # Athena-to-Snowflake only
           - Effect: Allow
             Action:
               - kms:CreateAlias
