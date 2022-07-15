@@ -33,7 +33,7 @@ variable "master_account_id" {
 variable "sns_topic_name" {
   type        = string
   description = "The name of the SNS topic"
-  default     = "-PantherEventsTopic-"
+  default     = "panther-cloudwatch-events-topic"
 }
 
 # existing role (not managed by this template) that will be used to manage
