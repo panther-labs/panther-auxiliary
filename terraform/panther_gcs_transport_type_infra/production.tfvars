@@ -5,5 +5,6 @@ subscription_id                      = "subscription-id"
 gcp_region                           = "gcp-region"
 gcp_zone                             = "gcp-zone"
 gcs_bucket_location                  = "gcs-bucket-location"
+gcs_bucket_prefixes                  = ["logs/", "audit-logs"]
 panther_service_account_id           = "panther-service-account-id"
 panther_service_account_display_name = "panther-service-account-display-name"
