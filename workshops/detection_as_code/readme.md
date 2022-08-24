@@ -12,7 +12,7 @@ $ panther_analysis_tool upload --path custom_okta_rules/ --api-host DOMAIN --api
 ```
 $ mkdir detection-workshop && cd detection-workshop 
 $ git clone https://github.com/panther-labs/panther-analysis.git 
-$ mkdir panther-analysis/custom_okta_rules && panther-analysis
+$ mkdir panther-analysis/custom_okta_rules && cd panther-analysis
 $ cp okta_rules/okta_api_key_revoked.* custom_okta_rules/
 ```
 
