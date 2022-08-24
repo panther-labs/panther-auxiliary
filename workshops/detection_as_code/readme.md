@@ -8,7 +8,7 @@ $ panther_analysis_tool test --path custom_okta_rules/
 $ panther_analysis_tool upload --path custom_okta_rules/ --api-host DOMAIN --api-token TOKEN
 ```
 
-## Detection Rep Clone
+## Detection Repo Clone
 ```
 $ mkdir detection-workshop && cd detection-workshop 
 $ git clone https://github.com/panther-labs/panther-analysis.git 
