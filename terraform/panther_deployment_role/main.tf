@@ -101,7 +101,6 @@ resource "aws_iam_policy" "deployment" {
         "ec2:DeleteSubnet",
         "ec2:DeleteTags",
         "ec2:DeleteVpc",
-        "ec2:DeleteVpcEndpoint",
         "ec2:DeleteVpcEndpoints",
         "ec2:Describe*",
         "ec2:DetachInternetGateway",
