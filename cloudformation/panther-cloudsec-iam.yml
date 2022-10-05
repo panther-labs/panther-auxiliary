@@ -82,6 +82,12 @@ Resources:
       ManagedPolicyArns:
         - !Sub arn:${AWS::Partition}:iam::aws:policy/SecurityAudit
       Policies:
+        # CloudFormationStackDriftDetection and CloudFormationStackDriftDetectionSupplements Policies
+        # are not directly required for scanning, but are required by AWS in
+        # order to perform CloudFormation Stack drift detection on the corresponding resource types
+        # If you delete those policies,
+        # make sure to exclude CloudFormation stacks from your cloud security source setup,
+        # otherwise you will be notified every 24 hours that those scans are failing.
         - PolicyName: CloudFormationStackDriftDetection
           PolicyDocument:
             Version: 2012-10-17
@@ -92,8 +98,6 @@ Resources:
                   - cloudformation:DetectStackResourceDrift
                 Resource: '*'
         - PolicyName: CloudFormationStackDriftDetectionSupplements
-          # These permissions are not directly required for scanning, but are required by AWS in
-          # order to perform CloudFormation Stack drift detection on the corresponding resource types
           PolicyDocument:
             Version: 2012-10-17
             Statement:

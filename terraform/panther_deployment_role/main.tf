@@ -74,26 +74,24 @@ resource "aws_iam_policy" "deployment" {
         "codebuild:List*",
         "cognito-idp:*",
         "dynamodb:List*",
+        "ec2:*NetworkInterface*",
         "ec2:AllocateAddress",
         "ec2:AssociateRouteTable",
         "ec2:AssociateSubnetCidrBlock",
         "ec2:AssociateVpcCidrBlock",
+        "ec2:AttachInternetGateway",
         "ec2:AuthorizeSecurityGroupEgress",
         "ec2:AuthorizeSecurityGroupIngress",
-        "ec2:AttachInternetGateway",
-        "ec2:CreateVpcEndpoint",
         "ec2:CreateFlowLogs",
         "ec2:CreateInternetGateway",
         "ec2:CreateNatGateway",
-        "ec2:*NetworkInterface*",
         "ec2:CreateRoute",
         "ec2:CreateRouteTable",
         "ec2:CreateSecurityGroup",
         "ec2:CreateSubnet",
         "ec2:CreateTags",
         "ec2:CreateVpc",
-        "ec2:DeleteVpcEndpoints",
-        "ec2:DeleteVpcEndpoint",
+        "ec2:CreateVpcEndpoint",
         "ec2:DeleteFlowLogs",
         "ec2:DeleteInternetGateway",
         "ec2:DeleteNatGateway",
@@ -103,11 +101,14 @@ resource "aws_iam_policy" "deployment" {
         "ec2:DeleteSubnet",
         "ec2:DeleteTags",
         "ec2:DeleteVpc",
+        "ec2:DeleteVpcEndpoints",
         "ec2:Describe*",
         "ec2:DetachInternetGateway",
         "ec2:DisassociateAddress",
         "ec2:DisassociateRouteTable",
         "ec2:DisassociateSubnetCidrBlock",
+        "ec2:DisassociateVpcCidrBlock",
+        "ec2:ModifyInstanceAttribute",
         "ec2:ModifySubnetAttribute",
         "ec2:ModifyVpcAttribute",
         "ec2:ModifyVpcEndpoint",
@@ -116,6 +117,10 @@ resource "aws_iam_policy" "deployment" {
         "ec2:ReplaceRouteTableAssociation",
         "ec2:RevokeSecurityGroupEgress",
         "ec2:RevokeSecurityGroupIngress",
+        "ec2:RunInstances",
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:TerminateInstances",
         "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
         "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
         "elasticfilesystem:ClientMount",
@@ -254,6 +259,19 @@ resource "aws_iam_policy" "deployment" {
     },
     {
       "Action": [
+        "iam:AddRoleToInstanceProfile",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:RemoveRoleFromInstanceProfile"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:instance-profile/Panther*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:instance-profile/panther-*"
+      ]
+    },
+    {
+      "Action": [
         "kms:CreateAlias",
         "kms:Decrypt",
         "kms:DeleteAlias",
@@ -282,7 +300,8 @@ resource "aws_iam_policy" "deployment" {
       ],
       "Effect": "Allow",
       "Resource": [
-        "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Extension*"
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Extension*",
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Python*"
       ]
     },
     {

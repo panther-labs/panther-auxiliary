@@ -50,3 +50,11 @@ variable "panther_service_account_display_name" {
   type        = string
   description = "Panther Service Account Display Name"
 }
+
+# Specifies a prefix path filter for this notification config.
+# Cloud Storage only sends notifications for objects in this bucket whose names begin with the specified prefix.
+variable "gcs_bucket_prefixes" {
+  type        = set(string)
+  default     = [""]
+  description = "GCS Bucket prefixes"
+}
