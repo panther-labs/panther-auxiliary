@@ -214,6 +214,7 @@ resource "aws_iam_policy" "deployment" {
         "dynamodb:CreateTable",
         "dynamodb:DeleteTable",
         "dynamodb:Describe*",
+        "dynamodb:Scan",
         "dynamodb:TagResource",
         "dynamodb:UntagResource",
         "dynamodb:UpdateContinuousBackups",
