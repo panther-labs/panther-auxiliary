@@ -21,6 +21,9 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 # Create a bucket
+# If the bucket already exists, 
+# remove the below resource google_storage_bucket 
+# and replace the google_storage_bucket.gcs-bucket.name with your bucket input (e.g var.bucket_name)
 resource "google_storage_bucket" "gcs-bucket" {
   name          = var.bucket_name
   location      = var.gcs_bucket_location
@@ -69,14 +72,16 @@ resource "google_pubsub_topic_iam_binding" "binding" {
 }
 
 # Bucket notifications for new files
+# A bucket can have up to 100 total notification configurations.
 resource "google_storage_notification" "notification" {
-  bucket         = google_storage_bucket.gcs-bucket.name
-  payload_format = "JSON_API_V1"
-  topic          = google_pubsub_topic.topic.name
-  event_types    = ["OBJECT_FINALIZE"]
-  depends_on     = [google_pubsub_topic_iam_binding.binding]
+  for_each           = var.gcs_bucket_prefixes
+  bucket             = google_storage_bucket.gcs-bucket.name
+  payload_format     = "JSON_API_V1"
+  topic              = google_pubsub_topic.topic.name
+  event_types        = ["OBJECT_FINALIZE"]
+  depends_on         = [google_pubsub_topic_iam_binding.binding]
+  object_name_prefix = each.value
 }
-
 # Create the service account that will be used by panther
 resource "google_service_account" "panther_service_account" {
   account_id   = var.panther_service_account_id
