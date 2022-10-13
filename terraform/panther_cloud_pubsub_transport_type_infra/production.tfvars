@@ -1,0 +1,6 @@
+project_id                           = "project-id"
+topic_name                           = "topic-name"
+subscription_id                      = "subscription-id"
+gcp_region                           = "gcp-region"
+panther_service_account_id           = "panther-service-account-id"
+panther_service_account_display_name = "panther-service-account-display-name"
