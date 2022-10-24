@@ -1,3 +1,5 @@
 # Terraform
 .terraform*
 terraform.tfstate*
+workshops/.DS_Store
+workshops/fake_data/.DS_Store
