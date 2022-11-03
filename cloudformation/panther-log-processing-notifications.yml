@@ -1,9 +1,9 @@
-# Copyright (C) 2022 Panther Labs Inc
+# Copyright (C) 2022 Panther Labs, Inc.
 #
-# Panther Enterprise is licensed under the terms of a commercial license available from
-# Panther Labs Inc ("Panther Commercial License") by contacting contact@runpanther.com.
-# All use, distribution, and/or modification of this software, whether commercial or non-commercial,
-# falls under the Panther Commercial License to the extent it is permitted.
+# The Panther SaaS is licensed under the terms of the Panther Enterprise Subscription
+# Agreement available at https://panther.com/enterprise-subscription-agreement/.
+# All intellectual property rights in and to the Panther SaaS, including any and all
+# rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: Sets up an SNS topic and subscribes the Panther Log processing SQS queue to it.
