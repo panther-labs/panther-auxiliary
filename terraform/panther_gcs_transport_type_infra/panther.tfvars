@@ -11,10 +11,10 @@ topic_name          = "topic-name"
 subscription_id     = "subscription-id"
 gcs_bucket_location = "gcs-bucket-location"
 
-# Prefixes that notifications will be setup for. Data will need to be added within thoses prefixes
-# You need to edit the following to include your subdirectories.
-# Use `*` for all subdirectories
-gcs_bucket_prefixes = ["logs/", "audit-logs"]
+# Prefixes that notifications will be setup for. Data will need to be added within those prefixes
+# You need to edit the following to include yours.
+# Use `*` for to include all prefixes in the GCS bucket.
+gcs_bucket_prefixes = ["example-prefix-1/"]
 
 # Panther needs a Service account to be able to authenticate and pull data from the topic
 panther_service_account_id           = "panther-service-account-id"
