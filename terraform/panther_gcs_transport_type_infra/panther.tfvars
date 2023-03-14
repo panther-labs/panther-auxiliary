@@ -13,7 +13,7 @@ gcs_bucket_location = "gcs-bucket-location"
 
 # Prefixes that notifications will be setup for. Data will need to be added within those prefixes
 # You need to edit the following to include yours.
-# Use `*` for to include all prefixes in the GCS bucket.
+# Remove completely to include all prefixes in your GCS bucket.
 gcs_bucket_prefixes = ["example-prefix-1/"]
 
 # Panther needs a Service account to be able to authenticate and pull data from the topic
