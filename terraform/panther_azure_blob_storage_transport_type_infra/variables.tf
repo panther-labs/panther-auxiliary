@@ -8,7 +8,7 @@
 variable "resource_group_name" {
   type        = string
   description = "All created resources will be grouped under this Resource Group"
-  default     = "Panther Resource Group"
+  default     = "panther-rg"
 }
 
 variable "azure_region" {
@@ -19,7 +19,7 @@ variable "azure_region" {
 variable "container_name" {
   type        = string
   description = "Name of the created Blob Storage Container"
-  default     = "Panther Input"
+  default     = "panther-input"
 }
 
 variable "storage_account_name" {
@@ -30,7 +30,7 @@ variable "storage_account_name" {
 variable "application_name" {
   type        = string
   description = "Name of the Azure AD application to be created"
-  default     = "Panther Log Puller"
+  default     = "panther-log-puller"
 }
 
 variable "storage_account_redundancy" {

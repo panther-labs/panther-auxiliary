@@ -59,7 +59,6 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "panther_azure_stor
 
 data "azurerm_subscription" "primary" {}
 
-data "azurerm_client_config" "azure_client" {}
 data "azuread_client_config" "azuread_client" {}
 
 resource "azuread_application" "panther_azure_application" {

@@ -6,6 +6,7 @@
 # rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
 
 terraform {
+  required_version = ">= 1.1.7, < 1.4.4"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
