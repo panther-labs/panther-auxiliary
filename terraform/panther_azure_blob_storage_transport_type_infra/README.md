@@ -11,5 +11,5 @@ terraform plan
 terraform apply
 
 # or apply the change with a variables file.
-terraform apply -var-file="testing.tfvars"
+terraform apply -var-file="panther.tfvars"
 ```

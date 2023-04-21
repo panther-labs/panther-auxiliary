@@ -74,6 +74,22 @@ output "client_id" {
   value = azuread_application.panther_azure_application.application_id
 }
 
+output "tenant_id" {
+  value = data.azuread_client_config.azuread_client.tenant_id
+}
+
+output "storage_account_name" {
+  value = azurerm_storage_account.panther_azure_storage_account.name
+}
+
+output "storage_queue_name" {
+  value = azurerm_storage_queue.panther_azure_storage_queue.name
+}
+
+output "storage_container_name" {
+  value = azurerm_storage_container.panther_azure_storage_container.name
+}
+
 output "secret" {
   value     = azuread_application_password.panther_app_secret.value
   sensitive = true
