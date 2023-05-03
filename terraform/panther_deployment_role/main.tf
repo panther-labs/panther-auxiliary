@@ -225,6 +225,14 @@ resource "aws_iam_policy" "deployment" {
       "Resource": "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/panther-*"
     },
     {
+      "Action": [
+        "dynamodb:Get*",
+        "dynamodb:Describe*"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/panther-organization"
+    },
+    {
       "Action": "firehose:*",
       "Effect": "Allow",
       "Resource": "arn:${var.aws_partition}:firehose:*:${var.aws_account_id}:deliverystream/panther-*"
