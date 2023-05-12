@@ -154,6 +154,8 @@ resource "aws_iam_policy" "deployment" {
         "guardduty:CreatePublishingDestination",
         "guardduty:ListDetectors",
         "kms:CreateKey",
+        "kms:GenerateDataKey",
+        "kms:GenerateRandom",
         "kms:List*",
         "lambda:*EventSourceMapping",
         "lambda:List*",
@@ -225,6 +227,14 @@ resource "aws_iam_policy" "deployment" {
       "Resource": "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/panther-*"
     },
     {
+      "Action": [
+        "dynamodb:Get*",
+        "dynamodb:Describe*"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/panther-organization"
+    },
+    {
       "Action": "firehose:*",
       "Effect": "Allow",
       "Resource": "arn:${var.aws_partition}:firehose:*:${var.aws_account_id}:deliverystream/panther-*"
@@ -274,6 +284,7 @@ resource "aws_iam_policy" "deployment" {
     {
       "Action": [
         "kms:CreateAlias",
+        "kms:Encrypt",
         "kms:Decrypt",
         "kms:DeleteAlias",
         "kms:DescribeKey",
