@@ -167,6 +167,8 @@ Resources:
               - guardduty:CreatePublishingDestination
               - guardduty:ListDetectors
               - kms:CreateKey
+              - kms:GenerateDataKey
+              - kms:GenerateRandom
               - kms:List*
               - lambda:*EventSourceMapping
               - lambda:List*
@@ -220,6 +222,11 @@ Resources:
               - dynamodb:UpdateTimeToLive
             Resource: !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther-*
           - Effect: Allow
+            Action:
+              - dynamodb:Get*
+              - dynamodb:Describe*
+            Resource: !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther-organization
+          - Effect: Allow
             Action: firehose:*
             Resource: !Sub arn:${AWS::Partition}:firehose:*:${AWS::AccountId}:deliverystream/panther-*
           - Effect: Allow
@@ -259,6 +266,7 @@ Resources:
           - Effect: Allow
             Action:
               - kms:CreateAlias
+              - kms:Encrypt
               - kms:Decrypt # required for KMS-encrypted S3 deployment assets (e.g. AWS::Lambda::LayerVersion)
               - kms:DeleteAlias
               - kms:DescribeKey
