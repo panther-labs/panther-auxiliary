@@ -19,21 +19,14 @@ resource "azurerm_storage_account" "panther_azure_storage_account" {
   account_replication_type = var.storage_account_redundancy
 }
 
-resource "azurerm_storage_container" "panther_azure_storage_container" {
-  name                  = var.container_name
-  storage_account_name  = azurerm_storage_account.panther_azure_storage_account.name
-  container_access_type = "private"
-}
-
-
 resource "azurerm_storage_queue" "panther_azure_storage_queue" {
-  name                 = "${var.container_name}-queue"
+  name                 = "panther-input-queue"
   storage_account_name = azurerm_storage_account.panther_azure_storage_account.name
 }
 
 
 resource "azurerm_eventgrid_system_topic" "panther_azure_storage_eventgrid_topic" {
-  name                   = "${var.container_name}-topic"
+  name                   = "panther-input-topic"
   resource_group_name    = azurerm_resource_group.panther_azure_resource_group.name
   location               = azurerm_resource_group.panther_azure_resource_group.location
   source_arm_resource_id = azurerm_storage_account.panther_azure_storage_account.id
@@ -42,7 +35,7 @@ resource "azurerm_eventgrid_system_topic" "panther_azure_storage_eventgrid_topic
 
 
 resource "azurerm_eventgrid_system_topic_event_subscription" "panther_azure_storage_eventgrid_topic_subscription" {
-  name                 = "${var.container_name}-topic-subscription"
+  name                 = "panther-input-topic-subscription"
   system_topic         = azurerm_eventgrid_system_topic.panther_azure_storage_eventgrid_topic.name
   resource_group_name  = azurerm_resource_group.panther_azure_resource_group.name
   included_event_types = ["Microsoft.Storage.BlobCreated"]
@@ -52,7 +45,7 @@ resource "azurerm_eventgrid_system_topic_event_subscription" "panther_azure_stor
   }
 
   subject_filter {
-    subject_begins_with = "/blobServices/default/containers/${var.container_name}/"
+    subject_begins_with = "/blobServices/default/containers/${var.blob_prefix}"
   }
 }
 
@@ -86,10 +79,6 @@ output "storage_queue_name" {
   value = azurerm_storage_queue.panther_azure_storage_queue.name
 }
 
-output "storage_container_name" {
-  value = azurerm_storage_container.panther_azure_storage_container.name
-}
-
 output "secret" {
   value     = azuread_application_password.panther_app_secret.value
   sensitive = true
@@ -102,7 +91,7 @@ resource "azuread_service_principal" "panther_azure_application_principal" {
 }
 
 resource "azurerm_role_assignment" "panther_azure_role_assignment_blob_read" {
-  scope                = "${data.azurerm_subscription.primary.id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Storage/storageAccounts/${var.storage_account_name}/blobServices/default/containers/${var.container_name}"
+  scope                = "${data.azurerm_subscription.primary.id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Storage/storageAccounts/${var.storage_account_name}/blobServices/default"
   role_definition_name = "Storage Blob Data Reader"
   principal_id         = azuread_service_principal.panther_azure_application_principal.id
   depends_on = [
@@ -112,7 +101,7 @@ resource "azurerm_role_assignment" "panther_azure_role_assignment_blob_read" {
 }
 
 resource "azurerm_role_assignment" "panther_azure_role_assignment_queue" {
-  scope                = "${data.azurerm_subscription.primary.id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Storage/storageAccounts/${var.storage_account_name}/queueServices/default/queues/${var.container_name}-queue"
+  scope                = "${data.azurerm_subscription.primary.id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Storage/storageAccounts/${var.storage_account_name}/queueServices/default/queues/panther-input-queue"
   role_definition_name = "Storage Queue Data Message Processor"
   principal_id         = azuread_service_principal.panther_azure_application_principal.id
   depends_on = [
