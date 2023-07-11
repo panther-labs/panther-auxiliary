@@ -154,6 +154,8 @@ resource "aws_iam_policy" "deployment" {
         "guardduty:CreatePublishingDestination",
         "guardduty:ListDetectors",
         "kms:CreateKey",
+        "kms:GenerateDataKey",
+        "kms:GenerateRandom",
         "kms:List*",
         "lambda:*EventSourceMapping",
         "lambda:List*",
@@ -282,6 +284,7 @@ resource "aws_iam_policy" "deployment" {
     {
       "Action": [
         "kms:CreateAlias",
+        "kms:Encrypt",
         "kms:Decrypt",
         "kms:DeleteAlias",
         "kms:DescribeKey",

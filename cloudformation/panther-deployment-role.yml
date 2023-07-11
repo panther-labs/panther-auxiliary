@@ -167,6 +167,8 @@ Resources:
               - guardduty:CreatePublishingDestination
               - guardduty:ListDetectors
               - kms:CreateKey
+              - kms:GenerateDataKey
+              - kms:GenerateRandom
               - kms:List*
               - lambda:*EventSourceMapping
               - lambda:List*
@@ -264,6 +266,7 @@ Resources:
           - Effect: Allow
             Action:
               - kms:CreateAlias
+              - kms:Encrypt
               - kms:Decrypt # required for KMS-encrypted S3 deployment assets (e.g. AWS::Lambda::LayerVersion)
               - kms:DeleteAlias
               - kms:DescribeKey
