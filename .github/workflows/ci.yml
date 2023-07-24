@@ -22,6 +22,9 @@ jobs:
       - name: Run terraform fmt
         run: terraform fmt -check -recursive ./terraform
       - name: Run tflint
-        run: find ./terraform -iname "*.tf" | xargs -n 1 tflint
+        run: |
+          pushd terraform
+          tflint --recursive
+          popd
       - name: Run cfn-lint
         run: find ./cloudformation -iname "*.yml" | xargs -n 1 cfn-lint
