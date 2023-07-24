@@ -53,364 +53,226 @@ resource "aws_iam_policy" "deployment" {
       "Action": [
         "acm:*",
         "apigateway:*",
-        "application-autoscaling:DeleteScalingPolicy",
-        "application-autoscaling:DeregisterScalableTarget",
-        "application-autoscaling:DescribeScalingPolicies",
-        "application-autoscaling:DescribeScalableTargets",
-        "application-autoscaling:PutScalingPolicy",
-        "application-autoscaling:RegisterScalableTarget",
+        "application-autoscaling:*ScalableTarget*",
+        "application-autoscaling:*ScalingPolicies",
+        "application-autoscaling:*ScalingPolicy",
         "athena:*",
+        "backup-storage:*",
+        "backup:*",
         "batch:*",
-        "cloudformation:Describe*",
-        "cloudformation:Detect*",
-        "cloudformation:Estimate*",
-        "cloudformation:Get*",
-        "cloudformation:List*",
-        "cloudformation:Validate*",
+        "cloudformation:*",
         "cloudfront:UpdateDistribution",
-        "cloudtrail:DescribeTrails",
-        "cloudtrail:CreateTrail",
-        "cloudwatch:*",
-        "codebuild:List*",
+        "cloudtrail:*",
+        "cloudwatch:*Alarm*",
+        "cloudwatch:*Dashboard*",
+        "cloudwatch:*Metric*",
+        "cloudwatch:*Tag*",
+        "cloudwatch:List*",
+        "codebuild:*",
         "cognito-idp:*",
-        "dynamodb:List*",
-        "ec2:*NetworkInterface*",
-        "ec2:AllocateAddress",
-        "ec2:AssociateRouteTable",
-        "ec2:AssociateSubnetCidrBlock",
-        "ec2:AssociateVpcCidrBlock",
-        "ec2:AttachInternetGateway",
-        "ec2:AuthorizeSecurityGroupEgress",
-        "ec2:AuthorizeSecurityGroupIngress",
-        "ec2:CreateFlowLogs",
-        "ec2:CreateInternetGateway",
-        "ec2:CreateNatGateway",
-        "ec2:CreateRoute",
-        "ec2:CreateRouteTable",
-        "ec2:CreateSecurityGroup",
-        "ec2:CreateSubnet",
-        "ec2:CreateTags",
-        "ec2:CreateVpc",
-        "ec2:CreateVpcEndpoint",
-        "ec2:DeleteFlowLogs",
-        "ec2:DeleteInternetGateway",
-        "ec2:DeleteNatGateway",
-        "ec2:DeleteRoute",
-        "ec2:DeleteRouteTable",
-        "ec2:DeleteSecurityGroup",
-        "ec2:DeleteSubnet",
-        "ec2:DeleteTags",
-        "ec2:DeleteVpc",
-        "ec2:DeleteVpcEndpoints",
-        "ec2:Describe*",
-        "ec2:DetachInternetGateway",
-        "ec2:DisassociateAddress",
-        "ec2:DisassociateRouteTable",
-        "ec2:DisassociateSubnetCidrBlock",
-        "ec2:DisassociateVpcCidrBlock",
-        "ec2:ModifyInstanceAttribute",
-        "ec2:ModifySubnetAttribute",
-        "ec2:ModifyVpcAttribute",
-        "ec2:ModifyVpcEndpoint",
-        "ec2:ReleaseAddress",
-        "ec2:ReplaceRoute",
-        "ec2:ReplaceRouteTableAssociation",
-        "ec2:RevokeSecurityGroupEgress",
-        "ec2:RevokeSecurityGroupIngress",
-        "ec2:RunInstances",
-        "ec2:StartInstances",
-        "ec2:StopInstances",
-        "ec2:TerminateInstances",
-        "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
-        "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
-        "elasticfilesystem:ClientMount",
-        "elasticfilesystem:ClientRootAccess",
-        "elasticfilesystem:ClientWrite",
-        "elasticfilesystem:CreateAccessPoint",
-        "elasticfilesystem:CreateFileSystem",
-        "elasticfilesystem:CreateMountTarget",
-        "elasticfilesystem:DeleteAccessPoint",
-        "elasticfilesystem:DeleteFileSystem",
-        "elasticfilesystem:DeleteMountTarget",
-        "elasticfilesystem:DescribeAccessPoints",
-        "elasticfilesystem:DescribeFileSystems",
-        "elasticfilesystem:DescribeFileSystemPolicy",
-        "elasticfilesystem:DescribeLifecycleConfiguration",
-        "elasticfilesystem:DescribeMountTargets",
-        "elasticfilesystem:DescribeMountTargetSecurityGroups",
-        "elasticfilesystem:ModifyMountTargetSecurityGroups",
-        "elasticfilesystem:PutLifecycleConfiguration",
-        "elasticfilesystem:PutFileSystemPolicy",
-        "elasticfilesystem:ListTagsForResource",
-        "elasticfilesystem:TagResource",
-        "elasticfilesystem:UntagResource",
-        "elasticfilesystem:UpdateFileSystem",
+        "dynamodb:*Backup*",
+        "dynamodb:*Stream*",
+        "dynamodb:*Table*",
+        "dynamodb:*Tag*",
+        "dynamodb:*TimeToLive*",
+        "ec2:*",
+        "ecs:*Cluster*",
+        "ecs:*Service*",
+        "ecs:*Tag*",
+        "ecs:*Task*",
+        "elasticfilesystem:*",
         "elasticloadbalancing:*",
-        "ecr:GetAuthorizationToken",
-        "ecs:*",
+        "es:*",
         "events:*",
-        "firehose:ListDeliveryStreams",
         "glue:*",
-        "guardduty:CreatePublishingDestination",
-        "guardduty:ListDetectors",
-        "kms:CreateKey",
-        "kms:GenerateDataKey",
-        "kms:GenerateRandom",
-        "kms:List*",
+        "iam:*Policy*",
+        "iam:*ServerCertificate",
+        "iam:CreateRole",
+        "iam:Get*",
+        "iam:GetRole",
+        "iam:GetRolePolicy",
+        "iam:ListAccountAliases",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListRolePolicies",
+        "iam:PutRolePolicy",
+        "iam:TagRole",
+        "kinesis:AddTagsToStream",
+        "kinesis:CreateStream",
+        "kinesis:DescribeStreamSummary",
+        "kinesis:EnableEnhancedMonitoring",
+        "kinesis:IncreaseStreamRetentionPeriod",
+        "kinesis:ListTagsForStream",
+        "kms:*",
         "lambda:*EventSourceMapping",
+        "lambda:*LayerVersion*",
         "lambda:List*",
         "logs:*",
-        "s3:ListAllMyBuckets",
-        "secretsmanager:Describe*",
-        "secretsmanager:List*",
-        "sns:List*",
-        "sqs:List*",
-        "states:CreateStateMachine",
-        "states:TagResource",
-        "states:UntagResource"
+        "organizations:DescribeOrganization",
+        "s3:*AccelerateConfiguration",
+        "s3:*AccountPublicAccessBlock",
+        "s3:*Bucket*",
+        "s3:*EncryptionConfiguration",
+        "s3:*InventoryConfiguration",
+        "s3:*LifecycleConfiguration",
+        "s3:*MetricsConfiguration",
+        "s3:*ReplicationConfiguration",
+        "s3:CreateAccessPoint",
+        "s3:PutObject*",
+        "secretsmanager:CancelRotateSecret",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:RotateSecret",
+        "servicequotas:*",
+        "sns:*",
+        "sqs:*Permission*",
+        "sqs:*Queue*",
+        "sqs:SendMessage",
+        "states:*",
+        "vpc:*",
+        "wafv2:*",
+        "wafv2:CreateRuleGroup",
+        "wafv2:CreateWebACL",
+        "wafv2:GetRuleGroup",
+        "wafv2:ListTagsForResource",
+        "wafv2:TagResource",
+        "wafv2:UpdateRuleGroup"
       ],
       "Effect": "Allow",
       "Resource": "*"
     },
     {
-      "Action": [
-        "cloudtrail:AddTags",
-        "cloudtrail:DeleteTrail",
-        "cloudtrail:PutEventSelectors",
-        "cloudtrail:StartLogging",
-        "cloudtrail:StopLogging",
-        "cloudtrail:UpdateTrail"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:cloudtrail:*:${var.aws_account_id}:trail/panther-cloudtrail-*"
-    },
-    {
-      "Action": "cloudformation:*",
-      "Effect": "Allow",
-      "Resource": [
-        "arn:${var.aws_partition}:cloudformation:*:${var.aws_account_id}:stack/panther*",
-        "arn:${var.aws_partition}:cloudformation:*:${var.aws_account_id}:stackset/panther*",
-        "arn:${var.aws_partition}:cloudformation:*:aws:transform/Serverless-2016-10-31"
-      ]
-    },
-    {
-      "Action": "codebuild:*",
-      "Effect": "Allow",
-      "Resource": [
-        "arn:${var.aws_partition}:codebuild:*:${var.aws_account_id}:project/panther-pulumi",
-        "arn:${var.aws_partition}:codebuild:*:${var.aws_account_id}:project/panther-pip-layer-builder"
-      ]
-    },
-    {
-      "Action": "serverlessrepo:*",
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:serverlessrepo:*:*:applications/*"
-    },
-    {
-      "Action": "s3:GetObject",
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:s3:::awsserverlessrepo-changesets-*"
-    },
-    {
-      "Action": [
-        "dynamodb:CreateTable",
-        "dynamodb:DeleteTable",
-        "dynamodb:Describe*",
-        "dynamodb:Scan",
-        "dynamodb:TagResource",
-        "dynamodb:UntagResource",
-        "dynamodb:UpdateContinuousBackups",
-        "dynamodb:UpdateTable",
-        "dynamodb:UpdateTimeToLive"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/panther-*"
-    },
-    {
-      "Action": [
-        "dynamodb:Get*",
-        "dynamodb:Describe*"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/panther-organization"
-    },
-    {
       "Action": "firehose:*",
       "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:firehose:*:${var.aws_account_id}:deliverystream/panther-*"
+      "Resource": "arn:${var.aws_partition}:firehose:*:${var.aws_account_id}:deliverystream/*"
     },
     {
       "Action": [
+        "dynamodb:Scan",
+        "dynamodb:Get*"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/panther-analysis",
+        "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/panther-organization"
+      ]
+    },
+    {
+      "Action": [
+        "iam:*InstanceProfile*",
         "iam:AttachRolePolicy",
         "iam:CreateRole",
         "iam:DeleteRole",
         "iam:DeleteRolePolicy",
         "iam:DetachRolePolicy",
-        "iam:GetRole",
-        "iam:GetRolePolicy",
+        "iam:Get*",
+        "iam:List*",
         "iam:PassRole",
         "iam:PutRolePolicy",
+        "iam:TagRole",
         "iam:UpdateAssumeRolePolicy",
         "iam:UpdateRole",
         "iam:UpdateRoleDescription",
-        "iam:*ServerCertificate",
-        "iam:CreateServiceLinkedRole",
-        "iam:ListRoleTags",
-        "iam:TagRole",
         "iam:UntagRole"
       ],
       "Effect": "Allow",
       "Resource": [
-        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/AWSServiceRole*",
-        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/dynamo-scaling-*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/firehose-http-input-data-bucket-*",
         "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/panther-*",
         "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/Panther*",
-        "arn:${var.aws_partition}:iam::${var.aws_account_id}:server-certificate/panther/*"
-      ]
-    },
-    {
-      "Action": [
-        "iam:AddRoleToInstanceProfile",
-        "iam:CreateInstanceProfile",
-        "iam:DeleteInstanceProfile",
-        "iam:RemoveRoleFromInstanceProfile"
-      ],
-      "Effect": "Allow",
-      "Resource": [
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/pip-layer-builder-codebuild-*",
         "arn:${var.aws_partition}:iam::${var.aws_account_id}:instance-profile/Panther*",
-        "arn:${var.aws_partition}:iam::${var.aws_account_id}:instance-profile/panther-*"
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/datadog*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/Datadog*"
       ]
     },
     {
       "Action": [
-        "kms:CreateAlias",
-        "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:DeleteAlias",
-        "kms:DescribeKey",
-        "kms:DisableKeyRotation",
-        "kms:EnableKeyRotation",
-        "kms:GetKeyPolicy",
-        "kms:GetKeyRotationStatus",
-        "kms:ListResourceTags",
-        "kms:PutKeyPolicy",
-        "kms:ScheduleKeyDeletion",
-        "kms:TagResource",
-        "kms:UntagResource",
-        "kms:UpdateAlias",
-        "kms:UpdateKeyDescription"
+        "iam:*"
       ],
       "Effect": "Allow",
       "Resource": [
-        "arn:${var.aws_partition}:kms:*:${var.aws_account_id}:alias/panther-*",
-        "arn:${var.aws_partition}:kms:*:${var.aws_account_id}:key/*"
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/batch.amazonaws.com/AWSServiceRoleForBatch",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/cloudtrail.amazonaws.com/AWSServiceRoleForCloudTrail",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/dynamodb.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_DynamoDBTable",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/elasticfilesystem.amazonaws.com/AWSServiceRoleForAmazonElasticFileSystem",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/opensearchservice.amazonaws.com/AWSServiceRoleForAmazonOpenSearchService",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/ops.apigateway.amazonaws.com/AWSServiceRoleForAPIGateway",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/servicequotas.amazonaws.com/AWSServiceRoleForServiceQuotas"
       ]
     },
     {
       "Action": [
-        "lambda:GetLayerVersion"
+        "sts:AssumeRole"
       ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:iam::*:role/PulumiRoute53"
+    },
+    {
+      "Action": "lambda:*",
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:${var.aws_account_id}:event-source-mapping:*",
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:${var.aws_account_id}:function:panther-*",
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:${var.aws_account_id}:layer:panther-*",
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:${var.aws_account_id}:function:datadog-*"
+      ]
+    },
+    {
+      "Action": "lambda:invokeFunction",
+      "Effect": "Allow",
+      "Resource": "arn:${var.aws_partition}:lambda:${var.aws_region}:${var.aws_account_id}:function:panther-source-api"
+    },
+    {
+      "Action": "lambda:GetLayerVersion",
       "Effect": "Allow",
       "Resource": [
         "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Extension*",
-        "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Python*"
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Python*",
+        "arn:${var.aws_partition}:lambda:${var.aws_region}:580247275435:layer:LambdaInsightsExtension*"
+      ]
+    },
+    {
+      "Action": "s3:*",
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:s3:::panther*-analysisversions-*",
+        "arn:${var.aws_partition}:s3:::analysis-versions-*"
+      ]
+    },
+    {
+      "Action": "elasticloadbalancing:DeleteLoadBalancer",
+      "Effect": "Deny",
+      "NotResource": [
+        "arn:${var.aws_partition}:elasticloadbalancing:${var.aws_region}:${var.aws_account_id}:loadbalancer/app/http-ingest-alb*"
+      ]
+    },
+    {
+      "Action": "dynamodb:DeleteTable",
+      "Effect": "Deny",
+      "NotResource": [
+        "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/*alerts-risk-factors",
+        "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/*alerts-indicators",
+        "arn:${var.aws_partition}:dynamodb:*:${var.aws_account_id}:table/*alert-search-rehydrate-jobs"
       ]
     },
     {
       "Action": [
-        "lambda:AddLayerVersionPermission",
-        "lambda:AddPermission",
-        "lambda:CreateFunction",
-        "lambda:Delete*",
-        "lambda:Get*",
-        "lambda:PublishLayerVersion",
-        "lambda:Put*",
-        "lambda:RemoveLayerVersionPermission",
-        "lambda:RemovePermission",
-        "lambda:TagResource",
-        "lambda:UntagResource",
-        "lambda:Update*"
+        "cognito-idp:DeleteUserPool*",
+        "dynamodb:DeleteBackup",
+        "dynamodb:DeleteItem",
+        "dynamodb:DeleteTableReplica",
+        "kms:DeleteAlias",
+        "kms:DeleteCustomKeyStore",
+        "kms:DeleteImportedKeyMaterial",
+        "kms:ScheduleKeyDeletion",
+        "s3:DeleteBucket",
+        "sns:DeleteTopic"
       ],
-      "Effect": "Allow",
-      "Resource": [
-        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:event-source-mapping:*",
-        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-*",
-        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:layer:panther-*"
-      ]
-    },
-    {
-      "Action": "lambda:InvokeFunction",
-      "Effect": "Allow",
-      "Resource": [
-        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-cfn-custom-resources",
-        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-cfn-stack-policy",
-        "arn:${var.aws_partition}:lambda:*:${var.aws_account_id}:function:panther-pip-layer-builder"
-      ]
-    },
-    {
-      "Action": [
-        "s3:CreateBucket",
-        "s3:DeleteBucket*",
-        "s3:GetBucket*",
-        "s3:Get*Configuration",
-        "s3:PutBucket*",
-        "s3:Put*Configuration"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:s3:::panther-*"
-    },
-    {
-      "Action": "s3:GetObject",
-      "Effect": "Allow",
-      "Resource": [
-        "arn:${var.aws_partition}:s3:::panther*-analysisversions-*/layers/*",
-        "arn:${var.aws_partition}:s3:::panther-dev-sourcebucket-*",
-        "arn:${var.aws_partition}:s3:::panther-enterprise-*"
-      ]
-    },
-    {
-      "Action": [
-        "sns:AddPermission",
-        "sns:CreateTopic",
-        "sns:DeleteTopic",
-        "sns:GetTopicAttributes",
-        "sns:RemovePermission",
-        "sns:SetTopicAttributes",
-        "sns:Subscribe",
-        "sns:TagResource",
-        "sns:Unsubscribe",
-        "sns:UntagResource"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:sns:*:${var.aws_account_id}:panther-*"
-    },
-    {
-      "Action": "secretsmanager:*",
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:secretsmanager:*:${var.aws_account_id}:secret:panther*"
-    },
-    {
-      "Action": [
-        "sqs:AddPermission",
-        "sqs:CreateQueue",
-        "sqs:DeleteQueue",
-        "sqs:GetQueueAttributes",
-        "sqs:GetQueueUrl",
-        "sqs:SetQueueAttributes",
-        "sqs:TagQueue",
-        "sqs:UntagQueue"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:${var.aws_partition}:sqs:*:${var.aws_account_id}:panther-*"
-    },
-    {
-      "Action": "states:*",
-      "Effect": "Allow",
-      "Resource": [
-        "arn:${var.aws_partition}:states:*:${var.aws_account_id}:activity:panther-*",
-        "arn:${var.aws_partition}:states:*:${var.aws_account_id}:execution:panther-*:*",
-        "arn:${var.aws_partition}:states:*:${var.aws_account_id}:stateMachine:panther-*"
-      ]
+      "Effect": "Deny",
+      "Resource": "*"
     }
   ],
   "Version": "2012-10-17"

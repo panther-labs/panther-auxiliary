@@ -16,12 +16,6 @@ variable "azure_region" {
   description = "Azure Region"
 }
 
-variable "container_name" {
-  type        = string
-  description = "Name of the created Blob Storage Container"
-  default     = "panther-input"
-}
-
 variable "storage_account_name" {
   type        = string
   description = "Name of the created Storage Account"
@@ -37,4 +31,10 @@ variable "storage_account_redundancy" {
   type        = string
   description = "Storage Account Redundancy Setting, see https://learn.microsoft.com/en-us/azure/storage/common/storage-redundancy"
   default     = "GRS"
+}
+
+variable "blob_prefix" {
+  type        = string
+  description = "prefix for filtering blobs"
+  default     = ""
 }
