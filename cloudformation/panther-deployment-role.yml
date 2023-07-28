@@ -32,6 +32,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !If [RoleNameSpecified, !Ref DeploymentRoleName, !Ref AWS::NoValue]
+      Description: IAM role for deploying Panther
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -45,17 +46,16 @@ Resources:
             Condition:
               Bool:
                 aws:SecureTransport: true
-
           - Effect: Allow
             Principal:
               AWS: !If
                 - OpsAccountSpecified
                 - !Sub arn:${AWS::Partition}:iam::${OpsAccountId}:role/PulumiCodeBuild
                 - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/PulumiCodeBuild
+            Action: sts:AssumeRole
             Condition:
               Bool:
                 aws:SecureTransport: true
-
           - Effect: Allow
             Principal:
               Service: cloudformation.amazonaws.com
@@ -63,7 +63,6 @@ Resources:
             Condition:
               Bool:
                 aws:SecureTransport: true
-      Description: IAM role for deploying Panther
       Tags:
         - Key: Application
           Value: Panther
@@ -146,9 +145,8 @@ Resources:
               - s3:*ReplicationConfiguration
               - s3:CreateAccessPoint
               - s3:PutObject*
-              - secretsmanager:CancelRotateSecret
-              - secretsmanager:DescribeSecret
-              - secretsmanager:RotateSecret
+              - secretsmanager:Describe*
+              - secretsmanager:List*
               - servicequotas:*
               - sns:*
               - sqs:*Permission*
@@ -164,6 +162,9 @@ Resources:
               - wafv2:TagResource
               - wafv2:UpdateRuleGroup
             Resource: '*'
+          - Effect: Allow
+            Action: secretsmanager:*
+            Resource: !Sub arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:panther*
           - Effect: Allow
             Action: firehose:*
             Resource: !Sub arn:${AWS::Partition}:firehose:*:${AWS::AccountId}:deliverystream/*

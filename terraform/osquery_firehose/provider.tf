@@ -6,7 +6,7 @@
 # rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
 
 terraform {
-  required_version = ">= 1.1.7, < 1.2.0"
+  required_version = ">= 1.1.7, < 2.0.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"

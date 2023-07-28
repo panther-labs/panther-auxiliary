@@ -118,9 +118,8 @@ resource "aws_iam_policy" "deployment" {
         "s3:*ReplicationConfiguration",
         "s3:CreateAccessPoint",
         "s3:PutObject*",
-        "secretsmanager:CancelRotateSecret",
-        "secretsmanager:DescribeSecret",
-        "secretsmanager:RotateSecret",
+        "secretsmanager:Describe*",
+        "secretsmanager:List*",
         "servicequotas:*",
         "sns:*",
         "sqs:*Permission*",
@@ -138,6 +137,11 @@ resource "aws_iam_policy" "deployment" {
       ],
       "Effect": "Allow",
       "Resource": "*"
+    },
+    {
+      "Action": "secretsmanager:*",
+      "Effect": "Allow",
+      "Resource": "arn:${var.aws_partition}:secretsmanager:*:${var.aws_account_id}:secret:panther*"
     },
     {
       "Action": "firehose:*",
