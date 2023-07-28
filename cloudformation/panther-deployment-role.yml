@@ -220,6 +220,11 @@ Resources:
               - dynamodb:UpdateTimeToLive
             Resource: !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther-*
           - Effect: Allow
+            Action:
+              - dynamodb:Get*
+              - dynamodb:Describe*
+            Resource: !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther-organization
+          - Effect: Allow
             Action: firehose:*
             Resource: !Sub arn:${AWS::Partition}:firehose:*:${AWS::AccountId}:deliverystream/panther-*
           - Effect: Allow
