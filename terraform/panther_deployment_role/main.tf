@@ -76,6 +76,7 @@ resource "aws_iam_policy" "deployment" {
         "dynamodb:*Tag*",
         "dynamodb:*TimeToLive*",
         "ec2:*",
+        "ecr:GetAuthorizationToken",
         "ecs:*Cluster*",
         "ecs:*Service*",
         "ecs:*Tag*",
@@ -236,6 +237,36 @@ resource "aws_iam_policy" "deployment" {
         "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Extension*",
         "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Python*",
         "arn:${var.aws_partition}:lambda:${var.aws_region}:580247275435:layer:LambdaInsightsExtension*"
+      ]
+    },
+    {
+      "Action": [
+        "s3:Get*",
+        "s3:ListBucket"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:s3:::panther-enterprise-${var.aws_region}*"
+      ]
+    },
+    {
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:ecr:${var.aws_region}:*:repository/panther-enterprise",
+        "arn:${var.aws_partition}:ecr:${var.aws_region}:${var.aws_account_id}:repository/panther-web-dev"
+      ]
+    },
+    {
+      "Action": "secretsmanager:GetSecretValue",
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:secretsmanager:${var.aws_region}::secret:DatadogApiKeySecret*",
+        "arn:${var.aws_partition}:secretsmanager:${var.aws_region}::secret:DatadogAppKeySecret*"
       ]
     },
     {

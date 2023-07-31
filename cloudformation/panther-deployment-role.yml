@@ -103,6 +103,7 @@ Resources:
               - dynamodb:*Tag*
               - dynamodb:*TimeToLive*
               - ec2:*
+              - ecr:GetAuthorizationToken
               - ecs:*Cluster*
               - ecs:*Service*
               - ecs:*Tag*
@@ -235,6 +236,25 @@ Resources:
               - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension*
               - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:464622532012:layer:Datadog-Python*
               - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension*
+          - Effect: Allow
+            Action:
+              - s3:Get*
+              - s3:ListBucket
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::panther-enterprise-${AWS::Region}*
+          - Effect: Allow
+            Action:
+              - ecr:BatchCheckLayerAvailability
+              - ecr:GetDownloadUrlForLayer
+              - ecr:BatchGetImage
+            Resource:
+              - !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:*:repository/panther-enterprise
+              - !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/panther-web-dev
+          - Effect: Allow
+            Action: secretsmanager:GetSecretValue
+            Resource:
+              - !Sub arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${OpsAccountId}:secret:DatadogApiKeySecret*
+              - !Sub arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${OpsAccountId}:secret:DatadogAppKeySecret*
           - Effect: Allow
             Action: s3:*
             Resource:
