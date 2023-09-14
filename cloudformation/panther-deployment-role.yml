@@ -23,7 +23,7 @@ Parameters:
     Default: ''
 
 Conditions:
-  AccountSpecified: !Not [!Equals [!Ref IdentityAccountId, '']]
+  IdentityAccountSpecified: !Not [!Equals [!Ref IdentityAccountId, '']]
   OpsAccountSpecified: !Not [!Equals [!Ref OpsAccountId, '']]
   RoleNameSpecified: !Not [!Equals [!Ref DeploymentRoleName, '']]
 
@@ -39,23 +39,23 @@ Resources:
           - Effect: Allow
             Principal:
               AWS: !If
-                - AccountSpecified
+                - IdentityAccountSpecified
                 - !Sub arn:${AWS::Partition}:iam::${IdentityAccountId}:root
                 - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
             Action: sts:AssumeRole
             Condition:
               Bool:
                 aws:SecureTransport: true
-          - Effect: Allow
-            Principal:
-              AWS: !If
-                - OpsAccountSpecified
-                - !Sub arn:${AWS::Partition}:iam::${OpsAccountId}:role/PulumiCodeBuild
-                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/PulumiCodeBuild
-            Action: sts:AssumeRole
-            Condition:
-              Bool:
-                aws:SecureTransport: true
+          - !If
+            - OpsAccountSpecified
+            - Effect: Allow
+              Principal:
+                AWS: !Sub arn:${AWS::Partition}:iam::${OpsAccountId}:role/PulumiCodeBuild
+              Action: sts:AssumeRole
+              Condition:
+                Bool:
+                  aws:SecureTransport: true
+            - !Ref AWS::NoValue
           - Effect: Allow
             Principal:
               Service: cloudformation.amazonaws.com
@@ -103,6 +103,7 @@ Resources:
               - dynamodb:*Tag*
               - dynamodb:*TimeToLive*
               - ec2:*
+              - ecr:GetAuthorizationToken
               - ecs:*Cluster*
               - ecs:*Service*
               - ecs:*Tag*
@@ -112,17 +113,9 @@ Resources:
               - es:*
               - events:*
               - glue:*
-              - iam:*Policy*
               - iam:*ServerCertificate
-              - iam:CreateRole
               - iam:Get*
-              - iam:GetRole
-              - iam:GetRolePolicy
-              - iam:ListAccountAliases
-              - iam:ListAttachedRolePolicies
-              - iam:ListRolePolicies
-              - iam:PutRolePolicy
-              - iam:TagRole
+              - iam:List*
               - kinesis:AddTagsToStream
               - kinesis:CreateStream
               - kinesis:DescribeStreamSummary
@@ -205,6 +198,17 @@ Resources:
             Action:
               - iam:*
             Resource:
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/Panther*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/analytics-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/data-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/datadog-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/deny-data-access-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/dynamo-scaling-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/firehose-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/panther-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/read-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/support-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/write-to-firehose-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/batch.amazonaws.com/AWSServiceRoleForBatch
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/cloudtrail.amazonaws.com/AWSServiceRoleForCloudTrail
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/dynamodb.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_DynamoDBTable
@@ -235,6 +239,21 @@ Resources:
               - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension*
               - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:464622532012:layer:Datadog-Python*
               - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension*
+          - Effect: Allow
+            Action:
+              - ecr:BatchCheckLayerAvailability
+              - ecr:GetDownloadUrlForLayer
+              - ecr:BatchGetImage
+            Resource:
+              - !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:*:repository/panther-enterprise
+              - !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:*:repository/panther-internal-rc
+          - Effect: Allow
+            Action:
+              - s3:Get*
+              - s3:ListBucket
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::panther-enterprise-${AWS::Region}*
+              - !Sub arn:${AWS::Partition}:s3:::panther-internal-rc-${AWS::Region}*
           - Effect: Allow
             Action: s3:*
             Resource:
