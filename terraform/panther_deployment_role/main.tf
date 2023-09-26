@@ -76,6 +76,7 @@ resource "aws_iam_policy" "deployment" {
         "dynamodb:*Tag*",
         "dynamodb:*TimeToLive*",
         "ec2:*",
+        "ecr:GetAuthorizationToken",
         "ecs:*Cluster*",
         "ecs:*Service*",
         "ecs:*Tag*",
@@ -85,17 +86,9 @@ resource "aws_iam_policy" "deployment" {
         "es:*",
         "events:*",
         "glue:*",
-        "iam:*Policy*",
         "iam:*ServerCertificate",
-        "iam:CreateRole",
         "iam:Get*",
-        "iam:GetRole",
-        "iam:GetRolePolicy",
-        "iam:ListAccountAliases",
-        "iam:ListAttachedRolePolicies",
-        "iam:ListRolePolicies",
-        "iam:PutRolePolicy",
-        "iam:TagRole",
+        "iam:List*",
         "kinesis:AddTagsToStream",
         "kinesis:CreateStream",
         "kinesis:DescribeStreamSummary",
@@ -195,6 +188,17 @@ resource "aws_iam_policy" "deployment" {
       ],
       "Effect": "Allow",
       "Resource": [
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/Panther*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/analytics-*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/data-*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/datadog-*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/deny-data-access-*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/dynamo-scaling-*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/firehose-*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/panther-*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/read-*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/support-*",
+        "arn:${var.aws_partition}:iam::${var.aws_account_id}:policy/write-to-firehose-*",
         "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/batch.amazonaws.com/AWSServiceRoleForBatch",
         "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/cloudtrail.amazonaws.com/AWSServiceRoleForCloudTrail",
         "arn:${var.aws_partition}:iam::${var.aws_account_id}:role/aws-service-role/dynamodb.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_DynamoDBTable",
@@ -236,6 +240,29 @@ resource "aws_iam_policy" "deployment" {
         "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Extension*",
         "arn:${var.aws_partition}:lambda:${var.aws_region}:464622532012:layer:Datadog-Python*",
         "arn:${var.aws_partition}:lambda:${var.aws_region}:580247275435:layer:LambdaInsightsExtension*"
+      ]
+    },
+    {
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:ecr:${var.aws_region}:*:repository/panther-enterprise",
+        "arn:${var.aws_partition}:ecr:${var.aws_region}:*:repository/panther-internal-rc"
+      ]
+    },
+    {
+      "Action": [
+        "s3:Get*",
+        "s3:ListBucket"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:${var.aws_partition}:s3:::panther-enterprise-${var.aws_region}*",
+        "arn:${var.aws_partition}:s3:::panther-internal-rc-${var.aws_region}*"
       ]
     },
     {
