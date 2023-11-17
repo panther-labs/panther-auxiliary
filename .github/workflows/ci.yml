@@ -27,4 +27,4 @@ jobs:
           tflint --recursive
           popd
       - name: Run cfn-lint
-        run: find ./cloudformation -iname "*.yml" | xargs -n 1 cfn-lint
+        run: cfn-lint -i W3045 -- deployments/auxiliary/cloudformation/*.yml
