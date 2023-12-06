@@ -16,7 +16,7 @@ variable "stack_name" {
   description = "The stack name, is recommended to use the name of the CloudWatch source"
 }
 
-variable "buffer_size" {
+variable "buffering_size" {
   type        = number
   default     = 128 # Maximum
   description = " Buffer incoming data to the specified size, in MBs, before delivering it to the destination"
