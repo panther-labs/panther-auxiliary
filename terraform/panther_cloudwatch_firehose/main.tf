@@ -226,10 +226,10 @@ resource "aws_kinesis_firehose_delivery_stream" "panther_firehose" {
   destination = "extended_s3"
 
   extended_s3_configuration {
-    bucket_arn      = aws_s3_bucket.firehose_bucket.arn
-    buffer_size     = var.buffer_size
-    buffer_interval = var.buffer_interval_in_seconds
-    role_arn        = aws_iam_role.firehose_s3_role.arn
+    bucket_arn         = aws_s3_bucket.firehose_bucket.arn
+    buffering_size     = var.buffering_size
+    buffering_interval = var.buffer_interval_in_seconds
+    role_arn           = aws_iam_role.firehose_s3_role.arn
   }
 }
 

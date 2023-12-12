@@ -22,8 +22,8 @@ resource "aws_kinesis_firehose_delivery_stream" "osquery_data_firehose" {
     compression_format = "GZIP"
 
     # Data is flushed once one of the buffer hints are satisfied
-    buffer_interval = 300
-    buffer_size     = 128
+    buffering_interval = 300
+    buffering_size     = 128
   }
 }
 
