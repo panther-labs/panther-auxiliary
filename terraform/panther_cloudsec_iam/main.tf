@@ -166,6 +166,25 @@ resource "aws_iam_role_policy" "panther_list_describe_eks" {
   })
 }
 
+resource "aws_iam_role_policy" "panther_describe_dynamodb" {
+  count = var.include_audit_role ? 1 : 0
+  name  = "DescribeDynamodb"
+  role  = aws_iam_role.panther_audit[0].id
+
+  policy = jsonencode({
+    Version : "2012-10-17",
+    Statement : [
+      {
+        Effect : "Allow",
+        Action : [
+          "dynamodb:DescribeKinesisStreamingDestination",
+        ],
+        Resource : "*"
+      }
+    ]
+  })
+}
+
 
 ###############################################################
 # CloudFormation StackSet Execution Role
