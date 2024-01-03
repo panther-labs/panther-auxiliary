@@ -79,8 +79,4 @@ Log Analysis analog to CloudWatch event notifications for cloud security real ti
 
 ## "Deployment" template
 
-Programmatic deployment of Panther
-
-## "deployment" role trust principal
-
-- the IAM identity of the external automation principal that is deploying Panther (not a Panther component)
+Note: the deployment role was previously available as a terraform template, but has been deprecated in favor of a CloudFormation implementation. Please see `cloudformation/panther-deployment-role.yml`.
