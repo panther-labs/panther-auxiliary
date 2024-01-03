@@ -148,6 +148,14 @@ Resources:
                   - eks:DescribeFargateProfile
                   - eks:DescribeNodegroup
                 Resource: '*'
+        - PolicyName: DescribeDynamodb
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeKinesisStreamingDestination
+                Resource: '*'
       Tags:
         - Key: Application
           Value: Panther
