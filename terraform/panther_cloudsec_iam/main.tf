@@ -177,7 +177,7 @@ resource "aws_iam_role_policy" "panther_describe_dynamodb" {
       {
         Effect : "Allow",
         Action : [
-          "dynamodb:DescribeKinesisStreamingDestination",
+          "dynamodb:Describe*",
         ],
         Resource : "*"
       }

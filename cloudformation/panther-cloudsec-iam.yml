@@ -154,7 +154,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - dynamodb:DescribeKinesisStreamingDestination
+                  - dynamodb:Describe*
                 Resource: '*'
       Tags:
         - Key: Application
