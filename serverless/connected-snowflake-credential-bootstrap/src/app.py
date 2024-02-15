@@ -49,7 +49,7 @@ class PantherSnowflakeCredential():
     account: str = ""
     user: str = ""
     password: str = PASSWORD_PLACEHOLDER
-    port: int = 443
+    port: str = "443"
 
     @staticmethod
     def secret_exists(client: boto3.Session) -> bool:
@@ -116,7 +116,7 @@ def credentials_from_secret(client: boto3.Session) -> PantherSnowflakeCredential
 
 def parse_event_into_creds(event: Mapping[str, str]) -> PantherSnowflakeCredential:
     """
-    Validate,massage the input event and store it as a credential object
+    Validate, massage the input event and store it as a credential object
     return: Instance of PantherSnowflakeCredentials representing the given input, save password
     """
     for field in ["host"]:
