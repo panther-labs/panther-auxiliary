@@ -13,7 +13,7 @@ iter:
 	done
 	
 publish:
-	sam build --use-container --build-image public.ecr.aws/sam/build-python3.11; sam package --s3-bucket $(bucket) --output-template-file ../../cloudformation/panther-$(samdir).yml
+	sam build --use-container --build-image public.ecr.aws/sam/build-python3.11; sam package --s3-bucket $(bucket)-$(region) --output-template-file ../../cloudformation/panther-$(samdir)-$(region).yml
 
 setup:
 	python3 -m venv venv; venv/bin/pip install -r src/requirements.txt; venv/bin/pip install pytest pylint
