@@ -86,8 +86,6 @@ Resources:
               - application-autoscaling:*ScalableTarget*
               - application-autoscaling:*ScalingPolicies
               - application-autoscaling:*ScalingPolicy
-              # Create and manage Athena if used as data lake
-              - athena:*
               # Create and manage backups for the core product
               - backup-storage:*
               - backup:*
@@ -130,8 +128,6 @@ Resources:
               - es:*
               # Manage EventBridge events sent by the product
               - events:*
-              # Manage data transfer between application resources
-              - glue:*
               # View IAM resources and manage certificates
               - iam:*ServerCertificate
               - iam:Get*
