@@ -1,0 +1,245 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "acm:*",
+        "apigateway:*",
+        "application-autoscaling:*ScalableTarget*",
+        "application-autoscaling:*ScalingPolicies",
+        "application-autoscaling:*ScalingPolicy",
+        "backup-storage:*",
+        "backup:*",
+        "batch:*",
+        "cloudformation:*",
+        "cloudfront:UpdateDistribution",
+        "cloudtrail:*",
+        "cloudwatch:*Alarm*",
+        "cloudwatch:*Dashboard*",
+        "cloudwatch:*Metric*",
+        "cloudwatch:*Tag*",
+        "cloudwatch:List*",
+        "codebuild:*",
+        "cognito-idp:*",
+        "dynamodb:*Backup*",
+        "dynamodb:*Stream*",
+        "dynamodb:*Table*",
+        "dynamodb:*Tag*",
+        "dynamodb:*TimeToLive*",
+        "ec2:*",
+        "ecr:GetAuthorizationToken",
+        "ecs:*Cluster*",
+        "ecs:*Service*",
+        "ecs:*Tag*",
+        "ecs:*Task*",
+        "elasticfilesystem:*",
+        "elasticloadbalancing:*",
+        "es:*",
+        "events:*",
+        "iam:*ServerCertificate",
+        "iam:Get*",
+        "iam:List*",
+        "kinesis:AddTagsToStream",
+        "kinesis:CreateStream",
+        "kinesis:DescribeStreamSummary",
+        "kinesis:EnableEnhancedMonitoring",
+        "kinesis:IncreaseStreamRetentionPeriod",
+        "kinesis:ListTagsForStream",
+        "kms:*",
+        "lambda:*EventSourceMapping",
+        "lambda:*LayerVersion*",
+        "lambda:List*",
+        "logs:*",
+        "organizations:DescribeOrganization",
+        "s3:*AccelerateConfiguration",
+        "s3:*AccountPublicAccessBlock",
+        "s3:*Bucket*",
+        "s3:*EncryptionConfiguration",
+        "s3:*InventoryConfiguration",
+        "s3:*LifecycleConfiguration",
+        "s3:*MetricsConfiguration",
+        "s3:*ReplicationConfiguration",
+        "s3:CreateAccessPoint",
+        "s3:PutObject*",
+        "secretsmanager:Describe*",
+        "secretsmanager:List*",
+        "servicequotas:*",
+        "sns:*",
+        "sqs:*Permission*",
+        "sqs:*Queue*",
+        "sqs:SendMessage",
+        "states:*",
+        "wafv2:*",
+        "wafv2:CreateRuleGroup",
+        "wafv2:CreateWebACL",
+        "wafv2:GetRuleGroup",
+        "wafv2:ListTagsForResource",
+        "wafv2:TagResource",
+        "wafv2:UpdateRuleGroup"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "secretsmanager:*",
+      "Resource": "arn:aws:secretsmanager:*:123412341234:secret:panther*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "firehose:*",
+      "Resource": "arn:aws:firehose:*:123412341234:deliverystream/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["dynamodb:Scan", "dynamodb:Get*"],
+      "Resource": [
+        "arn:aws:dynamodb:*:123412341234:table/panther-analysis",
+        "arn:aws:dynamodb:*:123412341234:table/panther-organization"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iam:*InstanceProfile*",
+        "iam:AttachRolePolicy",
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:DeleteRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:Get*",
+        "iam:List*",
+        "iam:PassRole",
+        "iam:PutRolePolicy",
+        "iam:TagRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:UpdateRole",
+        "iam:UpdateRoleDescription",
+        "iam:UntagRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::123412341234:role/dynamo-scaling-*",
+        "arn:aws:iam::123412341234:role/firehose-http-input-data-bucket-*",
+        "arn:aws:iam::123412341234:role/panther-*",
+        "arn:aws:iam::123412341234:role/Panther*",
+        "arn:aws:iam::123412341234:role/pip-layer-builder-codebuild-*",
+        "arn:aws:iam::123412341234:instance-profile/Panther*",
+        "arn:aws:iam::123412341234:role/datadog*",
+        "arn:aws:iam::123412341234:role/Datadog*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["iam:*"],
+      "Resource": [
+        "arn:aws:iam::123412341234:policy/Panther*",
+        "arn:aws:iam::123412341234:policy/analytics-*",
+        "arn:aws:iam::123412341234:policy/data-*",
+        "arn:aws:iam::123412341234:policy/datadog-*",
+        "arn:aws:iam::123412341234:policy/deny-data-access-*",
+        "arn:aws:iam::123412341234:policy/dynamo-scaling-*",
+        "arn:aws:iam::123412341234:policy/firehose-*",
+        "arn:aws:iam::123412341234:policy/panther-*",
+        "arn:aws:iam::123412341234:policy/read-*",
+        "arn:aws:iam::123412341234:policy/support-*",
+        "arn:aws:iam::123412341234:policy/write-to-firehose-*",
+        "arn:aws:iam::123412341234:role/aws-service-role/batch.amazonaws.com/AWSServiceRoleForBatch",
+        "arn:aws:iam::123412341234:role/aws-service-role/cloudtrail.amazonaws.com/AWSServiceRoleForCloudTrail",
+        "arn:aws:iam::123412341234:role/aws-service-role/dynamodb.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_DynamoDBTable",
+        "arn:aws:iam::123412341234:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
+        "arn:aws:iam::123412341234:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing",
+        "arn:aws:iam::123412341234:role/aws-service-role/elasticfilesystem.amazonaws.com/AWSServiceRoleForAmazonElasticFileSystem",
+        "arn:aws:iam::123412341234:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty",
+        "arn:aws:iam::123412341234:role/aws-service-role/opensearchservice.amazonaws.com/AWSServiceRoleForAmazonOpenSearchService",
+        "arn:aws:iam::123412341234:role/aws-service-role/ops.apigateway.amazonaws.com/AWSServiceRoleForAPIGateway",
+        "arn:aws:iam::123412341234:role/aws-service-role/servicequotas.amazonaws.com/AWSServiceRoleForServiceQuotas"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["sts:AssumeRole"],
+      "Resource": "arn:aws:iam::*:role/PulumiRoute53"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "lambda:*",
+      "Resource": [
+        "arn:aws:lambda:us-west-2:123412341234:event-source-mapping:*",
+        "arn:aws:lambda:us-west-2:123412341234:function:panther-*",
+        "arn:aws:lambda:us-west-2:123412341234:layer:panther-*",
+        "arn:aws:lambda:us-west-2:123412341234:function:datadog-*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "lambda:invokeFunction",
+      "Resource": "arn:aws:lambda:us-west-2:123412341234:function:panther-source-api"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "lambda:GetLayerVersion",
+      "Resource": [
+        "arn:aws:lambda:us-west-2:464622532012:layer:Datadog-Extension*",
+        "arn:aws:lambda:us-west-2:464622532012:layer:Datadog-Python*",
+        "arn:aws:lambda:us-west-2:580247275435:layer:LambdaInsightsExtension*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage"
+      ],
+      "Resource": [
+        "arn:aws:ecr:us-west-2:*:repository/panther-enterprise",
+        "arn:aws:ecr:us-west-2:*:repository/panther-internal-rc"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:Get*", "s3:ListBucket"],
+      "Resource": [
+        "arn:aws:s3:::panther-enterprise-us-west-2*",
+        "arn:aws:s3:::panther-internal-rc-us-west-2*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": ["arn:aws:s3:::panther*-analysisversions-*", "arn:aws:s3:::analysis-versions-*"]
+    },
+    {
+      "Effect": "Deny",
+      "Action": "elasticloadbalancing:DeleteLoadBalancer",
+      "NotResource": [
+        "arn:aws:elasticloadbalancing:us-west-2:123412341234:loadbalancer/app/http-ingest-alb*"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Action": "dynamodb:DeleteTable",
+      "NotResource": [
+        "arn:aws:dynamodb:*:123412341234:table/*alerts-risk-factors",
+        "arn:aws:dynamodb:*:123412341234:table/*alerts-indicators",
+        "arn:aws:dynamodb:*:123412341234:table/*alert-search-rehydrate-jobs"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Action": [
+        "cognito-idp:DeleteUserPool*",
+        "dynamodb:DeleteBackup",
+        "dynamodb:DeleteItem",
+        "dynamodb:DeleteTableReplica",
+        "kms:DeleteAlias",
+        "kms:DeleteCustomKeyStore",
+        "kms:DeleteImportedKeyMaterial",
+        "kms:ScheduleKeyDeletion",
+        "s3:DeleteBucket",
+        "sns:DeleteTopic"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

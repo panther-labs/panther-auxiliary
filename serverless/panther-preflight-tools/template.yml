@@ -1,0 +1,65 @@
+# Copyright (C) 2022 Panther Labs, Inc.
+#
+# The Panther SaaS is licensed under the terms of the Panther Enterprise Subscription
+# Agreement available at https://panther.com/enterprise-subscription-agreement/.
+# All intellectual property rights in and to the Panther SaaS, including any and all
+# rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
+
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Various tools for performing actions and checks in prospective panther AWS accounts
+
+Resources:
+  SnowflakeCredentialBootstrap:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: PantherSnowflakeCredentialBootstrap
+      Runtime: python3.11
+      CodeUri: connected-snowflake-credential-bootstrap/src/
+      Handler: app.lambda_handler
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:DescribeSecret
+                - secretsmanager:CreateSecret
+              Resource:
+                - '*'
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !Sub arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:panther-managed-accountadmin-secret*
+      MemorySize: 512
+      Timeout: 120
+      Description: Validate and store accountadmin snowflake credentials for use by panther
+  ReadinessCheck:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: PantherReadinessCheck
+      Runtime: python3.11
+      CodeUri: readiness-check/src/
+      Handler: app.lambda_handler
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - sts:GetCallerIdentity
+                - sts:GetSessionToken
+                - iam:SimulatePrincipalPolicy
+                - iam:GetPolicy
+                - iam:GetPolicyVersion
+              Resource:
+                - '*'
+            - Effect: Allow
+              Action:
+                - iam:ListRolePolicies
+                - iam:ListAttachedRolePolicies
+                - iam:GetRolePolicy
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/PantherDeploymentRole'
+
+      MemorySize: 512
+      Timeout: 120
+      Description: Simulate the panther DeploymentRole policy against the current aws environment

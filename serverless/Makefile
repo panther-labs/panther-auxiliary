@@ -3,26 +3,21 @@
 bucket = panther-public-sam-artifacts
 
 iter:
-	set -e; \
-	for samapp in `ls`; do \
-	    if [ -d $$samapp ]; then \
-			cd $$samapp; \
-			make --makefile=../Makefile $(action) samdir=$$samapp; \
-			cd ..; \
-		fi; \
-	done
+	find . -depth 1 -type d | xargs -I % make -C % --makefile=../Makefile $(action) samdir=%
 	
 publish:
-	sam build --use-container --build-image public.ecr.aws/sam/build-python3.11; sam package --s3-bucket $(bucket)-$(region) --output-template-file ../../cloudformation/panther-$(samdir)-$(region).yml
+	sam build --use-container --build-image public.ecr.aws/sam/build-python3.11; sam package --s3-bucket $(bucket)-$(region) --output-template-file ../../cloudformation/$(samdir)-$(region).yml
 
 setup:
-	python3 -m venv venv; venv/bin/pip install -r src/requirements.txt; venv/bin/pip install pytest pylint
+	find . -depth 1 -type d | xargs -I % python3 -m venv %/venv
+	find . -depth 1 -type d | xargs -I % bash -c "%/venv/bin/pip install -r %/src/requirements.txt"
+	find . -depth 1 -type d | xargs -I % bash -c "%/venv/bin/pip install pytest pylint"
 
 clean:
-	rm -rf venv
+	rm -rf */venv
 
 test:
-	AWS_DEFAULT_REGION=us-west-2 venv/bin/pytest test/
+	find . -depth 1 -type d | xargs -I % bash -c "pushd %; AWS_DEFAULT_REGION=us-west-2 venv/bin/pytest test/; popd"
 
 lint:
-	venv/bin/pylint -j 0 --max-line-length 140 --score no src/
+	find . -depth 1 -type d | xargs -I % bash -c "pushd %; venv/bin/pylint -j 0 --max-line-length 140 --score no src/; popd"
