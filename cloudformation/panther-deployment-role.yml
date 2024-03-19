@@ -310,6 +310,7 @@ Resources:
               - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*alerts-risk-factors
               - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*alerts-indicators
               - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*alert-search-rehydrate-jobs
+              - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*indicators-metadata
           - Effect: Deny
             Action:
               - cognito-idp:DeleteUserPool*
