@@ -168,7 +168,7 @@ Resources:
               # Create and manage queues to send messages between application components
               - sns:*
               - sqs:*Permission*
-              - sqs:*Queue*
+              - sqs:*ueue*
               - sqs:SendMessage
               # Manage the states of step functions that run the core product
               - states:*
@@ -311,6 +311,10 @@ Resources:
               - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*alerts-indicators
               - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*alert-search-rehydrate-jobs
               - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*indicators-metadata
+          - Effect: Deny
+            Action: athena:DeleteWorkGroup
+            NotResource:
+              - !Sub arn:${AWS::Partition}:athena:${AWS::Region}:${AWS::AccountId}:workgroup/panther
           - Effect: Deny
             Action:
               - cognito-idp:DeleteUserPool*
