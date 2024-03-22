@@ -307,10 +307,7 @@ Resources:
           - Effect: Deny
             Action: dynamodb:DeleteTable
             NotResource:
-              - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*alerts-risk-factors
-              - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*alerts-indicators
-              - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*alert-search-rehydrate-jobs
-              - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/*indicators-metadata
+              - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther-*
           - Effect: Deny
             Action: athena:DeleteWorkGroup
             NotResource:
