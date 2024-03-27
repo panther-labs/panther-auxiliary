@@ -86,6 +86,8 @@ Resources:
               - application-autoscaling:*ScalableTarget*
               - application-autoscaling:*ScalingPolicies
               - application-autoscaling:*ScalingPolicy
+              # Manage Athena resources
+              - athena:*
               # Create and manage backups for the core product
               - backup-storage:*
               - backup:*
