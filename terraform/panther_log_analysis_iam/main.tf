@@ -27,7 +27,7 @@ resource "aws_iam_role" "log_processing_role" {
   })
 
   tags = {
-    Application = "Panther"
+    "panther:app" = "panther"
   }
 }
 

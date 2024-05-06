@@ -137,8 +137,8 @@ Resources:
                     Resource: !Ref KmsKey
                 - !Ref AWS::NoValue
       Tags:
-        - Key: Application
-          Value: Panther
+        - Key: panther:app
+          Value: panther
 
 Outputs:
   RoleARN:

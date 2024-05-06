@@ -111,8 +111,8 @@ Resources:
                   - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
 
       Tags:
-        - Key: Application
-          Value: Panther
+        - Key: panther:app
+          Value: panther
 
 Outputs:
   DeploymentRoleArn:

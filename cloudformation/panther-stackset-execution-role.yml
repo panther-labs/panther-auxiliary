@@ -47,5 +47,5 @@ Resources:
                   - sns:*
                 Resource: '*'
       Tags:
-        - Key: Application
-          Value: Panther
+        - Key: panther:app
+          Value: panther

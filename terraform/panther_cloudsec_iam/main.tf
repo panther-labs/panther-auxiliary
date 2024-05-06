@@ -35,7 +35,7 @@ resource "aws_iam_role" "panther_audit" {
   })
 
   tags = {
-    Application = "Panther"
+    "panther:app" = "panther"
   }
 }
 
@@ -209,7 +209,7 @@ resource "aws_iam_role" "panther_cloud_formation_stackset_execution" {
   })
 
   tags = {
-    Application = "Panther"
+    "panther:app" = "panther"
   }
 }
 
