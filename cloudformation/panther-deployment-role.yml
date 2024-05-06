@@ -64,8 +64,8 @@ Resources:
               Bool:
                 aws:SecureTransport: true
       Tags:
-        - Key: Application
-          Value: Panther
+        - Key: panther:app
+          Value: panther
 
   DeploymentPolicy:
     Type: AWS::IAM::Policy

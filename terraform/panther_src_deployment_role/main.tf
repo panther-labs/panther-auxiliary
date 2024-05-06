@@ -105,6 +105,6 @@ resource "aws_iam_role" "deployment" {
   }
 
   tags = {
-    Application = "Panther"
+    "panther:app" = "panther"
   }
 }

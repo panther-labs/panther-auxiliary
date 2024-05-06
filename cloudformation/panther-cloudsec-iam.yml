@@ -157,8 +157,8 @@ Resources:
                   - dynamodb:Describe*
                 Resource: '*'
       Tags:
-        - Key: Application
-          Value: Panther
+        - Key: panther:app
+          Value: panther
 
   CloudFormationStackSetExecutionRole:
     Condition: EnableCloudWatchEvent
@@ -202,8 +202,8 @@ Resources:
                   - sns:*
                 Resource: '*'
       Tags:
-        - Key: Application
-          Value: Panther
+        - Key: panther:app
+          Value: panther
 
 Outputs:
   AuditRoleARN:

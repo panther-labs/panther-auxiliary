@@ -134,8 +134,8 @@ Resources:
                     Resource: !Ref KmsKey
                 - !Ref AWS::NoValue
       Tags:
-        - Key: Application
-          Value: Panther
+        - Key: panther:app
+          Value: panther
 
   # Policies for allowing Panther to configure user's bucket notifications.
   ManagePantherTopic:

@@ -93,8 +93,8 @@ Resources:
                   - !GetAtt FirehoseBucket.Arn
                   - !Sub ${FirehoseBucket.Arn}/*
       Tags:
-        - Key: Application
-          Value: Panther
+        - Key: panther:app
+          Value: panther
 
   CloudwatchFirehoseRole:
     # An IAM role that can write to Firehose to be assumed by CloudWatch logs service
