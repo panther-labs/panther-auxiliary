@@ -10,8 +10,17 @@ from os import path
 from datetime import datetime, timedelta
 from greynoise import GreyNoise
 
-FILENAME = "greynoise_noise_lut.jsonl"
 API_KEY = 'REPLACE ME'
+
+# These configurations can be changed as desired
+
+# How many days of data to pull when not picking up from a previous run, as well as how
+# many days of old data to keep when picking from a previous run. The
+MAX_LOOKBACK_DAYS = 7
+# How many days of data to pull when picking up from the results of a previous run
+INC_LOOKBACK_DAYS = 1
+# Filename the lookup table data is written to
+FILENAME = "greynoise_noise_lut.jsonl"
 
 
 def run(args):
@@ -25,11 +34,11 @@ def run(args):
         bootstrap(session)
 
 def update(session):
-    update_query = 'last_seen:1d'
+    update_query = f'last_seen:{INC_LOOKBACK_DAYS}d'
     new_data = fetch_results(session, update_query)
     
-    # We'll consider anything not seen in 7 days stale
-    stale_time = datetime.now() - timedelta(days=7)
+    # We'll consider anything not seen in MAX_LOOKBACK_DAYS days stale
+    stale_time = datetime.now() - timedelta(days=MAX_LOOKBACK_DAYS)
 
     # Copy over all the old data that does not exist in the new data and is not stale
     for line in fileinput.input(files=FILENAME, inplace=True, backup='.bak'):
@@ -54,9 +63,9 @@ def update(session):
             lut.write(json.dumps(indicator) + "\n")
     
 
-# When this runs without an existing file, grab the last 90 days of indicators
+# When this runs without an existing file, grab the last MAX_LOOKBACK_DAYS days of indicators
 def bootstrap(session):
-    bootstrap_query = 'last_seen:7d'
+    bootstrap_query = f'last_seen:{MAX_LOOKBACK_DAYS}d'
 
     page = 1
     logging.info('Fetching page 1')

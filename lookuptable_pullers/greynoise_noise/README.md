@@ -31,6 +31,8 @@ If you don't like staring at a blank screen waiting for it to work, you can set 
 
 `./puller.py -log INFO`
 
+Note that if you run the puller script from a location with the output of a previous script run, it will only pull the last few days and combine that with the output of the last result. This should result in faster subsequent runs. However, if you don't have a persistent data store to run this script that's fine as it will recompute the entire last 7 days if it does not find the ouput of a previous run.
+
 
 ### Getting the data to S3
 
