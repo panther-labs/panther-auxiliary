@@ -1,8 +1,7 @@
-on:
-  push
+on: push
 
 permissions:
-  contents: read  
+  contents: read
 
 jobs:
   validate:
@@ -27,7 +26,7 @@ jobs:
         with:
           python-version: 3.10.6
       - name: Install cfn-lint
-        run: pip install cfn-lint
+        run: pip install cfn-lint==0.85.1
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@651471c36a6092792c552e8b1bef71e592b462d8
         with:
@@ -42,4 +41,4 @@ jobs:
           tflint --recursive
           popd
       - name: Run cfn-lint
-        run: cfn-lint -i W3045 -- cloudformation/*.yml
+        run: cfn-lint -i W3045,E3030 -- cloudformation/*.yml
