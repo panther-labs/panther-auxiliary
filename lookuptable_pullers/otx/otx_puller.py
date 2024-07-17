@@ -6,7 +6,7 @@ from OTXv2 import OTXv2
 
 api_key = "CHANGE_ME"
 server = "https://otx.alienvault.com"
-max_age = 730
+max_age = 730 # days
 
 
 # Recursively split a pulse into smaller pulses if it exceeds the maximum size
