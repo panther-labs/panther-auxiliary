@@ -10,6 +10,7 @@ to accept a Panther deployment configured to use a connected, pre-existing
 snowflake account
 """
 
+from typing import Any
 from dataclasses import dataclass
 import json
 import os
@@ -40,10 +41,11 @@ the secret.  Then return to your terminal and execute the lambda again with "val
 
 
 @dataclass
-class PantherSnowflakeCredential():
+class PantherSnowflakeCredential:
     """
     Represent the credentials used by panther to authenticate to snowflake
     """
+
     arn: str = ""
     host: str = ""
     account: str = ""
@@ -70,26 +72,27 @@ class PantherSnowflakeCredential():
         Json-ifies the class and writes to the secret
         return: ARN of newly created secret
         """
-        secret_string = json.dumps({
-            "account": self.account,
-            "host": self.host,
-            "port": self.port,
-            "user": self.user,
-            "password": self.password
-        })
+        secret_string = json.dumps(
+            {
+                "account": self.account,
+                "host": self.host,
+                "port": self.port,
+                "user": self.user,
+                "password": self.password,
+            }
+        )
         resp = client.create_secret(
             Name=SECRETNAME,
             Description="Panther Labs, accountadmin snowflake credentials",
             SecretString=secret_string,
         )
-        self.arn = resp['ARN']
+        self.arn = resp["ARN"]
 
     def test(self) -> None:
         """
         Connects to snowflake to validate credentials
         """
-        snowflake.connector.connect(
-            user=self.user, password=self.password, account=self.account)
+        snowflake.connector.connect(user=self.user, password=self.password, account=self.account)
 
 
 def credentials_from_secret(client: boto3.Session) -> PantherSnowflakeCredential:
@@ -97,12 +100,9 @@ def credentials_from_secret(client: boto3.Session) -> PantherSnowflakeCredential
     Populates a credential object from a known-existing secret
     """
     if not PantherSnowflakeCredential.secret_exists(client):
-        raise ValueError(
-            "The snowflake credential secret was expected to exist, but does not.")
+        raise ValueError("The snowflake credential secret was expected to exist, but does not.")
 
-    resp = client.get_secret_value(
-        SecretId=SECRETNAME
-    )
+    resp = client.get_secret_value(SecretId=SECRETNAME)
     secret = json.loads(resp["SecretString"])
     return PantherSnowflakeCredential(
         arn=resp["ARN"],
@@ -110,7 +110,7 @@ def credentials_from_secret(client: boto3.Session) -> PantherSnowflakeCredential
         host=secret["host"],
         port=secret["port"],
         user=secret["user"],
-        password=secret["password"]
+        password=secret["password"],
     )
 
 
@@ -121,8 +121,7 @@ def parse_event_into_creds(event: Mapping[str, str]) -> PantherSnowflakeCredenti
     """
     for field in ["host"]:
         if field not in event.keys():
-            raise ValueError(
-                f"Failed validating input, missing field '{field}' in payload")
+            raise ValueError(f"Failed validating input, missing field '{field}' in payload")
 
     user = event.get("user", USERNAME)
     host = event["host"]
@@ -135,22 +134,20 @@ def parse_event_into_creds(event: Mapping[str, str]) -> PantherSnowflakeCredenti
     if not host:
         host = parsed.path
     if not host:
-        raise ValueError(
-            "Failed validating input for 'host' field: should be a hostname or uri with protocol")
+        raise ValueError("Failed validating input for 'host' field: should be a hostname or uri with protocol")
     if not host.endswith(SF_DOMAIN):
-        raise ValueError(
-            f"Failed validating input for 'host' field: host must end with {SF_DOMAIN}")
+        raise ValueError(f"Failed validating input for 'host' field: host must end with {SF_DOMAIN}")
 
     return PantherSnowflakeCredential(
         host=host,
         account=host.split(SF_DOMAIN)[0],
-        user=user
+        user=user,
         # Password is later populated by the user manually in the UI
         # Port always defaults to 443
     )
 
 
-def lambda_handler(event: Mapping[str, str], _) -> str:
+def lambda_handler(event: Mapping[str, str], _: Any) -> str:
     """
     Lambda entrypoint
     """
@@ -162,14 +159,16 @@ def lambda_handler(event: Mapping[str, str], _) -> str:
         creds = credentials_from_secret(client)
         if creds.password == PASSWORD_PLACEHOLDER:
             raise ValueError(
-                f"It appears the secret was not modified from its placeholder value.  {EDIT_SECRET_PROMPT}")
+                f"It appears the secret was not modified from its placeholder value.  {EDIT_SECRET_PROMPT}"
+            )
 
         # Run cred test
         try:
             creds.test()
         except:
             print(
-                "Failed testing the snowflake credentials! Please check for correctness of host,user,password in the secret")
+                "Failed testing the snowflake credentials! Please check for correctness of host,user,password in the secret"
+            )
             raise
         return f"Validation succeeded for the secret.  Please report back to your panther rep with this value: '{creds.arn}'"
 
@@ -177,7 +176,8 @@ def lambda_handler(event: Mapping[str, str], _) -> str:
     # Check that secret doesn't already exist
     if PantherSnowflakeCredential.secret_exists(client):
         raise FileExistsError(
-            f"The proposed secret '{SECRETNAME}' already exists in this account/region! Refusing to overwrite it.")
+            f"The proposed secret '{SECRETNAME}' already exists in this account/region! Refusing to overwrite it."
+        )
     # Parse the event input
     creds = parse_event_into_creds(event)
     # Create secret

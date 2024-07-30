@@ -13,7 +13,7 @@ with open("test/example_policy.json", "r") as file:
     test_policy = json.loads(file.read())
 
 
-def test_resolve_policy_statement_resources():
+def test_resolve_policy_statement_resources() -> None:
     local_policy = deepcopy(test_policy)
     cfn_expander.resolve_policy_statement_resources(local_policy)
 
@@ -25,7 +25,7 @@ def test_resolve_policy_statement_resources():
     return
 
 
-def test_expand_policy_statement_actions():
+def test_expand_policy_statement_actions() -> None:
     local_policy = deepcopy(test_policy)
     cfn_expander.expand_policy_statement_actions(local_policy)
 

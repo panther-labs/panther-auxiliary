@@ -5,7 +5,7 @@
 # All intellectual property rights in and to the Panther SaaS, including any and all
 # rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
 """
-Utilities for fetching, formatting, and expanding policies residing in a role 
+Utilities for fetching, formatting, and expanding policies residing in a role
 """
 
 from typing import Dict, List
@@ -19,12 +19,15 @@ def resolve_policy_statement_resources(policy: Dict) -> None:
     Mutates a given policy;
     Unifies Resource and NotResource fields to lists
     """
-    def _normalize_resource_value(resources) -> List[str]:
+
+    def _normalize_resource_value(resources: list[str] | str) -> List[str]:
         # Helper to normalize a str or list into a list
         return resources if isinstance(resources, list) else [resources] if isinstance(resources, str) else []
 
-    for statement in policy['Statement']:
-        resource_key = 'Resource' if statement.get('Resource') else 'NotResource' if statement.get('NotResource') else None
+    for statement in policy["Statement"]:
+        resource_key = (
+            "Resource" if statement.get("Resource") else "NotResource" if statement.get("NotResource") else None
+        )
 
         if resource_key:
             statement[resource_key] = _normalize_resource_value(statement.get(resource_key))
@@ -35,15 +38,15 @@ def expand_policy_statement_actions(policy: Dict) -> None:
     Mutates a given policy;
     Expanding all wildcard actions defined in statements to a list of discrete actions
     """
-    for statement in policy['Statement']:
+    for statement in policy["Statement"]:
         actions_list = []
-        if isinstance(statement.get('Action'), list):
-            for action in statement.get('Action'):
+        if isinstance(statement.get("Action"), list):
+            for action in statement.get("Action"):
                 expanded_actions = _expand_wildcard_action(action)
                 actions_list.extend(expanded_actions)
         else:
-            actions_list.extend(_expand_wildcard_action(statement.get('Action')))
-        statement['Action'] = actions_list
+            actions_list.extend(_expand_wildcard_action(statement.get("Action")))
+        statement["Action"] = actions_list
 
 
 def get_deployment_role_policies(role_name: str = "PantherDeploymentRole") -> List[Dict]:
@@ -56,7 +59,7 @@ def get_deployment_role_policies(role_name: str = "PantherDeploymentRole") -> Li
     inline_policydocs = list(
         map(
             lambda p: client.get_role_policy(RoleName=role_name, PolicyName=p).get("PolicyDocument", "{}"),
-            inline_policy_names
+            inline_policy_names,
         )
     )
 
@@ -64,19 +67,15 @@ def get_deployment_role_policies(role_name: str = "PantherDeploymentRole") -> Li
     attached_policy_arns = list(
         map(
             lambda p: p.get("PolicyArn", ""),
-            client.list_attached_role_policies(RoleName=role_name).get("AttachedPolicies", [])
+            client.list_attached_role_policies(RoleName=role_name).get("AttachedPolicies", []),
         )
     )
     attached_policydocs = list(
         map(
-            lambda q: client.get_policy_version(
-                VersionId=q.get("DefaultVersionId"),
-                PolicyArn=q.get("Arn")
-            ).get("PolicyVersion", {}).get("Document"),
-            map(
-                lambda p: client.get_policy(PolicyArn=p).get("Policy", {}),
-                attached_policy_arns
-            )
+            lambda q: client.get_policy_version(VersionId=q.get("DefaultVersionId"), PolicyArn=q.get("Arn"))
+            .get("PolicyVersion", {})
+            .get("Document"),
+            map(lambda p: client.get_policy(PolicyArn=p).get("Policy", {}), attached_policy_arns),
         )
     )
 
