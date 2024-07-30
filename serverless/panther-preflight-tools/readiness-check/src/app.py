@@ -13,7 +13,7 @@ from itertools import product
 from functools import reduce
 import logging
 from math import ceil
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import boto3
 
@@ -27,7 +27,7 @@ h.setLevel(logging.INFO)
 log.addHandler(h)
 
 
-def simulate(client: boto3.client, policy_source_arn: str, actions: List[str], resources: List[str]):
+def simulate(client: boto3.client, policy_source_arn: str, actions: List[str], resources: List[str]) -> dict[str, Any]:
     """
     Simulate a set of actions against a set of resources given a policy using policysim
     """
@@ -44,7 +44,7 @@ def get_aws_account() -> str:
     return sts_client.get_caller_identity().get("Account")
 
 
-def lambda_handler(*_) -> str:
+def lambda_handler(_: dict[str, Any], __: Any) -> str:
     """
     Lambda entrypoint.  Accepts no input values. The "where" of it's running is
     the most important aspect.
