@@ -59,7 +59,16 @@ Resources:
                 - iam:GetRolePolicy
               Resource:
                 - !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/PantherDeploymentRole'
-
+            - Effect: Allow
+              Action:
+                - s3:CreateBucket
+                - s3:DeleteBucket
+                - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
+              Resource:
+                - arn:aws:s3:::panther-readiness-check-*
+                - arn:aws:s3:::panther-readiness-check-*/*
       MemorySize: 512
       Timeout: 120
       Description: Simulate the panther DeploymentRole policy against the current aws environment

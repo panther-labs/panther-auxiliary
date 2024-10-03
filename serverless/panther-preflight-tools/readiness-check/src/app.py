@@ -13,11 +13,12 @@ from itertools import product
 from functools import reduce
 import logging
 from math import ceil
-from typing import Dict, List
+from typing import Dict, List, Any
 
 import boto3
 
 from cfn_expander import get_deployment_role_policies_with_expanded_actions
+from s3_select_check import S3SelectEnabledCheck
 
 
 log = logging.getLogger("readiness-checker")
@@ -27,7 +28,7 @@ h.setLevel(logging.INFO)
 log.addHandler(h)
 
 
-def simulate(client: boto3.client, policy_source_arn: str, actions: List[str], resources: List[str]):
+def simulate(client: boto3.client, policy_source_arn: str, actions: List[str], resources: List[str]) -> dict[str, Any]:
     """
     Simulate a set of actions against a set of resources given a policy using policysim
     """
@@ -44,10 +45,9 @@ def get_aws_account() -> str:
     return sts_client.get_caller_identity().get("Account")
 
 
-def lambda_handler(*_) -> str:
+def check_deployment_role_readiness() -> dict[str, Any]:
     """
-    Lambda entrypoint.  Accepts no input values. The "where" of it's running is
-    the most important aspect.
+    Check whether our deployment role is up to date and configured correctly.
 
     AWS Account ID is detected via an sts reflection call
     AWS Region is detected via AWS_* environment variables
@@ -119,7 +119,7 @@ def lambda_handler(*_) -> str:
         for i in range(ceil(len(p_actions) / 1000)):
             p_resources = expanded_policy.get("Resource", [])
             for resource in p_resources:
-                actions = set(p_actions[i * 1000 : (i + 1) * 1000])
+                actions = set(p_actions[i * 1000: (i + 1) * 1000])
                 denials = _get_denies(resource)
                 log.debug("Denies in place for <%s>: %s", resource, ", ".join(denials))
                 # Doing this if any expanded actions match an explicit deny.  No sense in simulating an expected denial.
@@ -155,6 +155,26 @@ def lambda_handler(*_) -> str:
             )
         return output
     return {"Message": "All evaluations were successful against the Deployment Role"}
+
+
+def check_s3_select_readiness() -> bool:
+    """
+    Check if S3Select is enabled on the target account
+    """
+    s3check = S3SelectEnabledCheck(log)
+    return s3check.is_enabled()
+
+
+def lambda_handler(_: dict[str, Any], __: Any) -> str:
+    """
+    Lambda entrypoint.  Accepts no input values. The "where" of it's running is
+    the most important aspect.
+    """
+
+    return {
+        'deployment_role_readiness_results': check_deployment_role_readiness(_, __),
+        's3_select_enabled': check_s3_select_readiness()
+    }
 
 
 if __name__ == "__main__":
