@@ -77,8 +77,7 @@ class S3SelectEnabledCheck:
 
     def _setup_bucket(self):
         self.log.info(f'setting up test s3 bucket ({self.test_bucket_name})')
-        self.s3.create_bucket(Bucket=self.test_bucket_name, CreateBucketConfiguration={
-                              'LocationConstraint': self.test_bucket_region})
+        self.s3.create_bucket(Bucket=self.test_bucket_name)
 
     def _cleanup_bucket(self):
         self.log.info(f'cleaning up test s3 bucket ({self.test_bucket_name})')
