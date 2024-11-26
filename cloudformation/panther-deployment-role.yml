@@ -312,21 +312,12 @@ Resources:
             NotResource:
               - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther-*
           - Effect: Deny
-            Action: athena:DeleteWorkGroup
-            NotResource:
-              - !Sub arn:${AWS::Partition}:athena:${AWS::Region}:${AWS::AccountId}:workgroup/panther
-          - Effect: Deny
             Action:
               - cognito-idp:DeleteUserPool*
               - dynamodb:DeleteBackup
               - dynamodb:DeleteItem
               - dynamodb:DeleteTableReplica
-              - kms:DeleteAlias
-              - kms:DeleteCustomKeyStore
-              - kms:DeleteImportedKeyMaterial
-              - kms:ScheduleKeyDeletion
               - s3:DeleteBucket
-              - sns:DeleteTopic
             Resource: '*'
 Outputs:
   DeploymentRoleArn:
