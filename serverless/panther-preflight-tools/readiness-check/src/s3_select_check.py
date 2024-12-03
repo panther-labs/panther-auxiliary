@@ -76,9 +76,16 @@ class S3SelectEnabledCheck:
         return is_enabled
 
     def _setup_bucket(self):
-        self.log.info(f'setting up test s3 bucket ({self.test_bucket_name})')
-        self.s3.create_bucket(Bucket=self.test_bucket_name, CreateBucketConfiguration={
-                              'LocationConstraint': self.test_bucket_region})
+        self.log.info(f'setting up test s3 bucket ({self.test_bucket_name}) with LocationConstraint ({self.test_bucket_region})')
+        try:
+            self.s3.create_bucket(Bucket=self.test_bucket_name, CreateBucketConfiguration={
+                'LocationConstraint': self.test_bucket_region})
+            self.log.info(f'test s3 bucket ({self.test_bucket_name}) created')
+        except Exception as e:
+            self.log.info(f'failed to create test s3 bucket ({self.test_bucket_name}) with LocationConstraint ({self.test_bucket_region}) - exception: {e} - retrying without LocationConstraint, please request access to S3Select')
+            self.s3.create_bucket(Bucket=self.test_bucket_name)
+            self.log.info(f'test s3 bucket ({self.test_bucket_name}) created without LocationConstraint')
+
 
     def _cleanup_bucket(self):
         self.log.info(f'cleaning up test s3 bucket ({self.test_bucket_name})')
