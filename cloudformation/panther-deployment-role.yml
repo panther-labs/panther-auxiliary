@@ -63,6 +63,8 @@ Resources:
             Condition:
               Bool:
                 aws:SecureTransport: true
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/ReadOnlyAccess
       Tags:
         - Key: panther:app
           Value: panther
@@ -70,178 +72,258 @@ Resources:
   DeploymentPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: PantherInfraManagement
+      PolicyName: PantherInfraManagementPolicy
       Roles:
         - !Ref DeploymentRole
       PolicyDocument:
         Version: 2012-10-17
         Statement:
-          - Effect: Allow
+          - Sid: AWSRequiredStarCalls
+            Effect: Allow
             Action:
-              # Create and manage SSL certificates
-              - acm:*
-              # Create and manage APIs used by the core product
-              - apigateway:*
-              # Manage the resources for the core product
-              - application-autoscaling:*ScalableTarget*
-              - application-autoscaling:*ScalingPolicies
-              - application-autoscaling:*ScalingPolicy
-              # Manage Athena resources
-              - athena:*
-              # Create and manage backups for the core product
-              - backup-storage:*
-              - backup:*
-              # Create and manage batch processing jobs for the core product
-              - batch:*
-              # Use CloudFormation to manage resources for the core product
-              - cloudformation:*
-              # Apply ACM to APIGW
-              - cloudfront:UpdateDistribution
-              # Aggregate logs from the core product
-              - cloudtrail:*
-              # Monitor the core product performance
-              - cloudwatch:*Alarm*
-              - cloudwatch:*Dashboard*
-              - cloudwatch:*Metric*
-              - cloudwatch:*Tag*
-              - cloudwatch:List*
-              # Execute code builds to assemble artifacts used by the product
-              - codebuild:*
-              # Enable user login
-              - cognito-idp:*
-              # Create and manage DynamoDB tables for the core product
-              - dynamodb:*Backup*
-              - dynamodb:*Stream*
-              - dynamodb:*Table*
-              - dynamodb:*Tag*
-              - dynamodb:*TimeToLive*
-              # Manage containers and their runtimes
-              - ec2:*
-              - ecr:GetAuthorizationToken
-              - ecs:*Cluster*
-              - ecs:*Service*
-              - ecs:*Tag*
-              - ecs:*Task*
-              # Manage Elastic File System for the product
-              - elasticfilesystem:*
-              # Manage the load balancer to route traffic to the product
-              - elasticloadbalancing:*
-              # Manage Elasticsearch for search functions in the product
-              - es:*
-              # Manage EventBridge events sent by the product
-              - events:*
-              # View IAM resources and manage certificates
-              - iam:*ServerCertificate
-              - iam:Get*
-              - iam:List*
-              # Create and manage streams to allow product components to communicate
-              - kinesis:AddTagsToStream
-              - kinesis:CreateStream
-              - kinesis:DescribeStreamSummary
-              - kinesis:EnableEnhancedMonitoring
-              - kinesis:IncreaseStreamRetentionPeriod
-              - kinesis:ListTagsForStream
-              # Create and manage encryption keys for the core product
-              - kms:*
-              # Manage Lambdas, including custom dependencies, used to receive events for the core product
-              - lambda:*EventSourceMapping
-              - lambda:*LayerVersion*
-              - lambda:List*
-              # Aggregate logs for the core product
-              - logs:*
-              # Retrieve organization info for account metadata
-              - organizations:DescribeOrganization
-              # Manage storage for rules and other application configurations
-              - s3:*AccelerateConfiguration
-              - s3:*AccountPublicAccessBlock
-              - s3:*Bucket*
-              - s3:*EncryptionConfiguration
-              - s3:*InventoryConfiguration
-              - s3:*LifecycleConfiguration
-              - s3:*MetricsConfiguration
-              - s3:*ReplicationConfiguration
-              - s3:CreateAccessPoint
-              - s3:PutObject*
-              # Get info about the secrets stored in the account
-              - secretsmanager:Describe*
-              - secretsmanager:List*
-              # Manage quotas for the services used by the application
-              - servicequotas:*
-              # Create and manage queues to send messages between application components
-              - sns:*
-              - sqs:*Permission*
-              - sqs:*ueue*
-              - sqs:SendMessage
-              # Manage the states of step functions that run the core product
-              - states:*
-              # Manage private networking for the application
-              - vpc:*
-              # Manage the application firewall
-              - wafv2:*
-              - wafv2:CreateRuleGroup
-              - wafv2:CreateWebACL
-              - wafv2:GetRuleGroup
-              - wafv2:ListTagsForResource
-              - wafv2:TagResource
-              - wafv2:UpdateRuleGroup
+              - ecs:CreateCluster
+              - ecs:DeregisterTaskDefinition
+              - kms:CreateKey
+              - kms:TagResource
+              - logs:CreateLogDelivery
+              - servicequotas:RequestServiceQuotaIncrease
+              - tag:TagResources
             Resource: '*'
-          # Create and manage Panther secrets needed for the product, e.g., Snowflake access secrets
-          - Effect: Allow
-            Action: secretsmanager:*
-            Resource: !Sub arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:panther*
-          # Create and manage streams in Firehose to pass messages between components of the product
-          - Effect: Allow
-            Action: firehose:*
-            Resource: !Sub arn:${AWS::Partition}:firehose:*:${AWS::AccountId}:deliverystream/*
-          # Scan and get specific DynamoDB tables so we can check system status during deployment
-          - Effect: Allow
+          - Sid: AWSRequiredKMSAuthor
+            # This is required until we add PantherDeploymentRole to all kms keys to prevent the error:
+            # MalformedPolicyDocumentException: The new key policy will not allow you to update the key policy in the future.
+            # https://stackoverflow.com/a/65307337
+            Effect: Allow
+            Action: kms:*
+            Resource: '*'
+          - Sid: PantherCloudformation
+            Effect: Allow
             Action:
-              - dynamodb:Scan
-              - dynamodb:Get*
+              - cloudformation:CreateChangeSet
+              - cloudformation:CreateStack
+              - cloudformation:DeleteChangeSet
+              - cloudformation:DeleteStack
+              - cloudformation:ExecuteChangeSet
+              - cloudformation:UpdateStack
             Resource:
-              - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther-analysis
-              - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther-organization
-          # Create, modify, and delete specific IAM roles and instance profiles as part of deployment to set up core product services
-          - Effect: Allow
+              - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/panther*
+              - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:aws:transform/Serverless*
+          - Sid: PantherEC2Create
+            Effect: Allow
             Action:
-              - iam:*InstanceProfile*
+              - ec2:AllocateAddress
+              - ec2:CreateFlowLogs
+              - ec2:CreateInternetGateway
+              - ec2:CreateNatGateway
+              - ec2:CreateRouteTable
+              - ec2:CreateSecurityGroup
+              - ec2:CreateSubnet
+              - ec2:CreateTags
+              - ec2:CreateVpc
+              - ec2:CreateVpcEndpoint
+              - ec2:RevokeSecurityGroupIngress
+            Resource:
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:elastic-ip/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:internet-gateway/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:natgateway/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc-endpoint/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc-flow-log/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*
+          - Sid: PantherEC2VPC
+            Effect: Allow
+            Action:
+              - ec2:AssociateRouteTable
+              - ec2:AssociateVpcCidrBlock
+              - ec2:AttachInternetGateway
+              - ec2:AuthorizeSecurityGroupEgress
+              - ec2:AuthorizeSecurityGroupIngress
+              - ec2:CreateRoute
+              - ec2:DeleteFlowLogs
+              - ec2:DeleteInternetGateway
+              - ec2:DeleteNatGateway
+              - ec2:DeleteRouteTable
+              - ec2:DeleteSecurityGroup
+              - ec2:DeleteSubnet
+              - ec2:DeleteTags
+              - ec2:DeleteVpcEndpoints
+              - ec2:ModifySubnetAttribute
+              - ec2:ModifyVpcAttribute
+              - ec2:ModifyVpcEndpoint
+              - ec2:ReleaseAddress
+              - ec2:RevokeSecurityGroupEgress
+            Resource:
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:elastic-ip/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:internet-gateway/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:natgateway/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc-endpoint/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc-flow-log/*
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*
+            Condition:
+              StringEquals:
+                aws:ResourceTag/panther:app: panther
+          - Sid: PantherALB
+            Effect: Allow
+            Action:
+              - elasticloadbalancing:AddTags
+              - elasticloadbalancing:CreateListener
+              - elasticloadbalancing:CreateLoadBalancer
+              - elasticloadbalancing:CreateRule
+              - elasticloadbalancing:CreateTargetGroup
+              - elasticloadbalancing:ModifyLoadBalancerAttributes
+              - elasticloadbalancing:ModifyTargetGroupAttributes
+              - elasticloadbalancing:RegisterTargets
+              - elasticloadbalancing:RemoveTags
+            Resource:
+              - !Sub arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener-rule/app/web/*
+              - !Sub arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/http-ingest-alb/*
+              - !Sub arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/web/*
+              - !Sub arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/app/http-ingest-alb/*
+              - !Sub arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/app/web/*
+              - !Sub arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/panther-http-ingest-target-group/*
+              - !Sub arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:targetgroup/panther-web/*
+          - Sid: PantherCodebuild
+            Effect: Allow
+            Action:
+              - codebuild:BatchGetProjects
+              - codebuild:CreateProject
+              - codebuild:DeleteProject
+              - codebuild:UpdateProject
+              - codebuild:StartBuild
+            Resource: !Sub arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/panther*
+          - Sid: PantherStateMachine
+            Effect: Allow
+            Action:
+              - states:CreateStateMachine
+              - states:DeleteStateMachine
+              - states:TagResource
+              - states:UpdateStateMachine
+            Resource: !Sub arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:panther*
+          - Sid: PantherEvents
+            Effect: Allow
+            Action:
+              - events:DeleteRule
+              - events:PutRule
+              - events:PutTargets
+              - events:RemoveTargets
+              - events:TagResource
+            Resource:
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/alert-search-rehydrate-api-rehydration-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-schedule-polling-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/detection-processor-poll-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/enrichment-api-prune-generations-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/enrichment-api-sync-all-profile-pullers-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/holding-tank-field-discovery-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/lambda-warmer-prewarm-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/ops-tools-*-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/panther*
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/pulumi-api-cleanup-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/replay-api-schedule-cleanup-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/system-status-monitor-ingestion-threshold-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/system-status-publish-sources-last-received-event-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/system-status-publish-sources-permission-status-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/system-status-refresh-log-type-metrics-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/users-api-deactivate-support-users-cron
+          - Sid: PantherAPIGateway
+            Effect: Allow
+            Action:
+              - apigateway:DELETE
+              - apigateway:PATCH
+              - apigateway:POST
+              - apigateway:PUT
+              - apigateway:TagResource
+            Resource:
+              - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/account
+              - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/apis*
+              - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/restapis*
+              - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/tags/*
+              - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/usageplans/*
+            Condition:
+              StringLikeIfExists:
+                apigateway:Request/apiName: panther*
+
+  DeploymentPolicy2:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: PantherInfraManagementPolicy2
+      Roles:
+        - !Ref DeploymentRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PantherS3
+            Effect: Allow
+            Action:
+              - s3:CreateBucket
+              - s3:DeleteBucket
+              - s3:DeleteBucketPolicy
+              - s3:PutBucketAcl
+              - s3:PutBucketCors
+              - s3:PutBucketLogging
+              - s3:PutBucketNotification
+              - s3:PutBucketOwnershipControls
+              - s3:PutBucketPolicy
+              - s3:PutBucketPublicAccessBlock
+              - s3:PutBucketTagging
+              - s3:PutBucketVersioning
+              - s3:PutEncryptionConfiguration
+              - s3:PutInventoryConfiguration
+              - s3:PutLifecycleConfiguration
+              - s3:PutMetricsConfiguration
+              - s3:PutObject
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::analysis-bulk-uploads-*
+              - !Sub arn:${AWS::Partition}:s3:::analysis-versions-*
+              - !Sub arn:${AWS::Partition}:s3:::audit-logs-*
+              - !Sub arn:${AWS::Partition}:s3:::dashboards-*
+              - !Sub arn:${AWS::Partition}:s3:::data-archive-*
+              - !Sub arn:${AWS::Partition}:s3:::datadog-aws-metric-stream-backup-*
+              - !Sub arn:${AWS::Partition}:s3:::datalake-*
+              - !Sub arn:${AWS::Partition}:s3:::input-data-*
+              - !Sub arn:${AWS::Partition}:s3:::panther-*
+              - !Sub arn:${AWS::Partition}:s3:::panther-audit-logs-*
+              - !Sub arn:${AWS::Partition}:s3:::processed-data-*
+              - !Sub arn:${AWS::Partition}:s3:::pulumi-state-*
+              - !Sub arn:${AWS::Partition}:s3:::replay-data-*
+              - !Sub arn:${AWS::Partition}:s3:::readiness-*
+              - !Sub arn:${AWS::Partition}:s3:::temporary-processed-data-*
+              - !Sub arn:${AWS::Partition}:s3:::unmonitored-audit-logs-*
+              - !Sub arn:${AWS::Partition}:s3:::user-uploads-*
+          - Sid: PantherIAM
+            Effect: Allow
+            Action:
               - iam:AttachRolePolicy
+              - iam:CreatePolicy
+              - iam:CreatePolicyVersion
               - iam:CreateRole
+              - iam:CreateServiceLinkedRole
+              - iam:DeletePolicy
+              - iam:DeletePolicyVersion
               - iam:DeleteRole
-              - iam:DeleteRolePolicy
               - iam:DetachRolePolicy
-              - iam:Get*
-              - iam:List*
               - iam:PassRole
               - iam:PutRolePolicy
+              - iam:TagPolicy
               - iam:TagRole
-              - iam:UpdateAssumeRolePolicy
-              - iam:UpdateRole
-              - iam:UpdateRoleDescription
+              - iam:TagServerCertificate
+              - iam:UploadServerCertificate
               - iam:UntagRole
+              - iam:UntagPolicy
             Resource:
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/dynamo-scaling-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/firehose-http-input-data-bucket-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/panther-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/pip-layer-builder-codebuild-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/Panther*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/datadog*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Datadog*
-          # Create and modify access specific policies and specific service roles
-          # These services roles need the policies to function, and the service roles are required for the core product.
-          - Effect: Allow
-            Action:
-              - iam:*
-            Resource:
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/Panther*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/analytics-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/data-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/datadog-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/deny-data-access-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/dynamo-scaling-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/firehose-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/panther-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/panther*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/Panther*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/read-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/support-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/write-to-firehose-*
@@ -249,59 +331,251 @@ Resources:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/cloudtrail.amazonaws.com/AWSServiceRoleForCloudTrail
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/dynamodb.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_DynamoDBTable
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/elasticfilesystem.amazonaws.com/AWSServiceRoleForAmazonElasticFileSystem
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/opensearchservice.amazonaws.com/AWSServiceRoleForAmazonOpenSearchService
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/ops.apigateway.amazonaws.com/AWSServiceRoleForAPIGateway
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/servicequotas.amazonaws.com/AWSServiceRoleForServiceQuotas
-          # Assume the Route 53 role in order to configure DNS records required for setup
-          - Effect: Allow
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Datadog*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/datadog*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/dynamo-scaling-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/firehose-http-input-data-bucket-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/panther*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/pip-layer-builder-codebuild-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:server-certificate/panther/*
+          - Sid: PantherFirehose
+            Effect: Allow
             Action:
-              - sts:AssumeRole
-            Resource: arn:aws:iam::*:role/PulumiRoute53
-          # Configure and run the core product services in Lambdas
-          - Effect: Allow
-            Action: lambda:*
+              - firehose:CreateDeliveryStream
+              - firehose:DeleteDeliveryStream
+              - firehose:StartDeliveryStreamEncryption
+              - firehose:TagDeliveryStream
+            Resource: !Sub arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/*
+          - Sid: PantherLambda
+            Effect: Allow
+            Action:
+              - lambda:AddPermission
+              - lambda:CreateFunction
+              - lambda:DeleteFunction
+              - lambda:DeleteLayerVersion
+              - lambda:InvokeFunction
+              - lambda:PublishLayerVersion
+              - lambda:PutFunctionConcurrency
+              - lambda:PutFunctionEventInvokeConfig
+              - lambda:PutFunctionRecursionConfig
+              - lambda:RemovePermission
+              - lambda:TagResource
+              - lambda:UpdateFunctionCode
+              - lambda:UpdateFunctionConfiguration
             Resource:
-              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:event-source-mapping:*
-              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:panther-*
-              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:layer:panther-*
               - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:datadog-*
-          - Effect: Allow
-            Action: lambda:InvokeFunction
-            Resource:
-              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:panther-*
-          # Check versions for Lambda dependencies
-          - Effect: Allow
-            Action: lambda:GetLayerVersion
-            Resource:
-              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension*
-              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:464622532012:layer:Datadog-Python*
-              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension*
-          # Download custom runtimes for ECR
-          - Effect: Allow
+              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:panther*
+              - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:layer:panther*
+          - Sid: PantherLambdaSourceMapping
+            Effect: Allow
+            Action:
+              - lambda:CreateEventSourceMapping
+              - lambda:DeleteEventSourceMapping
+              - lambda:UpdateEventSourceMapping
+            Resource: '*'
+            Condition:
+              StringLike:
+                lambda:FunctionArn: !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:panther*
+          - Sid: PantherSNS
+            Effect: Allow
+            Action:
+              - sns:CreateTopic
+              - sns:DeleteTopic
+              - sns:SetTopicAttributes
+              - sns:Subscribe
+              - sns:TagResource
+              - sns:Unsubscribe
+              - sns:UntagResource
+            Resource: !Sub arn:${AWS::Partition}:sns:${AWS::Region}:${AWS::AccountId}:panther*
+          - Sid: PantherSQS
+            Effect: Allow
+            Action:
+              - sqs:CreateQueue
+              - sqs:DeleteQueue
+              - sqs:TagQueue
+              - sqs:UntagQueue
+            Resource: !Sub arn:${AWS::Partition}:sqs:${AWS::Region}:${AWS::AccountId}:panther*
+          - Sid: PantherDynamoDB
+            Effect: Allow
+            Action:
+              - dynamodb:CreateTable
+              - dynamodb:DeleteTable
+              - dynamodb:Scan
+              - dynamodb:TagResource
+
+              - dynamodb:UpdateContinuousBackups
+              - dynamodb:UpdateTimeToLive
+            Resource: !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/panther*
+          - Sid: PantherECR
+            Effect: Allow
             Action:
               - ecr:BatchCheckLayerAvailability
-              - ecr:GetDownloadUrlForLayer
+              - ecr:CompleteLayerUpload
+              - ecr:InitiateLayerUpload
+              - ecr:PutImage
+              - ecr:SetRepositoryPolicy
+              - ecr:UploadLayerPart
               - ecr:BatchGetImage
-            Resource:
-              - !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:*:repository/panther-enterprise
-              - !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:*:repository/panther-internal-rc
-          # Read and list buckets holding Panther product internals
-          - Effect: Allow
+            Resource: !Sub arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/panther*
+          - Sid: PantherECRAdditional
+            Effect: Allow
             Action:
-              - s3:Get*
-              - s3:ListBucket
+              - ecr:GetAuthorizationToken
+            Resource: '*'
+          - Sid: PantherAssumeRoute53
+            Effect: Allow
+            Action: sts:AssumeRole
+            Resource: arn:aws:iam::*:role/PulumiRoute53
+
+  DeploymentPolicy3:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: PantherInfraManagementPolicy3
+      Roles:
+        - !Ref DeploymentRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PantherKMS
+            Effect: Allow
+            Action:
+              - kms:CreateGrant
+              - kms:Decrypt
+              - kms:EnableKeyRotation
+              - kms:Encrypt
+              - kms:GenerateDataKey
+              - kms:GenerateDataKeyWithoutPlaintext
+              - kms:UpdateAlias
+            Resource: !Sub arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/panther*
+          - Sid: DevPulumiOktaSupport
+            Effect: Allow
+            Action: kms:Decrypt
+            Resource: arn:aws:kms:us-west-2:246537256134:key/bc6a94a9-56a1-41b7-83aa-fddeb4df255e
+          - Sid: PulumiOktaSecret
+            Effect: Allow
+            Action: secretsmanager:GetSecretValue
+            Resource: arn:aws:secretsmanager:us-west-2:246537256134:secret:pulumi/okta-epd-login-app-management-token-05Mnkv
+          - Sid: PantherManageSecrets
+            Effect: Allow
+            Action:
+              - secretsmanager:CreateSecret
+              - secretsmanager:DeleteSecret
+              - secretsmanager:GetSecretValue
+              - secretsmanager:PutSecretValue
+              - secretsmanager:RotateSecret
+              - secretsmanager:TagResource
+              - secretsmanager:UpdateSecret
+            Resource: !Sub arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:panther*
+          - Sid: PantherLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:DeleteLogGroup
+              - logs:PutRetentionPolicy
+              - logs:PutSubscriptionFilter
+              - logs:TagLogGroup
+              - logs:TagResource
+              - logs:UntagLogGroup
             Resource:
-              - !Sub arn:${AWS::Partition}:s3:::panther-enterprise-${AWS::Region}*
-              - !Sub arn:${AWS::Partition}:s3:::panther-internal-rc-${AWS::Region}*
-          # Manage buckets holding past versions of rules and detections
-          - Effect: Allow
-            Action: s3:*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/apigateway/welcome*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/batch/job*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/panther*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/gateway/panther*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda-insights*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/datadog-log-forwarder*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/panther*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:panther-web-logs*
+          - Sid: PantherCognito
+            Effect: Allow
+            Action:
+              - cognito-idp:CreateUserPool
+              - cognito-idp:TagResource
+            Resource: !Sub arn:${AWS::Partition}:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*
+          - Sid: PantherCognitoManagement
+            Effect: Allow
+            Action:
+              - cognito-idp:CreateIdentityProvider
+              - cognito-idp:CreateUserPoolClient
+              - cognito-idp:CreateUserPoolDomain
+              - cognito-idp:SetUserPoolMfaConfig
+              - cognito-idp:UntagResource
+              - cognito-idp:UpdateIdentityProvider
+              - cognito-idp:UpdateUserPool
+            Resource: !Sub arn:${AWS::Partition}:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*
+            Condition:
+              StringEquals:
+                aws:ResourceTag/panther:app: panther
+          - Sid: PantherEFSCreate
+            Effect: Allow
+            Action:
+              - elasticfilesystem:CreateFileSystem
+              - elasticfilesystem:TagResource
+            Resource: !Sub arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:file-system/*
+          - Sid: PantherEFSManage
+            Effect: Allow
+            Action:
+              - elasticfilesystem:CreateAccessPoint
+              - elasticfilesystem:CreateMountTarget
+              - elasticfilesystem:DeleteAccessPoint
+              - elasticfilesystem:DeleteFileSystem
+              - elasticfilesystem:DeleteMountTarget
+              - elasticfilesystem:PutLifecycleConfiguration
+            Resource: !Sub arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:file-system/*
+            Condition:
+              StringEquals:
+                aws:ResourceTag/panther:app: panther
+          - Sid: PantherBatch
+            Effect: Allow
+            Action:
+              - batch:CreateComputeEnvironment
+              - batch:CreateJobQueue
+              - batch:DeleteComputeEnvironment
+              - batch:DeleteJobQueue
+              - batch:DeregisterJobDefinition
+              - batch:RegisterJobDefinition
+              - batch:TagResource
+              - batch:UpdateComputeEnvironment
+              - batch:UpdateJobQueue
             Resource:
-              - !Sub arn:${AWS::Partition}:s3:::panther*-analysisversions-*
-              - !Sub arn:${AWS::Partition}:s3:::analysis-versions-*
+              - !Sub arn:${AWS::Partition}:batch:${AWS::Region}:${AWS::AccountId}:compute-environment/panther*
+              - !Sub arn:${AWS::Partition}:batch:${AWS::Region}:${AWS::AccountId}:job-definition/panther*
+              - !Sub arn:${AWS::Partition}:batch:${AWS::Region}:${AWS::AccountId}:job-queue/panther*
+          - Sid: PantherECSManage
+            Effect: Allow
+            Action:
+              - ecs:CreateService
+              - ecs:DeleteCluster
+              - ecs:DeleteService
+              - ecs:RegisterTaskDefinition
+              - ecs:TagResource
+              - ecs:UpdateCluster
+              - ecs:UpdateClusterSettings
+              - ecs:UpdateService
+            Resource:
+              - !Sub arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:cluster/panther*
+              - !Sub arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:service/panther-web-cluster/panther-web
+              - !Sub arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/panther-web:*
+          - Sid: PantherCWDashboard
+            Effect: Allow
+            Action: cloudwatch:PutDashboard
+            Resource: !Sub arn:${AWS::Partition}:cloudwatch::${AWS::AccountId}:dashboard/Panther*
+
+  DeploymentPolicy4:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: PantherInfraManagementDenies
+      Roles:
+        - !Ref DeploymentRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
           # Do not delete sensitive resources, like DynamoDB tables and KMS aliases
           - Effect: Deny
             Action: elasticloadbalancing:DeleteLoadBalancer
@@ -310,23 +584,14 @@ Resources:
           - Effect: Deny
             Action: dynamodb:DeleteTable
             NotResource:
-              - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther-*
-          - Effect: Deny
-            Action: athena:DeleteWorkGroup
-            NotResource:
-              - !Sub arn:${AWS::Partition}:athena:${AWS::Region}:${AWS::AccountId}:workgroup/panther
+              - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther*
           - Effect: Deny
             Action:
               - cognito-idp:DeleteUserPool*
               - dynamodb:DeleteBackup
               - dynamodb:DeleteItem
               - dynamodb:DeleteTableReplica
-              - kms:DeleteAlias
-              - kms:DeleteCustomKeyStore
-              - kms:DeleteImportedKeyMaterial
-              - kms:ScheduleKeyDeletion
               - s3:DeleteBucket
-              - sns:DeleteTopic
             Resource: '*'
 Outputs:
   DeploymentRoleArn:
