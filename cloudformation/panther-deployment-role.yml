@@ -326,7 +326,6 @@ Resources:
               - kms:DeleteImportedKeyMaterial
               - kms:ScheduleKeyDeletion
               - s3:DeleteBucket
-              - sns:DeleteTopic
             Resource: '*'
 Outputs:
   DeploymentRoleArn:
