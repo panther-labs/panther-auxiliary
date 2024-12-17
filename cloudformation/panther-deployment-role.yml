@@ -112,6 +112,7 @@ Resources:
               - cloudformation:UpdateStack
             Resource:
               - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/panther*
+              - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/onboard-*
               - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:aws:transform/Serverless*
               # The following permissions are needed when self-onboarding is enabled.
               - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/onboard-log-processing-role-*
@@ -237,6 +238,7 @@ Resources:
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/system-status-publish-sources-last-received-event-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/system-status-publish-sources-permission-status-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/system-status-refresh-log-type-metrics-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/onboard-real-time-events*
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/users-api-deactivate-support-users-cron
               # This is required when self-onboarding is enabled.
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/onboard-real-time-events-*
@@ -253,7 +255,7 @@ Resources:
               - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/apis*
               - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/restapis*
               - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/tags/*
-              - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/usageplans/*
+              - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/usageplans*
             Condition:
               StringLikeIfExists:
                 apigateway:Request/apiName: panther*
