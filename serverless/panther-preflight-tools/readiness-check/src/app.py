@@ -165,14 +165,14 @@ def check_s3_select_readiness() -> bool:
     return s3check.is_enabled()
 
 
-def lambda_handler(_: dict[str, Any], __: Any) -> str:
+def lambda_handler(_: dict[str, Any], __: Any) -> dict:
     """
     Lambda entrypoint.  Accepts no input values. The "where" of it's running is
     the most important aspect.
     """
 
     return {
-        'deployment_role_readiness_results': check_deployment_role_readiness(_, __),
+        'deployment_role_readiness_results': check_deployment_role_readiness(),
         's3_select_enabled': check_s3_select_readiness()
     }
 
