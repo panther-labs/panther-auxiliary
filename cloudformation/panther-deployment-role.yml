@@ -159,6 +159,7 @@ Resources:
               - ec2:DeleteSubnet
               - ec2:DeleteTags
               - ec2:DeleteVpcEndpoints
+              - ec2:DisassociateVpcCidrBlock
               - ec2:ModifySubnetAttribute
               - ec2:ModifyVpcAttribute
               - ec2:ModifyVpcEndpoint
@@ -206,6 +207,32 @@ Resources:
               - codebuild:UpdateProject
               - codebuild:StartBuild
             Resource: !Sub arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/panther*
+          - Sid: PantherRedshiftProvisioningServiceLinkedRole
+            Effect: Allow
+            Action:
+              - iam:CreateServiceLinkedRole
+            Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift
+          - Sid: PantherRedshiftProvisioning
+            Effect: Allow
+            Action:
+              - redshift-data:ExecuteStatement # used to set up permissions inside databases
+              - redshift-serverless:CreateNamespace
+              - redshift-serverless:CreateWorkgroup
+              - redshift-serverless:DeleteNamespace
+              - redshift-serverless:DeleteWorkgroup
+              - redshift-serverless:GetCredentials
+              - redshift-serverless:UpdateNamespace
+              - redshift-serverless:UpdateWorkgroup
+              - redshift-serverless:UntagResource
+              - redshift-serverless:TagResource
+            Resource:
+              - !Sub arn:${AWS::Partition}:redshift-serverless:${AWS::Region}:${AWS::AccountId}:namespace/*
+              - !Sub arn:${AWS::Partition}:redshift-serverless:${AWS::Region}:${AWS::AccountId}:workgroup/*
+          - Sid: PantherRedshiftProvisioningDescribeStatement
+            Effect: Allow
+            Action:
+              - redshift-data:DescribeStatement # used to set up permissions inside databases
+            Resource: '*' # this action requires *
           - Sid: PantherStateMachine
             Effect: Allow
             Action:
@@ -225,6 +252,8 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/alert-search-rehydrate-api-rehydration-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-schedule-polling-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/compliance-aggregator-refresh-all-delete-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/compliance-aggregator-refresh-all-no-delete-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/detection-processor-poll-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/enrichment-api-prune-generations-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/enrichment-api-sync-all-profile-pullers-cron
@@ -372,6 +401,8 @@ Resources:
               - firehose:DeleteDeliveryStream
               - firehose:StartDeliveryStreamEncryption
               - firehose:TagDeliveryStream
+              - firehose:UntagDeliveryStream
+              - firehose:UpdateDestination
             Resource: !Sub arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/panther-*
           - Sid: PantherLambda
             Effect: Allow
@@ -379,6 +410,7 @@ Resources:
               - lambda:AddPermission
               - lambda:CreateFunction
               - lambda:DeleteFunction
+              - lambda:DeleteFunctionEventInvokeConfig
               - lambda:DeleteLayerVersion
               - lambda:InvokeFunction
               - lambda:PublishLayerVersion
@@ -490,6 +522,7 @@ Resources:
           - Sid: PantherManageSecrets
             Effect: Allow
             Action:
+              - secretsmanager:CancelRotateSecret
               - secretsmanager:CreateSecret
               - secretsmanager:DeleteSecret
               - secretsmanager:GetSecretValue
@@ -552,10 +585,9 @@ Resources:
               - elasticfilesystem:DeleteFileSystem
               - elasticfilesystem:DeleteMountTarget
               - elasticfilesystem:PutLifecycleConfiguration
-            Resource: !Sub arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:file-system/*
-            Condition:
-              StringEquals:
-                aws:ResourceTag/panther:app: panther
+            Resource:
+              - !Sub arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:file-system/*
+              - !Sub arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/*
           - Sid: PantherBatch
             Effect: Allow
             Action:
