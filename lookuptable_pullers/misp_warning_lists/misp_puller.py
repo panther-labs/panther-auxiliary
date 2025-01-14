@@ -1,5 +1,4 @@
 import json
-import sys
 from ipaddress import ip_network
 from pathlib import Path
 
