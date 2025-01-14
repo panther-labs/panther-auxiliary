@@ -206,6 +206,7 @@ Resources:
               - codebuild:DeleteProject
               - codebuild:UpdateProject
               - codebuild:StartBuild
+              - codebuild:RetryBuild
             Resource: !Sub arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/panther*
           - Sid: PantherRedshiftProvisioningServiceLinkedRole
             Effect: Allow
@@ -538,6 +539,7 @@ Resources:
               - logs:DeleteLogGroup
               - logs:PutRetentionPolicy
               - logs:PutSubscriptionFilter
+              - logs:DeleteSubscriptionFilter
               - logs:TagLogGroup
               - logs:TagResource
               - logs:UntagLogGroup
