@@ -147,7 +147,7 @@ def parse_event_into_creds(event: Mapping[str, str]) -> PantherSnowflakeCredenti
     )
 
 
-def lambda_handler(event: Mapping[str, str], _: Any) -> str:
+def lambda_handler(event: Mapping[str, str], _: Any) -> dict:
     """
     Lambda entrypoint
     """
@@ -170,7 +170,16 @@ def lambda_handler(event: Mapping[str, str], _: Any) -> str:
                 "Failed testing the snowflake credentials! Please check for correctness of host,user,password in the secret"
             )
             raise
-        return f"Validation succeeded for the secret.  Please report back to your panther rep with this value: '{creds.arn}'"
+
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": {
+                "message": f"Validation succeeded for the secret.  Please report back to your panther rep with this value: '{creds.arn}'"
+            }
+        }
 
     print("======SEED CREDS======")
     # Check that secret doesn't already exist
