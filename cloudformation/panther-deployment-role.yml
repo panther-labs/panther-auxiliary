@@ -91,6 +91,8 @@ Resources:
               - kms:CreateKey
               - kms:TagResource
               - logs:CreateLogDelivery
+              - s3:PutAccountPublicAccessBlock
+              - s3:PutPublicAccessBlock
               - servicequotas:RequestServiceQuotaIncrease
               - tag:TagResources
             Resource: '*'
