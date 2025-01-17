@@ -361,6 +361,7 @@ Resources:
               - iam:TagPolicy
               - iam:TagRole
               - iam:TagServerCertificate
+              - iam:UpdateRole
               - iam:UploadServerCertificate
               - iam:UntagRole
               - iam:UntagPolicy
