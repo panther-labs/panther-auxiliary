@@ -86,6 +86,7 @@ Resources:
           - Sid: AWSRequiredStarCalls
             Effect: Allow
             Action:
+              - cloudfront:UpdateDistribution # Required for API Gateway Domain name creation
               - ecs:CreateCluster
               - ecs:DeregisterTaskDefinition
               - kms:CreateKey
@@ -285,6 +286,7 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/account
               - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/apis*
+              - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/domainnames*
               - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/restapis*
               - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/tags/*
               - !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/usageplans*
