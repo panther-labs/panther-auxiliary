@@ -111,7 +111,9 @@ Resources:
               - cloudformation:CreateStack
               - cloudformation:DeleteChangeSet
               - cloudformation:DeleteStack
+              - cloudformation:DescribeStacks
               - cloudformation:ExecuteChangeSet
+              - cloudformation:ListStackResources
               - cloudformation:UpdateStack
             Resource:
               - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/panther*
@@ -204,6 +206,7 @@ Resources:
           - Sid: PantherCodebuild
             Effect: Allow
             Action:
+              - codebuild:BatchGetBuilds
               - codebuild:BatchGetProjects
               - codebuild:CreateProject
               - codebuild:DeleteProject
