@@ -573,6 +573,7 @@ Resources:
               - cognito-idp:CreateIdentityProvider
               - cognito-idp:CreateUserPoolClient
               - cognito-idp:CreateUserPoolDomain
+              - cognito-idp:DeleteIdentityProvider
               - cognito-idp:SetUserPoolMfaConfig
               - cognito-idp:UntagResource
               - cognito-idp:UpdateIdentityProvider
