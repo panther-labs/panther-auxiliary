@@ -317,7 +317,6 @@ Resources:
               - s3:CreateBucket
               - s3:DeleteBucket
               - s3:DeleteBucketPolicy
-              - s3:GetObject
               - s3:PutBucketAcl
               - s3:PutBucketCors
               - s3:PutBucketLogging
@@ -331,7 +330,6 @@ Resources:
               - s3:PutInventoryConfiguration
               - s3:PutLifecycleConfiguration
               - s3:PutMetricsConfiguration
-              - s3:PutObject
             Resource:
               - !Sub arn:${AWS::Partition}:s3:::analysis-bulk-uploads-*
               - !Sub arn:${AWS::Partition}:s3:::analysis-versions-*
@@ -350,59 +348,20 @@ Resources:
               - !Sub arn:${AWS::Partition}:s3:::temporary-processed-data-*
               - !Sub arn:${AWS::Partition}:s3:::unmonitored-audit-logs-*
               - !Sub arn:${AWS::Partition}:s3:::user-uploads-*
-          - Sid: PantherIAM
+          - Sid: PantherS3DevDeployment # Allow the deployment role to push build artifacts for the dev environment
             Effect: Allow
             Action:
-              - iam:AttachRolePolicy
-              - iam:CreatePolicy
-              - iam:CreatePolicyVersion
-              - iam:CreateRole
-              - iam:CreateServiceLinkedRole
-              - iam:DeletePolicy
-              - iam:DeletePolicyVersion
-              - iam:DeleteRole
-              - iam:DeleteRolePolicy
-              - iam:DetachRolePolicy
-              - iam:PassRole
-              - iam:PutRolePolicy
-              - iam:TagPolicy
-              - iam:TagRole
-              - iam:TagServerCertificate
-              - iam:UpdateRole
-              - iam:UploadServerCertificate
-              - iam:UntagRole
-              - iam:UntagPolicy
+              - s3:PutObject
             Resource:
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/Panther*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/analytics-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/data-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/datadog-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/deny-data-access-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/dynamo-scaling-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/firehose-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/panther*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/Panther*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/read-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/support-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/write-to-firehose-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/batch.amazonaws.com/AWSServiceRoleForBatch
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/cloudtrail.amazonaws.com/AWSServiceRoleForCloudTrail
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/dynamodb.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_DynamoDBTable
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/elasticfilesystem.amazonaws.com/AWSServiceRoleForAmazonElasticFileSystem
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/opensearchservice.amazonaws.com/AWSServiceRoleForAmazonOpenSearchService
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/ops.apigateway.amazonaws.com/AWSServiceRoleForAPIGateway
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/servicequotas.amazonaws.com/AWSServiceRoleForServiceQuotas
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Datadog*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/datadog*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/dynamo-scaling-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/firehose-http-input-data-bucket-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/panther*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/pip-layer-builder-codebuild-*
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:server-certificate/panther/*
+              - !Sub arn:${AWS::Partition}:s3:::panther-dev-sourcebucket-*
+          - Sid: PantherS3Deployment # Allow the deployment role to get build artifacts
+            Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::panther-enterprise*
+              - !Sub arn:${AWS::Partition}:s3:::panther-internal-test*
+              - !Sub arn:${AWS::Partition}:s3:::panther-internal-rc*
           - Sid: PantherFirehose
             Effect: Allow
             Action:
@@ -469,9 +428,7 @@ Resources:
             Action:
               - dynamodb:CreateTable
               - dynamodb:DeleteTable
-              - dynamodb:Scan
               - dynamodb:TagResource
-
               - dynamodb:UpdateContinuousBackups
               - dynamodb:UpdateTimeToLive
             Resource: !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/panther*
@@ -667,6 +624,59 @@ Resources:
               - dynamodb:DeleteTableReplica
               - s3:DeleteBucket
             Resource: '*'
+          - Sid: PantherIAM
+            Effect: Allow
+            Action:
+              - iam:AttachRolePolicy
+              - iam:CreatePolicy
+              - iam:CreatePolicyVersion
+              - iam:CreateRole
+              - iam:CreateServiceLinkedRole
+              - iam:DeletePolicy
+              - iam:DeletePolicyVersion
+              - iam:DeleteRole
+              - iam:DeleteRolePolicy
+              - iam:DetachRolePolicy
+              - iam:PassRole
+              - iam:PutRolePolicy
+              - iam:TagPolicy
+              - iam:TagRole
+              - iam:TagServerCertificate
+              - iam:UpdateRole
+              - iam:UploadServerCertificate
+              - iam:UntagRole
+              - iam:UntagPolicy
+            Resource:
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/Panther*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/analytics-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/data-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/datadog-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/deny-data-access-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/dynamo-scaling-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/firehose-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/panther*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/Panther*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/read-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/support-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/write-to-firehose-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/batch.amazonaws.com/AWSServiceRoleForBatch
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/cloudtrail.amazonaws.com/AWSServiceRoleForCloudTrail
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/dynamodb.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_DynamoDBTable
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/elasticfilesystem.amazonaws.com/AWSServiceRoleForAmazonElasticFileSystem
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/opensearchservice.amazonaws.com/AWSServiceRoleForAmazonOpenSearchService
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/ops.apigateway.amazonaws.com/AWSServiceRoleForAPIGateway
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/servicequotas.amazonaws.com/AWSServiceRoleForServiceQuotas
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Datadog*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/datadog*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/dynamo-scaling-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/firehose-http-input-data-bucket-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/panther*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/pip-layer-builder-codebuild-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:server-certificate/panther/*
 Outputs:
   DeploymentRoleArn:
     Value: !GetAtt DeploymentRole.Arn
