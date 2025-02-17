@@ -15,6 +15,29 @@ provider "google" {
   region  = var.gcp_region
 }
 
+locals {
+  workload_identity_federation_enabled = var.authentication_method == "workload_identity_federation"
+  service_account_identity = (
+    local.workload_identity_federation_enabled
+    ? null
+    : "serviceAccount:${google_service_account.panther_service_account[0].email}"
+  )
+  workload_identity_federation_identity = (
+    local.workload_identity_federation_enabled
+    ? "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.pool[0].name}/attribute.account/${var.panther_aws_account_id}"
+    : null
+  )
+  panther_identity = (
+    local.workload_identity_federation_enabled
+    ? local.workload_identity_federation_identity
+    : local.service_account_identity
+  )
+}
+
+data "google_project" "project" {
+  count = local.workload_identity_federation_enabled ? 1 : 0
+}
+
 # Create a topic
 resource "google_pubsub_topic" "topic" {
   name = var.topic_name
@@ -49,28 +72,75 @@ resource "google_pubsub_subscription" "subscription" {
 
 # Create the service account that will be used by panther
 resource "google_service_account" "panther_service_account" {
+  count = local.workload_identity_federation_enabled ? 0 : 1
+
   account_id   = var.panther_service_account_id
   display_name = var.panther_service_account_display_name
 }
 
 ### ~~~ IAM Policies ~~~
 
+# Workload Identity Pool
+resource "google_iam_workload_identity_pool" "pool" {
+  count = local.workload_identity_federation_enabled ? 1 : 0
+
+  workload_identity_pool_id = var.panther_workload_identity_pool_id
+}
+
+# Provider
+resource "google_iam_workload_identity_pool_provider" "provider" {
+  count = local.workload_identity_federation_enabled ? 1 : 0
+
+  workload_identity_pool_id          = google_iam_workload_identity_pool.pool[0].workload_identity_pool_id
+  workload_identity_pool_provider_id = var.panther_workload_identity_pool_provider_id
+  attribute_condition                = "attribute.account==\"${var.panther_aws_account_id}\""
+  attribute_mapping = {
+    # AWS assertion looks like this:
+    # {
+    #   "Account": "123456789012"
+    #   "Arn": "arn:aws:sts::123456789012:assumed-role/panther-<function_name>-function-1234567890123456789012345/panther-<function_name>"
+    #   "UserId": "ARO123EXAMPLE123:panther-<function_name>"
+    # }
+    # where <function_name> is the name of the function e.g. cloud-puller
+    "google.subject"    = "assertion.arn"
+    "attribute.arn"     = "assertion.arn"
+    "attribute.account" = "assertion.account"
+    "attribute.user_id" = "assertion.userid"
+    "attribute.role"    = "assertion.arn.extract('assumed-role/{role}/')"
+  }
+  aws {
+    account_id = var.panther_aws_account_id
+  }
+}
+
 # Pub/Sub Viewer
 resource "google_pubsub_subscription_iam_member" "viewer" {
   subscription = google_pubsub_subscription.subscription.name
   role         = "roles/pubsub.viewer"
-  member       = "serviceAccount:${google_service_account.panther_service_account.email}"
+  member       = local.panther_identity
 }
 
 # Pub/Sub Subscriber
 resource "google_pubsub_subscription_iam_member" "subscriber" {
   subscription = google_pubsub_subscription.subscription.name
   role         = "roles/pubsub.subscriber"
-  member       = "serviceAccount:${google_service_account.panther_service_account.email}"
+  member       = local.panther_identity
 }
 
 output "service_account_email" {
-  value       = google_service_account.panther_service_account.email
+  value       = local.workload_identity_federation_enabled ? null : google_service_account.panther_service_account[0].email
   description = "Service account email"
   sensitive   = false
+}
+
+output "project_number" {
+  value = local.workload_identity_federation_enabled ? data.google_project.project[0].number : null
+}
+
+output "pool_id" {
+  value = local.workload_identity_federation_enabled ? google_iam_workload_identity_pool.pool[0].workload_identity_pool_id : null
+}
+
+output "provider_id" {
+  value = local.workload_identity_federation_enabled ? google_iam_workload_identity_pool_provider.provider[0].workload_identity_pool_provider_id : null
 }
