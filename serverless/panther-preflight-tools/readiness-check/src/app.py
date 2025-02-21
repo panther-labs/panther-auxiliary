@@ -165,16 +165,21 @@ def check_s3_select_readiness() -> bool:
     return s3check.is_enabled()
 
 
-def lambda_handler(_: dict[str, Any], __: Any) -> dict:
+def lambda_handler(args: dict[str, Any], __: Any) -> dict:
     """
     Lambda entrypoint.  Accepts no input values. The "where" of it's running is
     the most important aspect.
     """
 
-    return {
+    ret = {
         'deployment_role_readiness_results': check_deployment_role_readiness(),
-        's3_select_enabled': check_s3_select_readiness()
     }
+
+    # S3Select is going away, but we'll keep the check just in case.
+    if args['s3_select_check']:
+        ret['s3_select_readiness_results'] = check_s3_select_readiness()
+
+    return ret
 
 
 if __name__ == "__main__":
