@@ -177,7 +177,7 @@ def lambda_handler(args: dict[str, Any], __: Any) -> dict:
 
     # S3Select is going away, but we'll keep the check just in case.
     if args['s3_select_check']:
-        ret['s3_select_readiness_results'] = check_s3_select_readiness()
+        ret['s3_select_enabled'] = check_s3_select_readiness()
 
     return ret
 
