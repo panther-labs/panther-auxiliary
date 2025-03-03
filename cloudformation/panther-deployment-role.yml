@@ -429,9 +429,7 @@ Resources:
               - dynamodb:CreateTable
               - dynamodb:DeleteTable
               - dynamodb:TagResource
-              - dynamodb:UpdateContinuousBackups
-              - dynamodb:UpdateTimeToLive
-              - dynamodb:UpdateTable
+              - dynamodb:Update*
             Resource: !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/panther*
           - Sid: PantherECR
             Effect: Allow
