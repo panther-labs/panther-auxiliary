@@ -192,6 +192,7 @@ Resources:
               - elasticloadbalancing:CreateRule
               - elasticloadbalancing:CreateTargetGroup
               - elasticloadbalancing:ModifyLoadBalancerAttributes
+              - elasticloadbalancing:ModifyListenerAttributes
               - elasticloadbalancing:ModifyTargetGroupAttributes
               - elasticloadbalancing:RegisterTargets
               - elasticloadbalancing:RemoveTags

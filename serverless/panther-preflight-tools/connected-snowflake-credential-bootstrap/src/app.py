@@ -20,11 +20,14 @@ from urllib.parse import urlparse, ParseResult
 import boto3
 from botocore.exceptions import ClientError
 import snowflake.connector
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 SECRETNAME = "panther-managed-accountadmin-secret"
 SF_DOMAIN = ".snowflakecomputing.com"
 USERNAME = "PANTHERACCOUNTADMIN"
 PASSWORD_PLACEHOLDER = "PleaseReplaceMe"
+PRIVATE_KEY_PLACEHOLDER = "PleaseReplaceMeWithPrivateKey"
 
 # What region are we in
 AWS_REGION = os.environ.get("AWS_REGION", "")
@@ -36,7 +39,7 @@ REGION = AWS_REGION if AWS_REGION else AWS_DEFAULT_REGION
 SECRET_URL = f"https://{REGION}.console.aws.amazon.com/secretsmanager/secret?name={SECRETNAME}&region={REGION}"
 
 EDIT_SECRET_PROMPT = f"""Please navigate to {SECRET_URL} in your authenticated browser and click \
-"Retrieve secret value" then "Edit".  Add your password in place of the placeholder and save \
+"Retrieve secret value" then "Edit".  Add your RSA private key in place of the placeholder and save \
 the secret.  Then return to your terminal and execute the lambda again with "validate":true"""
 
 
@@ -51,6 +54,7 @@ class PantherSnowflakeCredential:
     account: str = ""
     user: str = ""
     password: str = PASSWORD_PLACEHOLDER
+    privateKey1: str = PRIVATE_KEY_PLACEHOLDER
     port: str = "443"
 
     @staticmethod
@@ -78,6 +82,7 @@ class PantherSnowflakeCredential:
                 "host": self.host,
                 "port": self.port,
                 "user": self.user,
+                "privateKey1": self.privateKey1,
                 "password": self.password,
             }
         )
@@ -89,10 +94,40 @@ class PantherSnowflakeCredential:
         self.arn = resp["ARN"]
 
     def test(self) -> None:
+        if self.password == PASSWORD_PLACEHOLDER and self.privateKey1 == PRIVATE_KEY_PLACEHOLDER:
+            raise ValueError("The secret must contain either a password or a private key, but not both.")
+
+        if self.privateKey1 != PRIVATE_KEY_PLACEHOLDER:
+            self._test_keypair()
+        else:
+            self._test_password()
+
+    def _test_password(self) -> None:
+        snowflake.connector.connect(user=self.user, password=self.password, account=self.account)
+
+    def _test_keypair(self) -> None:
         """
         Connects to snowflake to validate credentials
         """
-        snowflake.connector.connect(user=self.user, password=self.password, account=self.account)
+        try:
+            # Convert the PEM string to an RSAPrivateKey object
+            private_key_obj = load_pem_private_key(
+                self.privateKey1.encode('utf-8'),
+                password=None,
+                backend=default_backend()
+            )
+
+            # Connect to Snowflake using the RSA private key object
+            snowflake.connector.connect(
+                user=self.user,
+                private_key=private_key_obj,
+                account=self.account
+            )
+        except ValueError as e:
+            if "Expected bytes or RSAPrivateKey" in str(e):
+                print("Error: The private key is not in the correct format. It should be a PEM-formatted RSA private key.")
+                print("Example format: '-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEF...\\n-----END PRIVATE KEY-----'")
+            raise
 
 
 def credentials_from_secret(client: boto3.Session) -> PantherSnowflakeCredential:
@@ -110,6 +145,7 @@ def credentials_from_secret(client: boto3.Session) -> PantherSnowflakeCredential
         host=secret["host"],
         port=secret["port"],
         user=secret["user"],
+        privateKey1=secret["privateKey1"],
         password=secret["password"],
     )
 
@@ -142,7 +178,7 @@ def parse_event_into_creds(event: Mapping[str, str]) -> PantherSnowflakeCredenti
         host=host,
         account=host.split(SF_DOMAIN)[0],
         user=user,
-        # Password is later populated by the user manually in the UI
+        # privateKey1 is populated later by automation
         # Port always defaults to 443
     )
 
@@ -157,18 +193,15 @@ def lambda_handler(event: Mapping[str, str], _: Any) -> dict:
         print("======VALIDATION MODE======")
         # Check creds are changed
         creds = credentials_from_secret(client)
-        if creds.password == PASSWORD_PLACEHOLDER:
-            raise ValueError(
-                f"It appears the secret was not modified from its placeholder value.  {EDIT_SECRET_PROMPT}"
-            )
 
         # Run cred test
         try:
             creds.test()
-        except:
+        except Exception as e:
             print(
-                "Failed testing the snowflake credentials! Please check for correctness of host,user,password in the secret"
+                "Failed testing the snowflake credentials! Please check for correctness of host, user, and private key in the secret"
             )
+            print(f"Error details: {str(e)}")
             raise
 
         return {
@@ -177,7 +210,8 @@ def lambda_handler(event: Mapping[str, str], _: Any) -> dict:
                 "Content-Type": "application/json"
             },
             "body": {
-                "message": f"Validation succeeded for the secret.  Please report back to your panther rep with this value: '{creds.arn}'"
+                "message": f"Validation succeeded for the secret.  Please report back to your panther rep with this value: '{creds.arn}'",
+                "credsArn": creds.arn,
             }
         }
 

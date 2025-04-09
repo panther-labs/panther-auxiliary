@@ -13,6 +13,9 @@ import boto3
 import logging
 import uuid
 
+from logger import log
+
+
 # 1. create a uniquely named bucket - panther-readiness-check-*
 # 2. upload dummy JSON file to the bucket
 # 3. S3Select content from said bucket - select statement should be valid
@@ -76,13 +79,15 @@ class S3SelectEnabledCheck:
         return is_enabled
 
     def _setup_bucket(self):
-        self.log.info(f'setting up test s3 bucket ({self.test_bucket_name}) with LocationConstraint ({self.test_bucket_region})')
+        self.log.info(
+            f'setting up test s3 bucket ({self.test_bucket_name}) with LocationConstraint ({self.test_bucket_region})')
         try:
             self.s3.create_bucket(Bucket=self.test_bucket_name, CreateBucketConfiguration={
                 'LocationConstraint': self.test_bucket_region})
             self.log.info(f'test s3 bucket ({self.test_bucket_name}) created')
         except Exception as e:
-            self.log.info(f'failed to create test s3 bucket ({self.test_bucket_name}) with LocationConstraint ({self.test_bucket_region}) - exception: {e} - retrying without LocationConstraint, please request access to S3Select')
+            self.log.info(
+                f'failed to create test s3 bucket ({self.test_bucket_name}) with LocationConstraint ({self.test_bucket_region}) - exception: {e} - retrying without LocationConstraint, please request access to S3Select')
             self.s3.create_bucket(Bucket=self.test_bucket_name)
             self.log.info(f'test s3 bucket ({self.test_bucket_name}) created without LocationConstraint')
 
@@ -98,3 +103,11 @@ class S3SelectEnabledCheck:
     def _delete_dummy_json_file(self):
         self.log.info('deleting dummy json file')
         self.s3.delete_object(Bucket=self.test_bucket_name, Key=self.test_key)
+
+
+def check_s3_select_readiness() -> bool:
+    """
+    Check if S3Select is enabled on the target account
+    """
+    s3check = S3SelectEnabledCheck(log)
+    return s3check.is_enabled()

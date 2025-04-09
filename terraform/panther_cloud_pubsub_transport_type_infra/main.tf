@@ -95,18 +95,12 @@ resource "google_iam_workload_identity_pool_provider" "provider" {
   workload_identity_pool_provider_id = var.panther_workload_identity_pool_provider_id
   attribute_condition                = "attribute.account==\"${var.panther_aws_account_id}\""
   attribute_mapping = {
-    # AWS assertion looks like this:
-    # {
-    #   "Account": "123456789012"
-    #   "Arn": "arn:aws:sts::123456789012:assumed-role/panther-<function_name>-function-1234567890123456789012345/panther-<function_name>"
-    #   "UserId": "ARO123EXAMPLE123:panther-<function_name>"
-    # }
-    # where <function_name> is the name of the function e.g. cloud-puller
-    "google.subject"    = "assertion.arn"
-    "attribute.arn"     = "assertion.arn"
+    # AWS assertion looks like this(from https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html "Example 2 - Called by user created with AssumeRole"):
+    # assertion.arn: arn:aws:sts::123456789012:assumed-role/my-role-name/my-role-session-name
+    # assertion.userid: ARO123EXAMPLE123:my-role-session-name
+    # assertion.account: 123456789012
+    "google.subject"    = "assertion.arn.extract('arn:aws:sts::{account_id}:')+\":\"+assertion.arn.extract('assumed-role/{role_and_session}').extract('/{session}')"
     "attribute.account" = "assertion.account"
-    "attribute.user_id" = "assertion.userid"
-    "attribute.role"    = "assertion.arn.extract('assumed-role/{role}/')"
   }
   aws {
     account_id = var.panther_aws_account_id
