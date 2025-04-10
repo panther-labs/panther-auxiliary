@@ -429,6 +429,7 @@ Resources:
             Action:
               - dynamodb:CreateTable
               - dynamodb:DeleteTable
+              - dynamodb:UpdateTable
               - dynamodb:TagResource
               - dynamodb:Update*
             Resource: !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/panther*
