@@ -192,6 +192,7 @@ Resources:
               - elasticloadbalancing:CreateRule
               - elasticloadbalancing:CreateTargetGroup
               - elasticloadbalancing:ModifyLoadBalancerAttributes
+              - elasticloadbalancing:ModifyListenerAttributes
               - elasticloadbalancing:ModifyTargetGroupAttributes
               - elasticloadbalancing:RegisterTargets
               - elasticloadbalancing:RemoveTags
@@ -592,6 +593,12 @@ Resources:
             Effect: Allow
             Action: cloudwatch:PutDashboard
             Resource: !Sub arn:${AWS::Partition}:cloudwatch::${AWS::AccountId}:dashboard/Panther*
+          - Sid: PantherUpdateSnowPipeCluster
+            Effect: Allow
+            Action:
+              - iam:UpdateAssumeRolePolicy
+            Resource:
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/panther-snowflake-logprocessing-role-${AWS::Region}
 
   DeploymentPolicy4:
     Type: AWS::IAM::ManagedPolicy
