@@ -191,12 +191,18 @@
         "ecr:GetDownloadUrlForLayer",
         "ecr:BatchGetImage"
       ],
-      "Resource": ["arn:aws:ecr:us-west-2:*:repository/panther-enterprise"]
+      "Resource": [
+        "arn:aws:ecr:us-west-2:*:repository/panther-enterprise",
+        "arn:aws:ecr:us-west-2:*:repository/panther-internal-rc"
+      ]
     },
     {
       "Effect": "Allow",
       "Action": ["s3:Get*", "s3:ListBucket"],
-      "Resource": ["arn:aws:s3:::panther-enterprise-us-west-2*"]
+      "Resource": [
+        "arn:aws:s3:::panther-enterprise-us-west-2*",
+        "arn:aws:s3:::panther-internal-rc-us-west-2*"
+      ]
     },
     {
       "Effect": "Allow",

@@ -192,7 +192,6 @@ Resources:
               - elasticloadbalancing:CreateRule
               - elasticloadbalancing:CreateTargetGroup
               - elasticloadbalancing:ModifyLoadBalancerAttributes
-              - elasticloadbalancing:ModifyListenerAttributes
               - elasticloadbalancing:ModifyTargetGroupAttributes
               - elasticloadbalancing:RegisterTargets
               - elasticloadbalancing:RemoveTags
@@ -362,6 +361,7 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:s3:::panther-enterprise*
               - !Sub arn:${AWS::Partition}:s3:::panther-internal-test*
+              - !Sub arn:${AWS::Partition}:s3:::panther-internal-rc*
           - Sid: PantherFirehose
             Effect: Allow
             Action:
@@ -648,6 +648,7 @@ Resources:
               - iam:TagPolicy
               - iam:TagRole
               - iam:TagServerCertificate
+              - iam:UpdateAssumeRolePolicy
               - iam:UpdateRole
               - iam:UploadServerCertificate
               - iam:UntagRole
