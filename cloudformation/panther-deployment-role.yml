@@ -685,6 +685,23 @@ Resources:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/pip-layer-builder-codebuild-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:server-certificate/panther/*
+
+  InternalDeploymentPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Condition: InternalDeploySpecified
+    Properties:
+      ManagedPolicyName: !Sub 'PantherInternalDeploymentPolicy-${AWS::Region}'
+      Roles:
+        - !Ref DeploymentRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PantherCloudTrail
+            Effect: Allow
+            Action:
+              - cloudtrail:*
+            Resource: !Sub arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/panther-account-*
+
 Outputs:
   DeploymentRoleArn:
     Value: !GetAtt DeploymentRole.Arn
