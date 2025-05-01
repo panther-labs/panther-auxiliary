@@ -192,6 +192,8 @@ Resources:
               - elasticloadbalancing:CreateRule
               - elasticloadbalancing:CreateTargetGroup
               - elasticloadbalancing:ModifyLoadBalancerAttributes
+              - elasticloadbalancing:ModifyListener
+              - elasticloadbalancing:ModifyListenerAttributes
               - elasticloadbalancing:ModifyTargetGroupAttributes
               - elasticloadbalancing:RegisterTargets
               - elasticloadbalancing:RemoveTags
@@ -361,7 +363,6 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:s3:::panther-enterprise*
               - !Sub arn:${AWS::Partition}:s3:::panther-internal-test*
-              - !Sub arn:${AWS::Partition}:s3:::panther-internal-rc*
           - Sid: PantherFirehose
             Effect: Allow
             Action:
@@ -643,12 +644,12 @@ Resources:
               - iam:DeleteRole
               - iam:DeleteRolePolicy
               - iam:DetachRolePolicy
+              - iam:DeleteServerCertificate
               - iam:PassRole
               - iam:PutRolePolicy
               - iam:TagPolicy
               - iam:TagRole
               - iam:TagServerCertificate
-              - iam:UpdateAssumeRolePolicy
               - iam:UpdateRole
               - iam:UploadServerCertificate
               - iam:UntagRole
@@ -684,6 +685,23 @@ Resources:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/pip-layer-builder-codebuild-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:server-certificate/panther/*
+
+  InternalDeploymentPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Condition: InternalDeploySpecified
+    Properties:
+      ManagedPolicyName: !Sub 'PantherInternalDeploymentPolicy-${AWS::Region}'
+      Roles:
+        - !Ref DeploymentRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PantherCloudTrail
+            Effect: Allow
+            Action:
+              - cloudtrail:*
+            Resource: !Sub arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/panther-account-*
+
 Outputs:
   DeploymentRoleArn:
     Value: !GetAtt DeploymentRole.Arn
