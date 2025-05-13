@@ -82,7 +82,6 @@ class PantherSnowflakeCredential:
                 "host": self.host,
                 "port": self.port,
                 "user": self.user,
-                "privateKey1": self.privateKey1,
                 "password": self.password,
             }
         )
@@ -97,7 +96,7 @@ class PantherSnowflakeCredential:
         if self.password == PASSWORD_PLACEHOLDER and self.privateKey1 == PRIVATE_KEY_PLACEHOLDER:
             raise ValueError("The secret must contain either a password or a private key, but not both.")
 
-        if self.privateKey1 != PRIVATE_KEY_PLACEHOLDER:
+        if self.privateKey1 && self.privateKey1 != PRIVATE_KEY_PLACEHOLDER:
             self._test_keypair()
         else:
             self._test_password()
@@ -145,8 +144,8 @@ def credentials_from_secret(client: boto3.Session) -> PantherSnowflakeCredential
         host=secret["host"],
         port=secret["port"],
         user=secret["user"],
-        privateKey1=secret["privateKey1"],
-        password=secret["password"],
+        privateKey1=secret.get("privateKey1"),
+        password=secret.get("password"),
     )
 
 
