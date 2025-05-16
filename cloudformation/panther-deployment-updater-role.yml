@@ -91,15 +91,16 @@ Resources:
             Action:
               - iam:AttachRolePolicy
               - iam:CreatePolicy
+              - iam:CreatePolicyVersion
               - iam:DeletePolicy
+              - iam:DeletePolicyVersion
               - iam:DeleteRolePolicy
               - iam:DetachRolePolicy
               - iam:GetPolicy
               - iam:GetPolicyVersion
               - iam:ListPolicyVersions
               - iam:PutRolePolicy
-              - iam:CreatePolicyVersion
-              - iam:DeletePolicyVersion
+              - iam:UpdateAssumeRolePolicy
             Resource:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/PantherDeploymentRole*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/Panther*
