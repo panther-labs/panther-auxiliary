@@ -588,7 +588,7 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:cluster/panther*
               - !Sub arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:service/panther-web-cluster/panther-web
-              - !Sub arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/panther-web:*
+              - !Sub arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/panther-*
           - Sid: PantherCWDashboard
             Effect: Allow
             Action: cloudwatch:PutDashboard
