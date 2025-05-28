@@ -82,6 +82,7 @@ class PantherSnowflakeCredential:
                 "host": self.host,
                 "port": self.port,
                 "user": self.user,
+                "privateKey1": self.privateKey1,
                 "password": self.password,
             }
         )
@@ -111,19 +112,21 @@ class PantherSnowflakeCredential:
         try:
             # Convert the PEM string to an RSAPrivateKey object
             private_key_obj = load_pem_private_key(
-                self.privateKey1.encode("utf-8"), password=None, backend=default_backend()
+                self.privateKey1.encode('utf-8'),
+                password=None,
+                backend=default_backend()
             )
 
             # Connect to Snowflake using the RSA private key object
-            snowflake.connector.connect(user=self.user, private_key=private_key_obj, account=self.account)
+            snowflake.connector.connect(
+                user=self.user,
+                private_key=private_key_obj,
+                account=self.account
+            )
         except ValueError as e:
             if "Expected bytes or RSAPrivateKey" in str(e):
-                print(
-                    "Error: The private key is not in the correct format. It should be a PEM-formatted RSA private key."
-                )
-                print(
-                    "Example format: '-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEF...\\n-----END PRIVATE KEY-----'"
-                )
+                print("Error: The private key is not in the correct format. It should be a PEM-formatted RSA private key.")
+                print("Example format: '-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEF...\\n-----END PRIVATE KEY-----'")
             raise
 
 
@@ -142,7 +145,7 @@ def credentials_from_secret(client: boto3.Session) -> PantherSnowflakeCredential
         host=secret["host"],
         port=secret["port"],
         user=secret["user"],
-        privateKey1=secret.get("privateKey1", PRIVATE_KEY_PLACEHOLDER),
+        privateKey1=secret["privateKey1"],
         password=secret["password"],
     )
 
@@ -203,11 +206,13 @@ def lambda_handler(event: Mapping[str, str], _: Any) -> dict:
 
         return {
             "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
+            "headers": {
+                "Content-Type": "application/json"
+            },
             "body": {
                 "message": f"Validation succeeded for the secret.  Please report back to your panther rep with this value: '{creds.arn}'",
                 "credsArn": creds.arn,
-            },
+            }
         }
 
     print("======SEED CREDS======")
