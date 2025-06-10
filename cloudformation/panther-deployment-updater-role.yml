@@ -99,8 +99,11 @@ Resources:
               - iam:GetPolicy
               - iam:GetPolicyVersion
               - iam:ListPolicyVersions
+              - iam:ListRoleTags
               - iam:PutRolePolicy
+              - iam:TagRole
               - iam:UpdateAssumeRolePolicy
+              - iam:UntagRole
             Resource:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/PantherDeploymentRole*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/Panther*
