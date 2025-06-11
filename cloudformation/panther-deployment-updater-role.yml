@@ -79,6 +79,7 @@ Resources:
         Statement:
           - Effect: Allow
             Action:
+              - cloudformation:ContinueUpdateRollback
               - cloudformation:CreateChangeSet
               - cloudformation:CreateStack
               - cloudformation:DeleteChangeSet
