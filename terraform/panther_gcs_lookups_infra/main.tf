@@ -20,10 +20,6 @@ locals {
   panther_identity = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.pool.name}/attribute.account/${var.panther_aws_account_id}"
 }
 
-# Obtain and save GCS built-in service account in order to use it for the notifications below
-data "google_storage_project_service_account" "gcs_account" {
-}
-
 data "google_project" "google_project" {
 }
 
