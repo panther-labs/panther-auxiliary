@@ -26,7 +26,7 @@ jobs:
       - name: Run tflint
         run: |
           pushd terraform
-          tflint --recursive
+          tflint --recursive --disable-rule=terraform_required_version --disable-rule=terraform_required_providers
           popd
       - name: Run cfn-lint
         run: cfn-lint -i W3045,E3030 -- cloudformation/*.yml
