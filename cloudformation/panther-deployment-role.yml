@@ -431,6 +431,8 @@ Resources:
               - dynamodb:CreateTable
               - dynamodb:DeleteTable
               - dynamodb:UpdateTable
+              # TODO: Remove this once we have successfully deleted Material.CaseCreated schema
+              - dynamodb:DeleteItem
               - dynamodb:TagResource
               - dynamodb:Update*
             Resource: !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/panther*
@@ -628,7 +630,6 @@ Resources:
             Action:
               - cognito-idp:DeleteUserPool*
               - dynamodb:DeleteBackup
-              - dynamodb:DeleteItem
               - dynamodb:DeleteTableReplica
               - s3:DeleteBucket
             Resource: '*'
