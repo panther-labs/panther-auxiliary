@@ -653,6 +653,7 @@ Resources:
               - iam:TagRole
               - iam:TagServerCertificate
               - iam:UpdateRole
+              - iam:UpdateAssumeRolePolicy
               - iam:UploadServerCertificate
               - iam:UntagRole
               - iam:UntagPolicy
