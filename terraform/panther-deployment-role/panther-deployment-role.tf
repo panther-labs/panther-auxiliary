@@ -566,7 +566,7 @@ resource "aws_iam_policy" "deployment_policy_2" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "deployment_policy_2_attachment" {
+resource "aws_iam_role_policy_attachment" "deployment_role_policy_2" {
   role       = aws_iam_role.deployment_role.name
   policy_arn = aws_iam_policy.deployment_policy_2.arn
 }
@@ -754,7 +754,7 @@ resource "aws_iam_policy" "deployment_policy_3" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "deployment_policy_3_attachment" {
+resource "aws_iam_role_policy_attachment" "deployment_role_policy_3" {
   role       = aws_iam_role.deployment_role.name
   policy_arn = aws_iam_policy.deployment_policy_3.arn
 }
@@ -851,7 +851,7 @@ resource "aws_iam_policy" "deployment_policy_4" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "deployment_policy_4_attachment" {
+resource "aws_iam_role_policy_attachment" "deployment_role_policy_4" {
   role       = aws_iam_role.deployment_role.name
   policy_arn = aws_iam_policy.deployment_policy_4.arn
 }
@@ -874,7 +874,7 @@ resource "aws_iam_policy" "internal_deployment_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "internal_deployment_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "internal_deployment_policy" {
   count      = local.internal_deploy_specified ? 1 : 0
   role       = aws_iam_role.deployment_role.name
   policy_arn = aws_iam_policy.internal_deployment_policy[0].arn
