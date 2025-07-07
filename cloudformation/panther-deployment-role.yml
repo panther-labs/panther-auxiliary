@@ -123,6 +123,11 @@ Resources:
               - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/onboard-log-processing-role-*
               - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/onboard-real-time-events-*
               - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/onboard-compliance-roles-*
+          - Sid: PantherCleanupNetworkInterfaces
+            Effect: Allow
+            Action:
+              - ec2:DeleteNetworkInterface
+            Resource: '*'
           - Sid: PantherEC2Create
             Effect: Allow
             Action:

@@ -157,6 +157,12 @@ resource "aws_iam_role_policy" "deployment_policy" {
         ]
       },
       {
+        "Sid" : "PantherCleanupNetworkInterfaces",
+        "Effect" : "Allow",
+        "Action" : ["ec2:DeleteNetworkInterface"],
+        "Resource" : "*"
+      },
+      {
         "Sid" : "PantherEC2Create",
         "Effect" : "Allow",
         "Action" : [
@@ -556,7 +562,7 @@ resource "aws_iam_policy" "deployment_policy_2" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "deployment_role_policy_2" {
+resource "aws_iam_role_policy_attachment" "deployment_policy_2" {
   role       = aws_iam_role.deployment_role.name
   policy_arn = aws_iam_policy.deployment_policy_2.arn
 }
@@ -740,7 +746,7 @@ resource "aws_iam_policy" "deployment_policy_3" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "deployment_role_policy_3" {
+resource "aws_iam_role_policy_attachment" "deployment_policy_3" {
   role       = aws_iam_role.deployment_role.name
   policy_arn = aws_iam_policy.deployment_policy_3.arn
 }
@@ -833,7 +839,7 @@ resource "aws_iam_policy" "deployment_policy_4" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "deployment_role_policy_4" {
+resource "aws_iam_role_policy_attachment" "deployment_policy_4" {
   role       = aws_iam_role.deployment_role.name
   policy_arn = aws_iam_policy.deployment_policy_4.arn
 }
