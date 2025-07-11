@@ -1,10 +1,3 @@
-# Copyright (C) 2022 Panther Labs, Inc.
-#
-# The Panther SaaS is licensed under the terms of the Panther Enterprise Subscription
-# Agreement available at https://panther.com/enterprise-subscription-agreement/.
-# All intellectual property rights in and to the Panther SaaS, including any and all
-# rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
-
 terraform {
   required_providers {
     aws = {
@@ -45,8 +38,8 @@ locals {
   internal_deploy_specified  = var.internal_deploy == "true"
 }
 
-data "aws_caller_identity" "current" {}
 data "aws_partition" "current" {}
+data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 resource "aws_iam_role" "deployment_role" {
