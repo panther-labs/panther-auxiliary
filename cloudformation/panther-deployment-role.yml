@@ -546,6 +546,7 @@ Resources:
               - cognito-idp:UntagResource
               - cognito-idp:UpdateIdentityProvider
               - cognito-idp:UpdateUserPool
+              - cognito-idp:UpdateUserPoolClient
             Resource: !Sub arn:${AWS::Partition}:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*
             Condition:
               StringEquals:
@@ -695,6 +696,13 @@ Resources:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/pip-layer-builder-codebuild-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:server-certificate/panther/*
+          - Sid: DomainCertificate
+            Effect: Allow
+            Action:
+              - acm:RequestCertificate
+              - acm:AddTagsToCertificate
+            Resource:
+              - !Sub arn:${AWS::Partition}:acm:*:${AWS::AccountId}:certificate/*
 
   InternalDeploymentPolicy:
     Type: AWS::IAM::ManagedPolicy
