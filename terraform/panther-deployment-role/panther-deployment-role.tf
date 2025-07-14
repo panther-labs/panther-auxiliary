@@ -1,3 +1,10 @@
+# Copyright (C) 2022 Panther Labs, Inc.
+#
+# The Panther SaaS is licensed under the terms of the Panther Enterprise Subscription
+# Agreement available at https://panther.com/enterprise-subscription-agreement/.
+# All intellectual property rights in and to the Panther SaaS, including any and all
+# rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
+
 terraform {
   required_providers {
     aws = {
@@ -5,6 +12,13 @@ terraform {
       version = "~> 5.0"
     }
   }
+}
+
+locals {
+  identity_account_specified = var.identity_account_id != ""
+  ops_account_specified      = var.ops_account_id != ""
+  role_name_specified        = var.deployment_role_name != ""
+  internal_deploy_specified  = var.internal_deploy == "true"
 }
 
 variable "deployment_role_name" {
@@ -35,13 +49,6 @@ data "aws_caller_identity" "current" {}
 data "aws_partition" "current" {}
 data "aws_region" "current" {}
 
-locals {
-  identity_account_specified = var.identity_account_id != ""
-  ops_account_specified      = var.ops_account_id != ""
-  role_name_specified        = var.deployment_role_name != ""
-  internal_deploy_specified  = var.internal_deploy == "true"
-}
-
 resource "aws_iam_role" "deployment_role" {
   name        = local.role_name_specified ? var.deployment_role_name : null
   description = "IAM role for deploying Panther"
@@ -63,7 +70,7 @@ resource "aws_iam_role" "deployment_role" {
       {
         "Effect" : "Allow",
         "Principal" : {
-          "Service" : ["cloudformation.amazonaws.com"]
+          "Service" : "cloudformation.amazonaws.com"
         },
         "Action" : ["sts:AssumeRole"],
         "Condition" : {
@@ -648,8 +655,7 @@ resource "aws_iam_policy" "deployment_policy_3" {
           "cognito-idp:SetUserPoolMfaConfig",
           "cognito-idp:UntagResource",
           "cognito-idp:UpdateIdentityProvider",
-          "cognito-idp:UpdateUserPool",
-          "cognito-idp:UpdateUserPoolClient"
+          "cognito-idp:UpdateUserPool"
         ],
         "Resource" : "arn:${data.aws_partition.current.partition}:cognito-idp:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:userpool/*",
         "Condition" : {
@@ -826,15 +832,6 @@ resource "aws_iam_policy" "deployment_policy_4" {
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/pip-layer-builder-codebuild-*",
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:server-certificate/panther/*"
         ]
-      },
-      {
-        "Sid" : "DomainCertificate",
-        "Effect" : "Allow",
-        "Action" : [
-          "acm:RequestCertificate",
-          "acm:AddTagsToCertificate"
-        ],
-        "Resource" : ["arn:${data.aws_partition.current.partition}:acm:*:${data.aws_caller_identity.current.account_id}:certificate/*"]
       }
     ]
   })
