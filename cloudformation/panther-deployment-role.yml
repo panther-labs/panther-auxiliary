@@ -1,10 +1,3 @@
-# Copyright (C) 2022 Panther Labs, Inc.
-#
-# The Panther SaaS is licensed under the terms of the Panther Enterprise Subscription
-# Agreement available at https://panther.com/enterprise-subscription-agreement/.
-# All intellectual property rights in and to the Panther SaaS, including any and all
-# rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
-
 AWSTemplateFormatVersion: 2010-09-09
 Description: IAM role for deploying Panther
 
@@ -255,6 +248,7 @@ Resources:
               - states:CreateStateMachine
               - states:DeleteStateMachine
               - states:TagResource
+              - states:UntagResource
               - states:UpdateStateMachine
             Resource: !Sub arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:stateMachine:panther*
           - Sid: PantherEvents
@@ -442,6 +436,7 @@ Resources:
               # TODO: Remove this once we have successfully deleted Material.CaseCreated schema
               - dynamodb:DeleteItem
               - dynamodb:TagResource
+              - dynamodb:UntagResource
               - dynamodb:Update*
             Resource: !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/panther*
           - Sid: PantherECR
@@ -548,6 +543,7 @@ Resources:
               - cognito-idp:UntagResource
               - cognito-idp:UpdateIdentityProvider
               - cognito-idp:UpdateUserPool
+              - cognito-idp:UpdateUserPoolClient
             Resource: !Sub arn:${AWS::Partition}:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*
             Condition:
               StringEquals:
@@ -567,6 +563,8 @@ Resources:
               - elasticfilesystem:DeleteFileSystem
               - elasticfilesystem:DeleteMountTarget
               - elasticfilesystem:PutLifecycleConfiguration
+              - elasticfilesystem:TagResource
+              - elasticfilesystem:UntagResource
             Resource:
               - !Sub arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:file-system/*
               - !Sub arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/*
@@ -580,6 +578,7 @@ Resources:
               - batch:DeregisterJobDefinition
               - batch:RegisterJobDefinition
               - batch:TagResource
+              - batch:UntagResource
               - batch:UpdateComputeEnvironment
               - batch:UpdateJobQueue
             Resource:
@@ -697,6 +696,13 @@ Resources:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/pip-layer-builder-codebuild-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:server-certificate/panther/*
+          - Sid: DomainCertificate
+            Effect: Allow
+            Action:
+              - acm:RequestCertificate
+              - acm:AddTagsToCertificate
+            Resource:
+              - !Sub arn:${AWS::Partition}:acm:*:${AWS::AccountId}:certificate/*
 
   InternalDeploymentPolicy:
     Type: AWS::IAM::ManagedPolicy

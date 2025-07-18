@@ -1,10 +1,3 @@
-# Copyright (C) 2022 Panther Labs, Inc.
-#
-# The Panther SaaS is licensed under the terms of the Panther Enterprise Subscription
-# Agreement available at https://panther.com/enterprise-subscription-agreement/.
-# All intellectual property rights in and to the Panther SaaS, including any and all
-# rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
-
 terraform {
   required_providers {
     aws = {
@@ -310,6 +303,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
           "states:CreateStateMachine",
           "states:DeleteStateMachine",
           "states:TagResource",
+          "states:UntagResource",
           "states:UpdateStateMachine"
         ],
         "Resource" : "arn:${data.aws_partition.current.partition}:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:panther*"
@@ -526,6 +520,7 @@ resource "aws_iam_policy" "deployment_policy_2" {
           "dynamodb:UpdateTable",
           "dynamodb:DeleteItem",
           "dynamodb:TagResource",
+          "dynamodb:UntagResource",
           "dynamodb:Update*"
         ],
         "Resource" : "arn:${data.aws_partition.current.partition}:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/panther*"
@@ -656,7 +651,8 @@ resource "aws_iam_policy" "deployment_policy_3" {
           "cognito-idp:SetUserPoolMfaConfig",
           "cognito-idp:UntagResource",
           "cognito-idp:UpdateIdentityProvider",
-          "cognito-idp:UpdateUserPool"
+          "cognito-idp:UpdateUserPool",
+          "cognito-idp:UpdateUserPoolClient"
         ],
         "Resource" : "arn:${data.aws_partition.current.partition}:cognito-idp:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:userpool/*",
         "Condition" : {
@@ -683,7 +679,9 @@ resource "aws_iam_policy" "deployment_policy_3" {
           "elasticfilesystem:DeleteAccessPoint",
           "elasticfilesystem:DeleteFileSystem",
           "elasticfilesystem:DeleteMountTarget",
-          "elasticfilesystem:PutLifecycleConfiguration"
+          "elasticfilesystem:PutLifecycleConfiguration",
+          "elasticfilesystem:TagResource",
+          "elasticfilesystem:UntagResource"
         ],
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:elasticfilesystem:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:file-system/*",
@@ -701,6 +699,7 @@ resource "aws_iam_policy" "deployment_policy_3" {
           "batch:DeregisterJobDefinition",
           "batch:RegisterJobDefinition",
           "batch:TagResource",
+          "batch:UntagResource",
           "batch:UpdateComputeEnvironment",
           "batch:UpdateJobQueue"
         ],
@@ -833,6 +832,15 @@ resource "aws_iam_policy" "deployment_policy_4" {
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/pip-layer-builder-codebuild-*",
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:server-certificate/panther/*"
         ]
+      },
+      {
+        "Sid" : "DomainCertificate",
+        "Effect" : "Allow",
+        "Action" : [
+          "acm:RequestCertificate",
+          "acm:AddTagsToCertificate"
+        ],
+        "Resource" : ["arn:${data.aws_partition.current.partition}:acm:*:${data.aws_caller_identity.current.account_id}:certificate/*"]
       }
     ]
   })
