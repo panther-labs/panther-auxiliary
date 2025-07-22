@@ -46,7 +46,9 @@ variable "internal_deploy" {
 }
 
 data "aws_caller_identity" "current" {}
+
 data "aws_partition" "current" {}
+
 data "aws_region" "current" {}
 
 resource "aws_iam_role" "deployment_role" {
@@ -70,7 +72,7 @@ resource "aws_iam_role" "deployment_role" {
       {
         "Effect" : "Allow",
         "Principal" : {
-          "Service" : ["cloudformation.amazonaws.com"]
+          "Service" : "cloudformation.amazonaws.com"
         },
         "Action" : ["sts:AssumeRole"],
         "Condition" : {
@@ -659,7 +661,8 @@ resource "aws_iam_policy" "deployment_policy_3" {
           "cognito-idp:SetUserPoolMfaConfig",
           "cognito-idp:UntagResource",
           "cognito-idp:UpdateIdentityProvider",
-          "cognito-idp:UpdateUserPool"
+          "cognito-idp:UpdateUserPool",
+          "cognito-idp:UpdateUserPoolClient"
         ],
         "Resource" : "arn:${data.aws_partition.current.partition}:cognito-idp:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:userpool/*",
         "Condition" : {
@@ -839,6 +842,15 @@ resource "aws_iam_policy" "deployment_policy_4" {
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/pip-layer-builder-codebuild-*",
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:server-certificate/panther/*"
         ]
+      },
+      {
+        "Sid" : "DomainCertificate",
+        "Effect" : "Allow",
+        "Action" : [
+          "acm:RequestCertificate",
+          "acm:AddTagsToCertificate"
+        ],
+        "Resource" : ["arn:${data.aws_partition.current.partition}:acm:*:${data.aws_caller_identity.current.account_id}:certificate/*"]
       }
     ]
   })
