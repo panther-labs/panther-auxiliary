@@ -1,10 +1,3 @@
-# Copyright (C) 2022 Panther Labs, Inc.
-#
-# The Panther SaaS is licensed under the terms of the Panther Enterprise Subscription
-# Agreement available at https://panther.com/enterprise-subscription-agreement/.
-# All intellectual property rights in and to the Panther SaaS, including any and all
-# rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
-
 terraform {
   required_providers {
     aws = {
@@ -46,9 +39,7 @@ variable "internal_deploy" {
 }
 
 data "aws_caller_identity" "current" {}
-
 data "aws_partition" "current" {}
-
 data "aws_region" "current" {}
 
 resource "aws_iam_role" "deployment_role" {
@@ -72,7 +63,7 @@ resource "aws_iam_role" "deployment_role" {
       {
         "Effect" : "Allow",
         "Principal" : {
-          "Service" : ["cloudformation.amazonaws.com"]
+          "Service" : "cloudformation.amazonaws.com"
         },
         "Action" : ["sts:AssumeRole"],
         "Condition" : {
@@ -374,7 +365,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
         ],
         "Condition" : {
           "StringLikeIfExists" : {
-            "apigateway:Request/apiName" : ["panther*"]
+            "apigateway:Request/apiName" : "panther*"
           }
         }
       }
@@ -519,6 +510,7 @@ resource "aws_iam_policy" "deployment_policy_2" {
         "Action" : [
           "sqs:CreateQueue",
           "sqs:DeleteQueue",
+          "sqs:SetQueueAttributes",
           "sqs:TagQueue",
           "sqs:UntagQueue"
         ],
