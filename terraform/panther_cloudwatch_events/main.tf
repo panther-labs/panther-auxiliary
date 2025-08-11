@@ -1,12 +1,3 @@
-# Copyright (C) 2022 Panther Labs, Inc.
-#
-# The Panther SaaS is licensed under the terms of the Panther Enterprise Subscription
-# Agreement available at https://panther.com/enterprise-subscription-agreement/.
-# All intellectual property rights in and to the Panther SaaS, including any and all
-# rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
-
-
-
 ####
 # This template configures Panther's real-time CloudWatch Event collection process.
 # It works by creating CloudWatch Event rules which feed to Panther's SQS Queue proxied by
