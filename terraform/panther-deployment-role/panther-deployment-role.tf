@@ -383,7 +383,6 @@ resource "aws_iam_policy" "deployment_policy_2" {
         "Effect" : "Allow",
         "Action" : [
           "s3:CreateBucket",
-          "s3:DeleteBucket",
           "s3:DeleteBucketPolicy",
           "s3:PutBucketAcl",
           "s3:PutBucketCors",
@@ -772,11 +771,15 @@ resource "aws_iam_policy" "deployment_policy_4" {
       },
       {
         "Effect" : "Deny",
+        "Action" : ["s3:DeleteBucket"],
+        "NotResource" : ["arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"]
+      },
+      {
+        "Effect" : "Deny",
         "Action" : [
           "cognito-idp:DeleteUserPool*",
           "dynamodb:DeleteBackup",
-          "dynamodb:DeleteTableReplica",
-          "s3:DeleteBucket"
+          "dynamodb:DeleteTableReplica"
         ],
         "Resource" : "*"
       },

@@ -321,7 +321,6 @@ Resources:
             Effect: Allow
             Action:
               - s3:CreateBucket
-              - s3:DeleteBucket
               - s3:DeleteBucketPolicy
               - s3:PutBucketAcl
               - s3:PutBucketCors
@@ -640,11 +639,14 @@ Resources:
             NotResource:
               - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther*
           - Effect: Deny
+            Action: s3:DeleteBucket
+            NotResource: # Allow deletion of the pulumi-state bucket. This can be removed in 1.115
+              - !Sub arn:${AWS::Partition}:s3:::pulumi-state-*
+          - Effect: Deny
             Action:
               - cognito-idp:DeleteUserPool*
               - dynamodb:DeleteBackup
               - dynamodb:DeleteTableReplica
-              - s3:DeleteBucket
             Resource: '*'
           - Sid: PantherIAM
             Effect: Allow
