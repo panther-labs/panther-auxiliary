@@ -1,10 +1,3 @@
-# Copyright (C) 2022 Panther Labs, Inc.
-#
-# The Panther SaaS is licensed under the terms of the Panther Enterprise Subscription
-# Agreement available at https://panther.com/enterprise-subscription-agreement/.
-# All intellectual property rights in and to the Panther SaaS, including any and all
-# rights to access the Panther SaaS, are governed by the Panther Enterprise Subscription Agreement.
-
 AWSTemplateFormatVersion: 2010-09-09
 Description: IAM role for deploying Panther
 
@@ -360,6 +353,13 @@ Resources:
               - !Sub arn:${AWS::Partition}:s3:::temporary-processed-data-*
               - !Sub arn:${AWS::Partition}:s3:::unmonitored-audit-logs-*
               - !Sub arn:${AWS::Partition}:s3:::user-uploads-*
+          - Sid: PantherS3PulumiStateBucketRemoverTemp
+            # Allow deletion of the pulumi-state bucket. This can be removed after 1.115
+            Effect: Allow
+            Action:
+              - s3:DeleteBucket
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::pulumi-state-*
           - Sid: PantherS3DevDeployment # Allow the deployment role to push build artifacts for the dev environment
             Effect: Allow
             Action:
@@ -647,7 +647,7 @@ Resources:
               - !Sub arn:${AWS::Partition}:dynamodb:*:${AWS::AccountId}:table/panther*
           - Effect: Deny
             Action: s3:DeleteBucket
-            NotResource: # Allow deletion of the pulumi-state bucket. This can be removed in 1.115
+            NotResource: # Allow deletion of the pulumi-state bucket. This 'notresource' can be removed after 1.115
               - !Sub arn:${AWS::Partition}:s3:::pulumi-state-*
           - Effect: Deny
             Action:
