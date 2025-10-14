@@ -263,6 +263,7 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/alert-search-rehydrate-api-rehydration-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-schedule-polling-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-git-polling-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/compliance-aggregator-refresh-all-delete-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/compliance-aggregator-refresh-all-no-delete-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/detection-processor-poll-cron

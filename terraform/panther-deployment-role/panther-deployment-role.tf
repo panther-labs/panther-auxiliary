@@ -323,6 +323,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/alert-search-rehydrate-api-rehydration-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/analysis-api-schedule-polling-cron",
+          "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/analysis-api-git-polling-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/compliance-aggregator-refresh-all-delete-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/compliance-aggregator-refresh-all-no-delete-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/detection-processor-poll-cron",
