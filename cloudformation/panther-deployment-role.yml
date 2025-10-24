@@ -488,6 +488,12 @@ Resources:
       PolicyDocument:
         Version: 2012-10-17
         Statement:
+          - Sid: Bedrock
+            Effect: Allow
+            Action:
+              - bedrock:GetUseCaseForModelAccess
+              - bedrock:PutUseCaseForModelAccess
+            Resource: '*'
           - Sid: PantherKMS
             Effect: Allow
             Action:

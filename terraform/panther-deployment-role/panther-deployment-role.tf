@@ -61,7 +61,21 @@ resource "aws_iam_role" "deployment_role" {
             "aws:SecureTransport" : "true"
           }
         }
-      },
+      }
+      ], local.ops_account_specified ? [
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : "arn:${data.aws_partition.current.partition}:iam::${var.ops_account_id}:role/PulumiCodeBuild"
+        },
+        "Action" : ["sts:AssumeRole"],
+        "Condition" : {
+          "Bool" : {
+            "aws:SecureTransport" : "true"
+          }
+        }
+      }
+      ] : [], [
       {
         "Effect" : "Allow",
         "Principal" : {
@@ -74,20 +88,8 @@ resource "aws_iam_role" "deployment_role" {
           }
         }
       }
-      ], local.ops_account_specified ? [{
-        "Effect" : "Allow",
-        "Principal" : {
-          "AWS" : "arn:${data.aws_partition.current.partition}:iam::${var.ops_account_id}:role/PulumiCodeBuild"
-        },
-        "Action" : ["sts:AssumeRole"],
-        "Condition" : {
-          "Bool" : {
-            "aws:SecureTransport" : "true"
-          }
-        }
-    }] : [])
+    ])
   })
-
   tags = {
     "panther:app" = "panther"
   }
@@ -152,9 +154,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
       {
         "Sid" : "PantherCleanupNetworkInterfaces",
         "Effect" : "Allow",
-        "Action" : [
-          "ec2:DeleteNetworkInterface"
-        ],
+        "Action" : ["ec2:DeleteNetworkInterface"],
         "Resource" : "*"
       },
       {
@@ -272,9 +272,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
       {
         "Sid" : "PantherRedshiftProvisioningServiceLinkedRole",
         "Effect" : "Allow",
-        "Action" : [
-          "iam:CreateServiceLinkedRole"
-        ],
+        "Action" : ["iam:CreateServiceLinkedRole"],
         "Resource" : "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift"
       },
       {
@@ -300,9 +298,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
       {
         "Sid" : "PantherRedshiftProvisioningDescribeStatement",
         "Effect" : "Allow",
-        "Action" : [
-          "redshift-data:DescribeStatement"
-        ],
+        "Action" : ["redshift-data:DescribeStatement"],
         "Resource" : "*"
       },
       {
@@ -431,29 +427,19 @@ resource "aws_iam_policy" "deployment_policy_2" {
       {
         "Sid" : "PantherS3PulumiStateBucketRemoverTemp",
         "Effect" : "Allow",
-        "Action" : [
-          "s3:DeleteBucket"
-        ],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"
-        ]
+        "Action" : ["s3:DeleteBucket"],
+        "Resource" : ["arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"]
       },
       {
         "Sid" : "PantherS3DevDeployment",
         "Effect" : "Allow",
-        "Action" : [
-          "s3:PutObject"
-        ],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:s3:::panther-dev-sourcebucket-*"
-        ]
+        "Action" : ["s3:PutObject"],
+        "Resource" : ["arn:${data.aws_partition.current.partition}:s3:::panther-dev-sourcebucket-*"]
       },
       {
         "Sid" : "PantherS3Deployment",
         "Effect" : "Allow",
-        "Action" : [
-          "s3:GetObject"
-        ],
+        "Action" : ["s3:GetObject"],
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:s3:::panther-enterprise*",
           "arn:${data.aws_partition.current.partition}:s3:::panther-internal-test*"
@@ -575,9 +561,7 @@ resource "aws_iam_policy" "deployment_policy_2" {
       {
         "Sid" : "PantherECRAdditional",
         "Effect" : "Allow",
-        "Action" : [
-          "ecr:GetAuthorizationToken"
-        ],
+        "Action" : ["ecr:GetAuthorizationToken"],
         "Resource" : "*"
       },
       {
@@ -600,6 +584,15 @@ resource "aws_iam_policy" "deployment_policy_3" {
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
+      {
+        "Sid" : "Bedrock",
+        "Effect" : "Allow",
+        "Action" : [
+          "bedrock:GetUseCaseForModelAccess",
+          "bedrock:PutUseCaseForModelAccess"
+        ],
+        "Resource" : "*"
+      },
       {
         "Sid" : "PantherKMS",
         "Effect" : "Allow",
@@ -773,12 +766,8 @@ resource "aws_iam_policy" "deployment_policy_3" {
       {
         "Sid" : "PantherUpdateSnowPipeCluster",
         "Effect" : "Allow",
-        "Action" : [
-          "iam:UpdateAssumeRolePolicy"
-        ],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/panther-snowflake-logprocessing-role-${data.aws_region.current.name}"
-        ]
+        "Action" : ["iam:UpdateAssumeRolePolicy"],
+        "Resource" : ["arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/panther-snowflake-logprocessing-role-${data.aws_region.current.name}"]
       }
     ]
   })
@@ -797,23 +786,17 @@ resource "aws_iam_policy" "deployment_policy_4" {
       {
         "Effect" : "Deny",
         "Action" : ["elasticloadbalancing:DeleteLoadBalancer"],
-        "NotResource" : [
-          "arn:${data.aws_partition.current.partition}:elasticloadbalancing:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/http-ingest-alb*"
-        ]
+        "NotResource" : ["arn:${data.aws_partition.current.partition}:elasticloadbalancing:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/http-ingest-alb*"]
       },
       {
         "Effect" : "Deny",
         "Action" : ["dynamodb:DeleteTable"],
-        "NotResource" : [
-          "arn:${data.aws_partition.current.partition}:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/panther*"
-        ]
+        "NotResource" : ["arn:${data.aws_partition.current.partition}:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/panther*"]
       },
       {
         "Effect" : "Deny",
         "Action" : ["s3:DeleteBucket"],
-        "NotResource" : [
-          "arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"
-        ]
+        "NotResource" : ["arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"]
       },
       {
         "Effect" : "Deny",
@@ -890,9 +873,7 @@ resource "aws_iam_policy" "deployment_policy_4" {
           "acm:RequestCertificate",
           "acm:AddTagsToCertificate"
         ],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:acm:*:${data.aws_caller_identity.current.account_id}:certificate/*"
-        ]
+        "Resource" : ["arn:${data.aws_partition.current.partition}:acm:*:${data.aws_caller_identity.current.account_id}:certificate/*"]
       }
     ]
   })
@@ -912,9 +893,7 @@ resource "aws_iam_policy" "internal_deployment_policy" {
       {
         "Sid" : "PantherCloudTrail",
         "Effect" : "Allow",
-        "Action" : [
-          "cloudtrail:*"
-        ],
+        "Action" : ["cloudtrail:*"],
         "Resource" : "arn:${data.aws_partition.current.partition}:cloudtrail:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:trail/panther-account-*"
       }
     ]
