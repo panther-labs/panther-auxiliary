@@ -268,6 +268,7 @@ Resources:
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/compliance-aggregator-refresh-all-delete-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/compliance-aggregator-refresh-all-no-delete-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/detection-processor-poll-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/experimental-detection-processor-poll-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/enrichment-api-prune-generations-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/enrichment-api-sync-all-profile-pullers-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/holding-tank-field-discovery-cron

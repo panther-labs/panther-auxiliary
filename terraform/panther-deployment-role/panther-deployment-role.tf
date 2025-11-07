@@ -38,11 +38,11 @@ variable "internal_deploy" {
   default     = "false"
 }
 
-data "aws_caller_identity" "current" {}
-
 data "aws_partition" "current" {}
 
 data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "deployment_role" {
   name        = local.role_name_specified ? var.deployment_role_name : null
@@ -332,6 +332,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/compliance-aggregator-refresh-all-delete-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/compliance-aggregator-refresh-all-no-delete-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/detection-processor-poll-cron",
+          "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/experimental-detection-processor-poll-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/enrichment-api-prune-generations-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/enrichment-api-sync-all-profile-pullers-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/holding-tank-field-discovery-cron",
