@@ -197,6 +197,7 @@ Resources:
               - elasticloadbalancing:ModifyTargetGroupAttributes
               - elasticloadbalancing:RegisterTargets
               - elasticloadbalancing:RemoveTags
+              - elasticloadbalancing:SetWebACL
             Resource:
               - !Sub arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener-rule/app/web/*
               - !Sub arn:${AWS::Partition}:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/http-ingest-alb/*
@@ -293,6 +294,7 @@ Resources:
               - apigateway:PATCH
               - apigateway:POST
               - apigateway:PUT
+              - apigateway:SetWebACL
               - apigateway:TagResource
               - apigateway:UntagResource
             Resource:
@@ -529,6 +531,7 @@ Resources:
           - Sid: PantherLogs
             Effect: Allow
             Action:
+              - logs:AssociateKmsKey
               - logs:CreateLogGroup
               - logs:DeleteLogGroup
               - logs:PutRetentionPolicy
@@ -540,13 +543,23 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/apigateway/welcome*
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/batch/job*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/cloudtrail/*
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/panther*
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/gateway/panther*
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda-insights*
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/datadog-log-forwarder*
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/panther*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/vpc*
+              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:aws-waf-logs-*
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:panther-*
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:alert-open-search*
+          - Sid: PantherLogsResourcePolicy
+            Effect: Allow
+            Action:
+              - logs:PutResourcePolicy
+              - logs:DeleteResourcePolicy
+              - logs:DescribeResourcePolicies
+            Resource: '*'
           - Sid: PantherCognito
             Effect: Allow
             Action:
@@ -729,11 +742,15 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:acm:*:${AWS::AccountId}:certificate/*
 
-  InternalDeploymentPolicy:
+  DeploymentPolicy5:
     Type: AWS::IAM::ManagedPolicy
-    Condition: InternalDeploySpecified
     Properties:
-      ManagedPolicyName: !Sub 'PantherInternalDeploymentPolicy-${AWS::Region}'
+      ManagedPolicyName:
+        !If [
+          InternalDeploySpecified,
+          !Sub 'PantherInfraManagementPolicy5-${AWS::Region}',
+          PantherInfraManagementPolicy5,
+        ]
       Roles:
         - !Ref DeploymentRole
       PolicyDocument:
@@ -742,8 +759,53 @@ Resources:
           - Sid: PantherCloudTrail
             Effect: Allow
             Action:
-              - cloudtrail:*
-            Resource: !Sub arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/panther-account-*
+              - cloudtrail:CreateTrail
+              - cloudtrail:DeleteTrail
+              - cloudtrail:UpdateTrail
+              - cloudtrail:StartLogging
+              - cloudtrail:StopLogging
+              - cloudtrail:PutEventSelectors
+              - cloudtrail:AddTags
+              - cloudtrail:RemoveTags
+            Resource: !Sub arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/panther*
+          - Sid: PantherBackup
+            Effect: Allow
+            Action:
+              - backup:CreateBackupVault
+              - backup:DeleteBackupVault
+              - backup:PutBackupVaultAccessPolicy
+              - backup:DeleteBackupVaultAccessPolicy
+              - backup:PutBackupVaultNotifications
+              - backup:CreateBackupPlan
+              - backup:DeleteBackupPlan
+              - backup:UpdateBackupPlan
+              - backup:GetBackupPlan
+              - backup:ListBackupPlans
+              - backup:CreateBackupSelection
+              - backup:TagResource
+              - backup:UntagResource
+            Resource:
+              - !Sub arn:${AWS::Partition}:backup:${AWS::Region}:${AWS::AccountId}:backup-vault:panther-*
+              - !Sub arn:${AWS::Partition}:backup:${AWS::Region}:${AWS::AccountId}:backup-plan:*
+          - Sid: PantherBackupStorage
+            Effect: Allow
+            Action:
+              - backup-storage:MountCapsule
+            Resource: '*'
+          - Sid: PantherWAF
+            Effect: Allow
+            Action:
+              - wafv2:CreateWebACL
+              - wafv2:DeleteWebACL
+              - wafv2:UpdateWebACL
+              - wafv2:GetWebACL
+              - wafv2:ListWebACLs
+              - wafv2:PutLoggingConfiguration
+              - wafv2:TagResource
+              - wafv2:UntagResource
+              - wafv2:AssociateWebACL
+              - wafv2:DisassociateWebACL
+            Resource: '*'
 
 Outputs:
   DeploymentRoleArn:

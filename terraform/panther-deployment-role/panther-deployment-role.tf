@@ -243,7 +243,8 @@ resource "aws_iam_role_policy" "deployment_policy" {
           "elasticloadbalancing:ModifyListenerAttributes",
           "elasticloadbalancing:ModifyTargetGroupAttributes",
           "elasticloadbalancing:RegisterTargets",
-          "elasticloadbalancing:RemoveTags"
+          "elasticloadbalancing:RemoveTags",
+          "elasticloadbalancing:SetWebACL"
         ],
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:elasticloadbalancing:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:listener-rule/app/web/*",
@@ -359,6 +360,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
           "apigateway:PATCH",
           "apigateway:POST",
           "apigateway:PUT",
+          "apigateway:SetWebACL",
           "apigateway:TagResource",
           "apigateway:UntagResource"
         ],
@@ -639,6 +641,7 @@ resource "aws_iam_policy" "deployment_policy_3" {
         "Sid" : "PantherLogs",
         "Effect" : "Allow",
         "Action" : [
+          "logs:AssociateKmsKey",
           "logs:CreateLogGroup",
           "logs:DeleteLogGroup",
           "logs:PutRetentionPolicy",
@@ -651,14 +654,27 @@ resource "aws_iam_policy" "deployment_policy_3" {
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/apigateway/welcome*",
           "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/batch/job*",
+          "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/cloudtrail/*",
           "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/codebuild/panther*",
           "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/gateway/panther*",
           "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda-insights*",
           "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/datadog-log-forwarder*",
           "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/panther*",
+          "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/vpc*",
+          "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:aws-waf-logs-*",
           "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:panther-*",
           "arn:${data.aws_partition.current.partition}:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:alert-open-search*"
         ]
+      },
+      {
+        "Sid" : "PantherLogsResourcePolicy",
+        "Effect" : "Allow",
+        "Action" : [
+          "logs:PutResourcePolicy",
+          "logs:DeleteResourcePolicy",
+          "logs:DescribeResourcePolicies"
+        ],
+        "Resource" : "*"
       },
       {
         "Sid" : "PantherCognito",
@@ -885,26 +901,79 @@ resource "aws_iam_role_policy_attachment" "deployment_policy_4" {
   policy_arn = aws_iam_policy.deployment_policy_4.arn
 }
 
-resource "aws_iam_policy" "internal_deployment_policy" {
-  count = local.internal_deploy_specified ? 1 : 0
-  name  = "PantherInternalDeploymentPolicy-${data.aws_region.current.name}"
+resource "aws_iam_policy" "deployment_policy_5" {
+  name = local.internal_deploy_specified ? "PantherInfraManagementPolicy5-${data.aws_region.current.name}" : "PantherInfraManagementPolicy5"
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
       {
         "Sid" : "PantherCloudTrail",
         "Effect" : "Allow",
-        "Action" : ["cloudtrail:*"],
-        "Resource" : "arn:${data.aws_partition.current.partition}:cloudtrail:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:trail/panther-account-*"
+        "Action" : [
+          "cloudtrail:CreateTrail",
+          "cloudtrail:DeleteTrail",
+          "cloudtrail:UpdateTrail",
+          "cloudtrail:StartLogging",
+          "cloudtrail:StopLogging",
+          "cloudtrail:PutEventSelectors",
+          "cloudtrail:AddTags",
+          "cloudtrail:RemoveTags"
+        ],
+        "Resource" : "arn:${data.aws_partition.current.partition}:cloudtrail:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:trail/panther*"
+      },
+      {
+        "Sid" : "PantherBackup",
+        "Effect" : "Allow",
+        "Action" : [
+          "backup:CreateBackupVault",
+          "backup:DeleteBackupVault",
+          "backup:PutBackupVaultAccessPolicy",
+          "backup:DeleteBackupVaultAccessPolicy",
+          "backup:PutBackupVaultNotifications",
+          "backup:CreateBackupPlan",
+          "backup:DeleteBackupPlan",
+          "backup:UpdateBackupPlan",
+          "backup:GetBackupPlan",
+          "backup:ListBackupPlans",
+          "backup:CreateBackupSelection",
+          "backup:TagResource",
+          "backup:UntagResource"
+        ],
+        "Resource" : [
+          "arn:${data.aws_partition.current.partition}:backup:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:backup-vault:panther-*",
+          "arn:${data.aws_partition.current.partition}:backup:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:backup-plan:*"
+        ]
+      },
+      {
+        "Sid" : "PantherBackupStorage",
+        "Effect" : "Allow",
+        "Action" : ["backup-storage:MountCapsule"],
+        "Resource" : "*"
+      },
+      {
+        "Sid" : "PantherWAF",
+        "Effect" : "Allow",
+        "Action" : [
+          "wafv2:CreateWebACL",
+          "wafv2:DeleteWebACL",
+          "wafv2:UpdateWebACL",
+          "wafv2:GetWebACL",
+          "wafv2:ListWebACLs",
+          "wafv2:PutLoggingConfiguration",
+          "wafv2:TagResource",
+          "wafv2:UntagResource",
+          "wafv2:AssociateWebACL",
+          "wafv2:DisassociateWebACL"
+        ],
+        "Resource" : "*"
       }
     ]
   })
 }
 
-resource "aws_iam_role_policy_attachment" "internal_deployment_policy" {
-  count      = local.internal_deploy_specified ? 1 : 0
+resource "aws_iam_role_policy_attachment" "deployment_policy_5" {
   role       = aws_iam_role.deployment_role.name
-  policy_arn = aws_iam_policy.internal_deployment_policy[0].arn
+  policy_arn = aws_iam_policy.deployment_policy_5.arn
 }
 
 output "deployment_role_arn" {
