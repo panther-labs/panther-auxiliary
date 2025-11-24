@@ -85,6 +85,8 @@ Resources:
               - kms:CreateKey
               - kms:TagResource
               - logs:CreateLogDelivery
+              - logs:DeleteResourcePolicy
+              - logs:PutResourcePolicy
               - s3:PutAccountPublicAccessBlock
               - s3:PutPublicAccessBlock
               - servicequotas:RequestServiceQuotaIncrease
@@ -539,6 +541,7 @@ Resources:
               - logs:DeleteSubscriptionFilter
               - logs:TagLogGroup
               - logs:TagResource
+              - logs:UntagResource
               - logs:UntagLogGroup
             Resource:
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/apigateway/welcome*
@@ -739,8 +742,21 @@ Resources:
             Action:
               - acm:RequestCertificate
               - acm:AddTagsToCertificate
+              - acm:RemoveTagsFromCertificate
             Resource:
               - !Sub arn:${AWS::Partition}:acm:*:${AWS::AccountId}:certificate/*
+          - Sid: PantherOpenSearch
+            Effect: Allow
+            Action:
+              - es:AddTags
+              - es:CreateDomain
+              - es:DeleteDomain
+              - es:DescribeDomain
+              - es:RemoveTags
+              - es:UpdateDomainConfig
+              - es:UpgradeDomain
+            Resource:
+              - !Sub arn:${AWS::Partition}:es:${AWS::Region}:${AWS::AccountId}:domain/panther-*
 
   DeploymentPolicy5:
     Type: AWS::IAM::ManagedPolicy

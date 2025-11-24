@@ -7,6 +7,12 @@ terraform {
   }
 }
 
+data "aws_partition" "current" {}
+
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
+
 locals {
   identity_account_specified = var.identity_account_id != ""
   ops_account_specified      = var.ops_account_id != ""
@@ -37,12 +43,6 @@ variable "internal_deploy" {
   description = "Is set to true when built locally through mage. Used to make the policy names regional."
   default     = "false"
 }
-
-data "aws_partition" "current" {}
-
-data "aws_region" "current" {}
-
-data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "deployment_role" {
   name        = local.role_name_specified ? var.deployment_role_name : null
@@ -116,6 +116,8 @@ resource "aws_iam_role_policy" "deployment_policy" {
           "kms:CreateKey",
           "kms:TagResource",
           "logs:CreateLogDelivery",
+          "logs:DeleteResourcePolicy",
+          "logs:PutResourcePolicy",
           "s3:PutAccountPublicAccessBlock",
           "s3:PutPublicAccessBlock",
           "servicequotas:RequestServiceQuotaIncrease",
@@ -649,6 +651,7 @@ resource "aws_iam_policy" "deployment_policy_3" {
           "logs:DeleteSubscriptionFilter",
           "logs:TagLogGroup",
           "logs:TagResource",
+          "logs:UntagResource",
           "logs:UntagLogGroup"
         ],
         "Resource" : [
@@ -888,9 +891,24 @@ resource "aws_iam_policy" "deployment_policy_4" {
         "Effect" : "Allow",
         "Action" : [
           "acm:RequestCertificate",
-          "acm:AddTagsToCertificate"
+          "acm:AddTagsToCertificate",
+          "acm:RemoveTagsFromCertificate"
         ],
         "Resource" : ["arn:${data.aws_partition.current.partition}:acm:*:${data.aws_caller_identity.current.account_id}:certificate/*"]
+      },
+      {
+        "Sid" : "PantherOpenSearch",
+        "Effect" : "Allow",
+        "Action" : [
+          "es:AddTags",
+          "es:CreateDomain",
+          "es:DeleteDomain",
+          "es:DescribeDomain",
+          "es:RemoveTags",
+          "es:UpdateDomainConfig",
+          "es:UpgradeDomain"
+        ],
+        "Resource" : ["arn:${data.aws_partition.current.partition}:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/panther-*"]
       }
     ]
   })
