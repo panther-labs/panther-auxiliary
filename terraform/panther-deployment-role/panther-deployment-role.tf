@@ -375,7 +375,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
           "arn:${data.aws_partition.current.partition}:apigateway:${data.aws_region.current.name}::/usageplans*"
         ],
         "Condition" : {
-          "StringLikeIfExists" : {
+          "StringLike" : {
             "apigateway:Request/apiName" : "panther*"
           }
         }
