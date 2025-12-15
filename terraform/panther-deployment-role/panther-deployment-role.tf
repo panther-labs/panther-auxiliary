@@ -7,12 +7,6 @@ terraform {
   }
 }
 
-data "aws_partition" "current" {}
-
-data "aws_region" "current" {}
-
-data "aws_caller_identity" "current" {}
-
 locals {
   identity_account_specified = var.identity_account_id != ""
   ops_account_specified      = var.ops_account_id != ""
@@ -43,6 +37,12 @@ variable "internal_deploy" {
   description = "Is set to true when built locally through mage. Used to make the policy names regional."
   default     = "false"
 }
+
+data "aws_partition" "current" {}
+
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "deployment_role" {
   name        = local.role_name_specified ? var.deployment_role_name : null
@@ -336,8 +336,6 @@ resource "aws_iam_role_policy" "deployment_policy" {
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/compliance-aggregator-refresh-all-no-delete-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/detection-processor-poll-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/experimental-detection-processor-poll-cron",
-          "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/enrichment-api-prune-generations-cron",
-          "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/enrichment-api-sync-all-profile-pullers-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/holding-tank-field-discovery-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/lambda-warmer-prewarm-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/ops-tools-*-cron",
@@ -375,7 +373,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
           "arn:${data.aws_partition.current.partition}:apigateway:${data.aws_region.current.name}::/usageplans*"
         ],
         "Condition" : {
-          "StringLike" : {
+          "StringLikeIfExists" : {
             "apigateway:Request/apiName" : "panther*"
           }
         }
