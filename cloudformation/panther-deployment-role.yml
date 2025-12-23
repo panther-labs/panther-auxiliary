@@ -265,15 +265,18 @@ Resources:
               - events:UntagResource
             Resource:
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/alert-search-rehydrate-api-rehydration-cron
-              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-schedule-polling-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-*-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-git-polling-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-schedule-polling-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/compliance-aggregator-refresh-all-delete-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/compliance-aggregator-refresh-all-no-delete-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/detection-processor-poll-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/enrichment-api-prune-generations-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/enrichment-api-sync-all-profile-pullers-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/experimental-detection-processor-poll-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/holding-tank-field-discovery-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/lambda-warmer-prewarm-cron
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/onboard-real-time-events*
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/ops-tools-*-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/panther*
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/pulumi-api-cleanup-cron
@@ -283,7 +286,6 @@ Resources:
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/system-status-publish-sources-last-received-event-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/system-status-publish-sources-permission-status-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/system-status-refresh-log-type-metrics-cron
-              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/onboard-real-time-events*
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/users-api-deactivate-support-users-cron
               # This is required when self-onboarding is enabled.
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/onboard-real-time-events-*
