@@ -7,6 +7,12 @@ terraform {
   }
 }
 
+data "aws_partition" "current" {}
+
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
+
 locals {
   identity_account_specified = var.identity_account_id != ""
   ops_account_specified      = var.ops_account_id != ""
@@ -37,12 +43,6 @@ variable "internal_deploy" {
   description = "Is set to true when built locally through mage. Used to make the policy names regional."
   default     = "false"
 }
-
-data "aws_partition" "current" {}
-
-data "aws_region" "current" {}
-
-data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "deployment_role" {
   name        = local.role_name_specified ? var.deployment_role_name : null
@@ -328,6 +328,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
           "events:UntagResource"
         ],
         "Resource" : [
+          "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/ai-api-*-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/alert-search-rehydrate-api-rehydration-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/analysis-api-*-cron",
           "arn:${data.aws_partition.current.partition}:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/analysis-api-git-polling-cron",

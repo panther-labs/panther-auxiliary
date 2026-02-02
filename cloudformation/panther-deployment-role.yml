@@ -264,6 +264,7 @@ Resources:
               - events:TagResource
               - events:UntagResource
             Resource:
+              - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/ai-api-*-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/alert-search-rehydrate-api-rehydration-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-*-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-git-polling-cron
