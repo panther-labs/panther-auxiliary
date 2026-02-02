@@ -7,12 +7,6 @@ terraform {
   }
 }
 
-data "aws_partition" "current" {}
-
-data "aws_region" "current" {}
-
-data "aws_caller_identity" "current" {}
-
 locals {
   identity_account_specified = var.identity_account_id != ""
   ops_account_specified      = var.ops_account_id != ""
@@ -43,6 +37,12 @@ variable "internal_deploy" {
   description = "Is set to true when built locally through mage. Used to make the policy names regional."
   default     = "false"
 }
+
+data "aws_partition" "current" {}
+
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "deployment_role" {
   name        = local.role_name_specified ? var.deployment_role_name : null
@@ -440,19 +440,7 @@ resource "aws_iam_policy" "deployment_policy_2" {
         "Sid" : "PantherS3DevDeployment",
         "Effect" : "Allow",
         "Action" : ["s3:PutObject"],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:s3:::panther-dev-sourcebucket-*",
-          "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*"
-        ]
-      },
-      {
-        "Sid" : "PantherS3DevBackupCleanup",
-        "Effect" : "Allow",
-        "Action" : ["s3:DeleteObject"],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*",
-          "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*/*"
-        ]
+        "Resource" : ["arn:${data.aws_partition.current.partition}:s3:::panther-dev-sourcebucket-*"]
       },
       {
         "Sid" : "PantherS3Deployment",

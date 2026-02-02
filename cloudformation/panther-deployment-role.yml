@@ -374,14 +374,6 @@ Resources:
               - s3:PutObject
             Resource:
               - !Sub arn:${AWS::Partition}:s3:::panther-dev-sourcebucket-*
-              - !Sub arn:${AWS::Partition}:s3:::panther-dev-backupbucket-*
-          - Sid: PantherS3DevBackupCleanup # Allow the deployment role to clean up old backup objects
-            Effect: Allow
-            Action:
-              - s3:DeleteObject
-            Resource:
-              - !Sub arn:${AWS::Partition}:s3:::panther-dev-backupbucket-*
-              - !Sub arn:${AWS::Partition}:s3:::panther-dev-backupbucket-*/*
           - Sid: PantherS3Deployment # Allow the deployment role to get build artifacts
             Effect: Allow
             Action:
