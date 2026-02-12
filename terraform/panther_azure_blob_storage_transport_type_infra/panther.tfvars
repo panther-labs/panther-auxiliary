@@ -1,3 +1,3 @@
 storage_account_name = "example"
-container_name       = "secops-logs"
+blob_prefix          = ""
 azure_region         = "East US"

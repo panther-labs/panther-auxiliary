@@ -12,12 +12,6 @@ resource "azurerm_storage_account" "panther_azure_storage_account" {
   account_replication_type = var.storage_account_redundancy
 }
 
-resource "azurerm_storage_container" "panther_azure_storage_container" {
-  name                  = var.container_name
-  storage_account_name  = azurerm_storage_account.panther_azure_storage_account.name
-  container_access_type = "private"
-}
-
 resource "azurerm_storage_queue" "panther_azure_storage_queue" {
   name                 = "panther-input-queue"
   storage_account_name = azurerm_storage_account.panther_azure_storage_account.name

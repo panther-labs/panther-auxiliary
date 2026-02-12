@@ -12,13 +12,6 @@ variable "azure_region" {
 variable "storage_account_name" {
   type        = string
   description = "Name of the created Storage Account"
-  default     = "pantherstorageaccount"
-}
-
-variable "container_name" {
-  description = "Name of the blob container"
-  type        = string
-  default     = "panther-logs"
 }
 
 variable "application_name" {
