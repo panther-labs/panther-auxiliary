@@ -150,7 +150,6 @@
         "arn:aws:iam::123412341234:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing",
         "arn:aws:iam::123412341234:role/aws-service-role/elasticfilesystem.amazonaws.com/AWSServiceRoleForAmazonElasticFileSystem",
         "arn:aws:iam::123412341234:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty",
-        "arn:aws:iam::123412341234:role/aws-service-role/opensearchservice.amazonaws.com/AWSServiceRoleForAmazonOpenSearchService",
         "arn:aws:iam::123412341234:role/aws-service-role/ops.apigateway.amazonaws.com/AWSServiceRoleForAPIGateway",
         "arn:aws:iam::123412341234:role/aws-service-role/servicequotas.amazonaws.com/AWSServiceRoleForServiceQuotas"
       ]
@@ -215,8 +214,7 @@
       "Action": "dynamodb:DeleteTable",
       "NotResource": [
         "arn:aws:dynamodb:*:123412341234:table/*alerts-risk-factors",
-        "arn:aws:dynamodb:*:123412341234:table/*alerts-indicators",
-        "arn:aws:dynamodb:*:123412341234:table/*alert-search-rehydrate-jobs"
+        "arn:aws:dynamodb:*:123412341234:table/*alerts-indicators"
       ]
     },
     {

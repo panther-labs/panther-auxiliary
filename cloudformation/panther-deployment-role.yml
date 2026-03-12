@@ -265,6 +265,7 @@ Resources:
               - events:UntagResource
             Resource:
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/ai-api-*-cron
+              # TODO: remove after all deployments have cleaned up the alert-search-rehydrate EventBridge rule
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/alert-search-rehydrate-api-rehydration-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-*-cron
               - !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/analysis-api-git-polling-cron
@@ -564,7 +565,6 @@ Resources:
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/vpc*
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:aws-waf-logs-*
               - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:panther-*
-              - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:alert-open-search*
           - Sid: PantherLogsResourcePolicy
             Effect: Allow
             Action:
@@ -735,7 +735,6 @@ Resources:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/elasticfilesystem.amazonaws.com/AWSServiceRoleForAmazonElasticFileSystem
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
-              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/opensearchservice.amazonaws.com/AWSServiceRoleForAmazonOpenSearchService
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/ops.apigateway.amazonaws.com/AWSServiceRoleForAPIGateway
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/servicequotas.amazonaws.com/AWSServiceRoleForServiceQuotas
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Datadog*
@@ -754,19 +753,6 @@ Resources:
               - acm:RemoveTagsFromCertificate
             Resource:
               - !Sub arn:${AWS::Partition}:acm:*:${AWS::AccountId}:certificate/*
-          - Sid: PantherOpenSearch
-            Effect: Allow
-            Action:
-              - es:AddTags
-              - es:CreateDomain
-              - es:DeleteDomain
-              - es:DescribeDomain
-              - es:RemoveTags
-              - es:UpdateDomainConfig
-              - es:UpgradeDomain
-            Resource:
-              - !Sub arn:${AWS::Partition}:es:${AWS::Region}:${AWS::AccountId}:domain/panther-*
-
   DeploymentPolicy5:
     Type: AWS::IAM::ManagedPolicy
     Properties:
