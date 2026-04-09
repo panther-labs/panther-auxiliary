@@ -427,7 +427,8 @@ resource "aws_iam_policy" "deployment_policy_2" {
           "arn:${data.aws_partition.current.partition}:s3:::readiness-*",
           "arn:${data.aws_partition.current.partition}:s3:::temporary-processed-data-*",
           "arn:${data.aws_partition.current.partition}:s3:::unmonitored-audit-logs-*",
-          "arn:${data.aws_partition.current.partition}:s3:::user-uploads-*"
+          "arn:${data.aws_partition.current.partition}:s3:::user-uploads-*",
+          "arn:${data.aws_partition.current.partition}:s3:::integration-test-codebuild-artifacts-*"
         ]
       },
       {
@@ -442,7 +443,8 @@ resource "aws_iam_policy" "deployment_policy_2" {
         "Action" : ["s3:PutObject"],
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:s3:::panther-dev-sourcebucket-*",
-          "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*"
+          "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*",
+          "arn:${data.aws_partition.current.partition}:s3:::integration-test-codebuild-artifacts-*"
         ]
       },
       {
@@ -452,6 +454,19 @@ resource "aws_iam_policy" "deployment_policy_2" {
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*",
           "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*/*"
+        ]
+      },
+      {
+        "Sid" : "PantherIntegrationTestsCleanup",
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion",
+          "s3:DeleteBucket"
+        ],
+        "Resource" : [
+          "arn:${data.aws_partition.current.partition}:s3:::integration-test-codebuild-artifacts-*",
+          "arn:${data.aws_partition.current.partition}:s3:::integration-test-codebuild-artifacts-*/*"
         ]
       },
       {
@@ -894,6 +909,7 @@ resource "aws_iam_policy" "deployment_policy_4" {
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/panther*",
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/Panther*",
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/pip-layer-builder-codebuild-*",
+          "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/integration-test-codebuild-*",
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:server-certificate/panther/*"
         ]
       },

@@ -362,6 +362,7 @@ Resources:
               - !Sub arn:${AWS::Partition}:s3:::temporary-processed-data-*
               - !Sub arn:${AWS::Partition}:s3:::unmonitored-audit-logs-*
               - !Sub arn:${AWS::Partition}:s3:::user-uploads-*
+              - !Sub arn:${AWS::Partition}:s3:::integration-test-codebuild-artifacts-*
           - Sid: PantherS3PulumiStateBucketRemoverTemp
             # Allow deletion of the pulumi-state bucket. This can be removed after 1.115
             Effect: Allow
@@ -376,6 +377,7 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:s3:::panther-dev-sourcebucket-*
               - !Sub arn:${AWS::Partition}:s3:::panther-dev-backupbucket-*
+              - !Sub arn:${AWS::Partition}:s3:::integration-test-codebuild-artifacts-*
           - Sid: PantherS3DevBackupCleanup # Allow the deployment role to clean up old backup objects
             Effect: Allow
             Action:
@@ -383,6 +385,15 @@ Resources:
             Resource:
               - !Sub arn:${AWS::Partition}:s3:::panther-dev-backupbucket-*
               - !Sub arn:${AWS::Partition}:s3:::panther-dev-backupbucket-*/*
+          - Sid: PantherIntegrationTestsCleanup
+            Effect: Allow
+            Action:
+              - s3:DeleteObject
+              - s3:DeleteObjectVersion
+              - s3:DeleteBucket
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::integration-test-codebuild-artifacts-*
+              - !Sub arn:${AWS::Partition}:s3:::integration-test-codebuild-artifacts-*/*
           - Sid: PantherS3Deployment # Allow the deployment role to get build artifacts
             Effect: Allow
             Action:
@@ -744,6 +755,7 @@ Resources:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/panther*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/Panther*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/pip-layer-builder-codebuild-*
+              - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/integration-test-codebuild-*
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:server-certificate/panther/*
           - Sid: DomainCertificate
             Effect: Allow
