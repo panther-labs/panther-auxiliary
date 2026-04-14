@@ -7,12 +7,6 @@ terraform {
   }
 }
 
-data "aws_partition" "current" {}
-
-data "aws_region" "current" {}
-
-data "aws_caller_identity" "current" {}
-
 locals {
   identity_account_specified = var.identity_account_id != ""
   ops_account_specified      = var.ops_account_id != ""
@@ -43,6 +37,12 @@ variable "internal_deploy" {
   description = "Is set to true when built locally through mage. Used to make the policy names regional."
   default     = "false"
 }
+
+data "aws_partition" "current" {}
+
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "deployment_role" {
   name        = local.role_name_specified ? var.deployment_role_name : null
@@ -156,9 +156,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
       {
         "Sid" : "PantherCleanupNetworkInterfaces",
         "Effect" : "Allow",
-        "Action" : [
-          "ec2:DeleteNetworkInterface"
-        ],
+        "Action" : ["ec2:DeleteNetworkInterface"],
         "Resource" : "*"
       },
       {
@@ -277,9 +275,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
       {
         "Sid" : "PantherRedshiftProvisioningServiceLinkedRole",
         "Effect" : "Allow",
-        "Action" : [
-          "iam:CreateServiceLinkedRole"
-        ],
+        "Action" : ["iam:CreateServiceLinkedRole"],
         "Resource" : "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift"
       },
       {
@@ -305,9 +301,7 @@ resource "aws_iam_role_policy" "deployment_policy" {
       {
         "Sid" : "PantherRedshiftProvisioningDescribeStatement",
         "Effect" : "Allow",
-        "Action" : [
-          "redshift-data:DescribeStatement"
-        ],
+        "Action" : ["redshift-data:DescribeStatement"],
         "Resource" : "*"
       },
       {
@@ -433,47 +427,52 @@ resource "aws_iam_policy" "deployment_policy_2" {
           "arn:${data.aws_partition.current.partition}:s3:::readiness-*",
           "arn:${data.aws_partition.current.partition}:s3:::temporary-processed-data-*",
           "arn:${data.aws_partition.current.partition}:s3:::unmonitored-audit-logs-*",
-          "arn:${data.aws_partition.current.partition}:s3:::user-uploads-*"
+          "arn:${data.aws_partition.current.partition}:s3:::user-uploads-*",
+          "arn:${data.aws_partition.current.partition}:s3:::integration-test-codebuild-artifacts-*"
         ]
       },
       {
         "Sid" : "PantherS3PulumiStateBucketRemoverTemp",
         "Effect" : "Allow",
-        "Action" : [
-          "s3:DeleteBucket"
-        ],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"
-        ]
+        "Action" : ["s3:DeleteBucket"],
+        "Resource" : ["arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"]
       },
       {
         "Sid" : "PantherS3DevDeployment",
         "Effect" : "Allow",
-        "Action" : [
-          "s3:PutObject"
-        ],
+        "Action" : ["s3:PutObject"],
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:s3:::panther-dev-sourcebucket-*",
-          "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*"
+          "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*",
+          "arn:${data.aws_partition.current.partition}:s3:::integration-test-codebuild-artifacts-*"
         ]
       },
       {
         "Sid" : "PantherS3DevBackupCleanup",
         "Effect" : "Allow",
-        "Action" : [
-          "s3:DeleteObject"
-        ],
+        "Action" : ["s3:DeleteObject"],
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*",
           "arn:${data.aws_partition.current.partition}:s3:::panther-dev-backupbucket-*/*"
         ]
       },
       {
-        "Sid" : "PantherS3Deployment",
+        "Sid" : "PantherIntegrationTestsCleanup",
         "Effect" : "Allow",
         "Action" : [
-          "s3:GetObject"
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion",
+          "s3:DeleteBucket"
         ],
+        "Resource" : [
+          "arn:${data.aws_partition.current.partition}:s3:::integration-test-codebuild-artifacts-*",
+          "arn:${data.aws_partition.current.partition}:s3:::integration-test-codebuild-artifacts-*/*"
+        ]
+      },
+      {
+        "Sid" : "PantherS3Deployment",
+        "Effect" : "Allow",
+        "Action" : ["s3:GetObject"],
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:s3:::panther-enterprise*",
           "arn:${data.aws_partition.current.partition}:s3:::panther-internal-test*"
@@ -595,9 +594,7 @@ resource "aws_iam_policy" "deployment_policy_2" {
       {
         "Sid" : "PantherECRAdditional",
         "Effect" : "Allow",
-        "Action" : [
-          "ecr:GetAuthorizationToken"
-        ],
+        "Action" : ["ecr:GetAuthorizationToken"],
         "Resource" : "*"
       },
       {
@@ -726,6 +723,7 @@ resource "aws_iam_policy" "deployment_policy_3" {
           "cognito-idp:CreateUserPoolClient",
           "cognito-idp:CreateUserPoolDomain",
           "cognito-idp:DeleteIdentityProvider",
+          "cognito-idp:DeleteUserPoolClient",
           "cognito-idp:SetUserPoolMfaConfig",
           "cognito-idp:UntagResource",
           "cognito-idp:UpdateIdentityProvider",
@@ -816,12 +814,8 @@ resource "aws_iam_policy" "deployment_policy_3" {
       {
         "Sid" : "PantherUpdateSnowPipeCluster",
         "Effect" : "Allow",
-        "Action" : [
-          "iam:UpdateAssumeRolePolicy"
-        ],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/panther-snowflake-logprocessing-role-${data.aws_region.current.name}"
-        ]
+        "Action" : ["iam:UpdateAssumeRolePolicy"],
+        "Resource" : ["arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/panther-snowflake-logprocessing-role-${data.aws_region.current.name}"]
       }
     ]
   })
@@ -840,28 +834,23 @@ resource "aws_iam_policy" "deployment_policy_4" {
       {
         "Effect" : "Deny",
         "Action" : ["elasticloadbalancing:DeleteLoadBalancer"],
-        "NotResource" : [
-          "arn:${data.aws_partition.current.partition}:elasticloadbalancing:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/http-ingest-alb*"
-        ]
+        "NotResource" : ["arn:${data.aws_partition.current.partition}:elasticloadbalancing:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/http-ingest-alb*"]
       },
       {
         "Effect" : "Deny",
         "Action" : ["dynamodb:DeleteTable"],
-        "NotResource" : [
-          "arn:${data.aws_partition.current.partition}:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/panther*"
-        ]
+        "NotResource" : ["arn:${data.aws_partition.current.partition}:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/panther*"]
       },
       {
         "Effect" : "Deny",
         "Action" : ["s3:DeleteBucket"],
-        "NotResource" : [
-          "arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"
-        ]
+        "NotResource" : ["arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"]
       },
       {
         "Effect" : "Deny",
         "Action" : [
-          "cognito-idp:DeleteUserPool*",
+          "cognito-idp:DeleteUserPool",
+          "cognito-idp:DeleteUserPoolDomain",
           "dynamodb:DeleteBackup",
           "dynamodb:DeleteTableReplica"
         ],
@@ -922,6 +911,7 @@ resource "aws_iam_policy" "deployment_policy_4" {
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/panther*",
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/Panther*",
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/pip-layer-builder-codebuild-*",
+          "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/integration-test-codebuild-*",
           "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:server-certificate/panther/*"
         ]
       },
@@ -933,9 +923,7 @@ resource "aws_iam_policy" "deployment_policy_4" {
           "acm:AddTagsToCertificate",
           "acm:RemoveTagsFromCertificate"
         ],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:acm:*:${data.aws_caller_identity.current.account_id}:certificate/*"
-        ]
+        "Resource" : ["arn:${data.aws_partition.current.partition}:acm:*:${data.aws_caller_identity.current.account_id}:certificate/*"]
       }
     ]
   })
@@ -992,9 +980,7 @@ resource "aws_iam_policy" "deployment_policy_5" {
       {
         "Sid" : "PantherBackupStorage",
         "Effect" : "Allow",
-        "Action" : [
-          "backup-storage:MountCapsule"
-        ],
+        "Action" : ["backup-storage:MountCapsule"],
         "Resource" : "*"
       },
       {
