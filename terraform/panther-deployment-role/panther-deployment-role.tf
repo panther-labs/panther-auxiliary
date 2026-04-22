@@ -7,12 +7,9 @@ terraform {
   }
 }
 
-locals {
-  identity_account_specified = var.identity_account_id != ""
-  ops_account_specified      = var.ops_account_id != ""
-  role_name_specified        = var.deployment_role_name != ""
-  internal_deploy_specified  = var.internal_deploy == "true"
-}
+data "aws_partition" "current" {}
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 variable "deployment_role_name" {
   type        = string
@@ -38,58 +35,64 @@ variable "internal_deploy" {
   default     = "false"
 }
 
-data "aws_partition" "current" {}
-
-data "aws_region" "current" {}
-
-data "aws_caller_identity" "current" {}
+locals {
+  identity_account_specified = var.identity_account_id != ""
+  ops_account_specified      = var.ops_account_id != ""
+  role_name_specified        = var.deployment_role_name != ""
+  internal_deploy_specified  = var.internal_deploy == "true"
+}
 
 resource "aws_iam_role" "deployment_role" {
   name        = local.role_name_specified ? var.deployment_role_name : null
   description = "IAM role for deploying Panther"
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
-    "Statement" : concat([
-      {
-        "Effect" : "Allow",
-        "Principal" : {
-          "AWS" : local.identity_account_specified ? "arn:${data.aws_partition.current.partition}:iam::${var.identity_account_id}:root" : "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:root"
-        },
-        "Action" : ["sts:AssumeRole"],
-        "Condition" : {
-          "Bool" : {
-            "aws:SecureTransport" : "true"
+    "Statement" : concat(
+      [
+        {
+          "Effect" : "Allow",
+          "Principal" : {
+            "AWS" : local.identity_account_specified ? "arn:${data.aws_partition.current.partition}:iam::${var.identity_account_id}:root" : "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:root"
+          },
+          "Action" : ["sts:AssumeRole"],
+          "Condition" : {
+            "Bool" : {
+              "aws:SecureTransport" : "true"
+            }
           }
         }
-      }
-      ], local.ops_account_specified ? [
-      {
-        "Effect" : "Allow",
-        "Principal" : {
-          "AWS" : "arn:${data.aws_partition.current.partition}:iam::${var.ops_account_id}:role/PulumiCodeBuild"
-        },
-        "Action" : ["sts:AssumeRole"],
-        "Condition" : {
-          "Bool" : {
-            "aws:SecureTransport" : "true"
+      ],
+      local.ops_account_specified ? [
+        {
+          "Effect" : "Allow",
+          "Principal" : {
+            "AWS" : "arn:${data.aws_partition.current.partition}:iam::${var.ops_account_id}:role/PulumiCodeBuild"
+          },
+          "Action" : ["sts:AssumeRole"],
+          "Condition" : {
+            "Bool" : {
+              "aws:SecureTransport" : "true"
+            }
           }
         }
-      }
-      ] : [], [
-      {
-        "Effect" : "Allow",
-        "Principal" : {
-          "Service" : "cloudformation.amazonaws.com"
-        },
-        "Action" : ["sts:AssumeRole"],
-        "Condition" : {
-          "Bool" : {
-            "aws:SecureTransport" : "true"
+      ] : [],
+      [
+        {
+          "Effect" : "Allow",
+          "Principal" : {
+            "Service" : "cloudformation.amazonaws.com"
+          },
+          "Action" : ["sts:AssumeRole"],
+          "Condition" : {
+            "Bool" : {
+              "aws:SecureTransport" : "true"
+            }
           }
         }
-      }
-    ])
+      ]
+    )
   })
+
   tags = {
     "panther:app" = "panther"
   }
@@ -435,7 +438,9 @@ resource "aws_iam_policy" "deployment_policy_2" {
         "Sid" : "PantherS3PulumiStateBucketRemoverTemp",
         "Effect" : "Allow",
         "Action" : ["s3:DeleteBucket"],
-        "Resource" : ["arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"]
+        "Resource" : [
+          "arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"
+        ]
       },
       {
         "Sid" : "PantherS3DevDeployment",
@@ -815,7 +820,9 @@ resource "aws_iam_policy" "deployment_policy_3" {
         "Sid" : "PantherUpdateSnowPipeCluster",
         "Effect" : "Allow",
         "Action" : ["iam:UpdateAssumeRolePolicy"],
-        "Resource" : ["arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/panther-snowflake-logprocessing-role-${data.aws_region.current.name}"]
+        "Resource" : [
+          "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/panther-snowflake-logprocessing-role-${data.aws_region.current.name}"
+        ]
       }
     ]
   })
@@ -834,17 +841,23 @@ resource "aws_iam_policy" "deployment_policy_4" {
       {
         "Effect" : "Deny",
         "Action" : ["elasticloadbalancing:DeleteLoadBalancer"],
-        "NotResource" : ["arn:${data.aws_partition.current.partition}:elasticloadbalancing:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/http-ingest-alb*"]
+        "NotResource" : [
+          "arn:${data.aws_partition.current.partition}:elasticloadbalancing:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/http-ingest-alb*"
+        ]
       },
       {
         "Effect" : "Deny",
         "Action" : ["dynamodb:DeleteTable"],
-        "NotResource" : ["arn:${data.aws_partition.current.partition}:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/panther*"]
+        "NotResource" : [
+          "arn:${data.aws_partition.current.partition}:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/panther*"
+        ]
       },
       {
         "Effect" : "Deny",
         "Action" : ["s3:DeleteBucket"],
-        "NotResource" : ["arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"]
+        "NotResource" : [
+          "arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"
+        ]
       },
       {
         "Effect" : "Deny",
@@ -923,7 +936,9 @@ resource "aws_iam_policy" "deployment_policy_4" {
           "acm:AddTagsToCertificate",
           "acm:RemoveTagsFromCertificate"
         ],
-        "Resource" : ["arn:${data.aws_partition.current.partition}:acm:*:${data.aws_caller_identity.current.account_id}:certificate/*"]
+        "Resource" : [
+          "arn:${data.aws_partition.current.partition}:acm:*:${data.aws_caller_identity.current.account_id}:certificate/*"
+        ]
       }
     ]
   })
@@ -1012,5 +1027,6 @@ resource "aws_iam_role_policy_attachment" "deployment_policy_5" {
 }
 
 output "deployment_role_arn" {
-  value = aws_iam_role.deployment_role.arn
+  description = "ARN of the Panther deployment IAM role provisioned by this stack"
+  value       = aws_iam_role.deployment_role.arn
 }

@@ -836,4 +836,5 @@ Resources:
 
 Outputs:
   DeploymentRoleArn:
+    Description: ARN of the Panther deployment IAM role provisioned by this stack
     Value: !GetAtt DeploymentRole.Arn
