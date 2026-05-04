@@ -658,6 +658,12 @@ resource "aws_iam_policy" "deployment_policy_3" {
         "Resource" : "arn:aws:secretsmanager:us-west-2:246537256134:secret:pulumi/okta-epd-login-app-management-token-05Mnkv"
       },
       {
+        "Sid" : "DatadogAppKeySecret",
+        "Effect" : "Allow",
+        "Action" : ["secretsmanager:GetSecretValue"],
+        "Resource" : "arn:aws:secretsmanager:us-west-2:292442345278:secret:DatadogAppKeySecret-aD77r7x6coRN-4VEVXh"
+      },
+      {
         "Sid" : "PantherManageSecrets",
         "Effect" : "Allow",
         "Action" : [
