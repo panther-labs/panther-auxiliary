@@ -424,6 +424,7 @@ Resources:
               - lambda:DeleteFunctionEventInvokeConfig
               - lambda:DeleteLayerVersion
               - lambda:InvokeFunction
+              - lambda:ListTags
               - lambda:PublishLayerVersion
               - lambda:PutFunctionConcurrency
               - lambda:PutFunctionEventInvokeConfig

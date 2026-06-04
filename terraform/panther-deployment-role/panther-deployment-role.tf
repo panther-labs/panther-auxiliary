@@ -511,6 +511,7 @@ resource "aws_iam_policy" "deployment_policy_2" {
           "lambda:DeleteFunctionEventInvokeConfig",
           "lambda:DeleteLayerVersion",
           "lambda:InvokeFunction",
+          "lambda:ListTags",
           "lambda:PublishLayerVersion",
           "lambda:PutFunctionConcurrency",
           "lambda:PutFunctionEventInvokeConfig",
