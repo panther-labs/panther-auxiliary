@@ -276,38 +276,6 @@ resource "aws_iam_role_policy" "deployment_policy" {
         "Resource" : "arn:${data.aws_partition.current.partition}:codebuild:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:project/panther*"
       },
       {
-        "Sid" : "PantherRedshiftProvisioningServiceLinkedRole",
-        "Effect" : "Allow",
-        "Action" : ["iam:CreateServiceLinkedRole"],
-        "Resource" : "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/redshift.amazonaws.com/AWSServiceRoleForRedshift"
-      },
-      {
-        "Sid" : "PantherRedshiftProvisioning",
-        "Effect" : "Allow",
-        "Action" : [
-          "redshift-data:ExecuteStatement",
-          "redshift-serverless:CreateNamespace",
-          "redshift-serverless:CreateWorkgroup",
-          "redshift-serverless:DeleteNamespace",
-          "redshift-serverless:DeleteWorkgroup",
-          "redshift-serverless:GetCredentials",
-          "redshift-serverless:UpdateNamespace",
-          "redshift-serverless:UpdateWorkgroup",
-          "redshift-serverless:UntagResource",
-          "redshift-serverless:TagResource"
-        ],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:redshift-serverless:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:namespace/*",
-          "arn:${data.aws_partition.current.partition}:redshift-serverless:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:workgroup/*"
-        ]
-      },
-      {
-        "Sid" : "PantherRedshiftProvisioningDescribeStatement",
-        "Effect" : "Allow",
-        "Action" : ["redshift-data:DescribeStatement"],
-        "Resource" : "*"
-      },
-      {
         "Sid" : "PantherStateMachine",
         "Effect" : "Allow",
         "Action" : [
