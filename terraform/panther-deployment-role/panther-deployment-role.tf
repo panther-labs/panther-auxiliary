@@ -405,14 +405,6 @@ resource "aws_iam_policy" "deployment_policy_2" {
         ]
       },
       {
-        "Sid" : "PantherS3PulumiStateBucketRemoverTemp",
-        "Effect" : "Allow",
-        "Action" : ["s3:DeleteBucket"],
-        "Resource" : [
-          "arn:${data.aws_partition.current.partition}:s3:::pulumi-state-*"
-        ]
-      },
-      {
         "Sid" : "PantherS3DevDeployment",
         "Effect" : "Allow",
         "Action" : ["s3:PutObject"],
@@ -436,8 +428,7 @@ resource "aws_iam_policy" "deployment_policy_2" {
         "Effect" : "Allow",
         "Action" : [
           "s3:DeleteObject",
-          "s3:DeleteObjectVersion",
-          "s3:DeleteBucket"
+          "s3:DeleteObjectVersion"
         ],
         "Resource" : [
           "arn:${data.aws_partition.current.partition}:s3:::integration-test-codebuild-artifacts-*",
