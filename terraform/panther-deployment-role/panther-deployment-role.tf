@@ -620,10 +620,16 @@ resource "aws_iam_policy" "deployment_policy_3" {
         "Resource" : "arn:aws:secretsmanager:us-west-2:246537256134:secret:pulumi/okta-epd-login-app-management-token-05Mnkv"
       },
       {
+        "Sid" : "DatadogAppKeyDecrypt",
+        "Effect" : "Allow",
+        "Action" : ["kms:Decrypt"],
+        "Resource" : "arn:aws:kms:us-west-2:246537256134:key/8414ef50-0d92-46da-8032-fbf879a99e2a"
+      },
+      {
         "Sid" : "DatadogAppKeySecret",
         "Effect" : "Allow",
         "Action" : ["secretsmanager:GetSecretValue"],
-        "Resource" : "arn:aws:secretsmanager:us-west-2:292442345278:secret:DatadogAppKeySecret-aD77r7x6coRN-4VEVXh"
+        "Resource" : "arn:aws:secretsmanager:us-west-2:246537256134:secret:DatadogAppKeySecret-9XsU25TsI2kk-tvse5e"
       },
       {
         "Sid" : "PantherManageSecrets",
