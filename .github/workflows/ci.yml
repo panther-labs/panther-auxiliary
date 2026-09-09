@@ -20,7 +20,7 @@ jobs:
         with:
           terraform_version: 1.3.4
       - name: Setup tflint
-        uses: terraform-linters/setup-tflint@6e1e0642c0289bd619021bf6b34e3c08ed1e005a
+        uses: terraform-linters/setup-tflint@1cf010d3c7aef302051ccdb68c14c5dc2efa34ef
       - name: Run terraform fmt
         run: terraform fmt -check -recursive ./terraform
       - name: Run tflint
