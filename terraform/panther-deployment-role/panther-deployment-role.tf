@@ -771,6 +771,7 @@ resource "aws_iam_policy" "deployment_policy_3" {
           "ecs:CreateService",
           "ecs:DeleteCluster",
           "ecs:DeleteService",
+          "ecs:PutClusterCapacityProviders",
           "ecs:RegisterTaskDefinition",
           "ecs:TagResource",
           "ecs:UntagResource",
