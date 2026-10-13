@@ -1,0 +1,2 @@
+Temporary GitHub App commit test.
+This file will be removed by the next validation run.
