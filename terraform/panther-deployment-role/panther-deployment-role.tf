@@ -45,7 +45,6 @@ locals {
 resource "aws_iam_role" "deployment_role" {
   name        = local.role_name_specified ? var.deployment_role_name : null
   description = "IAM role for deploying Panther"
-
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : concat(
